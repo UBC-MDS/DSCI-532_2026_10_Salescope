@@ -1,0 +1,1 @@
+DSCI-532 Group 10 Dashboard utilizing the Sales and Customer Insights Dataset from https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights.
