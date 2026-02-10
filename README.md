@@ -1,1 +1,1 @@
-# DSCI-532_2026_10_customer-sales-insights
+# DSCI-532_2026_10_Salescope
