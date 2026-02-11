@@ -6,59 +6,105 @@ from shinywidgets import render_plotly, render_widget, output_widget
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
-tips = sns.load_dataset("tips")
 
 # UI
 app_ui = ui.page_fluid(
     ui.tags.style("body { font-size: 0.6em; }"),
-    ui.panel_title("Restaurant tipping"),
+    ui.panel_title("Salescope"),
     ui.layout_sidebar(
         ui.sidebar(
             ui.input_slider(
-                id="slider",
-                label="Bill amount",
-                min=tips.total_bill.min(),
-                max=tips.total_bill.max(),
-                value=[tips.total_bill.min(), tips.total_bill.max()],
+                id="slider_freq",
+                label="Purchase Frequency",
+                min=1,
+                max=19,
+                value=[1, 19],
             ),
+            ui.input_slider(
+                id="slider_value",
+                label="Average Order Value",
+                min=20,
+                max=200,
+                value=[20, 200],
+            ),
+            ui.input_slider(
+                id="slider_time",
+                label="Time Between Purchase",
+                min=5,
+                max=89,
+                value=[5, 89],
+            ),
+            
             ui.input_checkbox_group(
-                id="checkbox_group",
-                label="Food service",
+                id="checkbox_group_type",
+                label="Most Common Purchase Type",
                 choices={
-                    "Lunch": "Lunch",
-                    "Dinner": "Dinner",
+                    "Clothing": "Clothing",
+                    "Electronics": "Electronics",
+                    "Home": "Home",
+                    "Sport": "Sport",
+                    
                 },
                 selected=[
-                    "Lunch",
-                    "Dinner",
+                    "Clothing",
                 ],
             ),
+
+            ui.input_checkbox_group(
+                id="checkbox_group_continent",
+                label="Continent",
+                choices={
+                    "Asia": "Asia",
+                    "Europe": "Europe",
+                    "North America": "North America",
+                    "South America": "South America",
+                },
+                selected=[
+                    "North America",
+                ],
+            ),
+
+            ui.input_checkbox_group(
+                id="checkbox_group_strategy",
+                label="Retention Strategy",
+                choices={
+                    "Discount": "Discount",
+                    "Email Campaign": "Email Campaign",
+                    "Loyalty Program": "Loyalty Program"
+                },
+                selected=[
+                    "Discount",
+                    "Email Campaign",
+                    "Loyalty Program",
+                ],
+            ),
+            
             ui.input_action_button("action_button", "Reset filter"),
             open="desktop",
         ),
         ui.layout_columns(
-            ui.value_box("Total tippers", ui.output_text("total_tippers")),
-            ui.value_box("Average tip", ui.output_text("average_tip")),
-            ui.value_box("Average bill", ui.output_text("average_bill")),
+            ui.value_box("Average Churn Probability", "0.727"),
+            ui.value_box("Average Lifetime Value", "5432.86"),
+            ui.value_box("Count of Datapoints", "1234"),
             fill=False,
         ),
         ui.layout_columns(
             ui.card(
-                ui.card_header("Tips by day"),
-                ui.output_data_frame("tips_data"),
+                ui.card_header("Retention Strategy vs Lifetime Value"),
+                ui.output_data_frame("tips_data"), # not definied placeholder
                 full_screen=True,
             ),
             ui.card(
-                ui.card_header("Total bill vs tip"),
-                output_widget("scatterplot"),
+                ui.card_header("Launch Date vs Lifetime Value"),
+                output_widget("scatterplot"), # not definied placeholder
                 full_screen=True,
             ),
             col_widths=[6, 6],
         ),
         ui.layout_columns(
             ui.card(
-                ui.card_header("Tip percentages"),
-                output_widget("ridge"),
+                ui.card_header("Distribution of Lifetime Value"),
+                output_widget("ridge"), # not definied placeholder
                 full_screen=True,
             )
         ),
@@ -68,71 +114,7 @@ app_ui = ui.page_fluid(
 
 # Server
 def server(input, output, session):
-
-    @reactive.calc
-    def filtered_data():
-        idx1 = tips.total_bill.between(
-            left=input.slider()[0],
-            right=input.slider()[1],
-            inclusive="both",
-        )
-        idx2 = tips.time.isin(input.checkbox_group())
-        tips_filtered = tips[idx1 & idx2]
-        return tips_filtered
-
-    @render.text
-    def total_tippers():
-        return str(filtered_data().shape[0])
-
-    @render.text
-    def average_tip():
-        perc = filtered_data().tip / filtered_data().total_bill
-        return f"{perc.mean():.1%}"
-
-    @render.text
-    def average_bill():
-        bill = filtered_data().total_bill.mean()
-        return f"${bill:.2f}"
-
-    @render.data_frame
-    def tips_data():
-        df = filtered_data().copy()
-        df["tip_pct"] = df.tip / df.total_bill
-        summary = df.groupby("day").agg(
-            count=("tip", "size"),
-            avg_bill=("total_bill", "mean"),
-            avg_tip=("tip", "mean"),
-            avg_tip_pct=("tip_pct", "mean"),
-        ).round(2).reset_index()
-        return summary
-
-    @render_plotly
-    def scatterplot():
-        return px.scatter(filtered_data(), x="total_bill", y="tip", trendline="lowess")
-
-    @render_widget
-    def ridge():
-        df = filtered_data().copy()
-        df["percent"] = df.tip / df.total_bill
-
-        uvals = df.day.unique()
-        samples = [[df.percent[df.day == val]] for val in uvals]
-
-        plt = ridgeplot(
-            samples=samples,
-            labels=uvals,
-            bandwidth=0.01,
-            colorscale="viridis",
-            colormode="row-index",
-        )
-
-        plt.update_layout(
-            legend=dict(
-                orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5
-            )
-        )
-
-        return plt
+    pass
 
 
 # Create app
