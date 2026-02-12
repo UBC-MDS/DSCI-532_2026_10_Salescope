@@ -59,6 +59,12 @@ Based on these insights from the Salescope dashboard, Sarah decides to reallocat
 
 ## Section 5: App Sketch & Description
 
-![Rough draft for the dashboard markup](../img/sketch.jpg)
+![Rough draft for the dashboard markup.](../img/sketch.jpg)
 
-(Going to add further explanation on this draft/general idea of this draft later today after waking up)
+[Direct Miro link to view the dashboard](https://miro.com/app/board/uXjVGBtJ8CA=/?share_link_id=304444552937)
+
+There are a few additional explanation notes for this dashboard from the Miro link and [Issue #33: Dashboard Rough Sketch Improvement Discussion](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/33) that are listed here additionally:
+
+- The KPI setup will include 4 stats; the first two in average customer life time value and churn rate were placed first due to general importance in the use cases. The other two, purchase count and rate of days per purchase, can be computed by summing `Purchase_Frequency` on the filtered rows and as a weighted average of `Time_Between_Purchases` respectively.
+- User stories 2 and 3 are directly addressed by the labelled plots that are placed on this board as templates, there will be changes made according to initial and continual EDA in Milestone 1 and onwards. User story 1 is addressed by the lower table and is a close representation of what it will look like on the final dashboard, the main visual difference is that the table is not likely to be as visibly tall compared to the other elements.
+- The slide bars for main data filters are meant to repeat with the table tabs as they serve different purposes; main data filters control what subset of the entire 10000 row dataframe is used for generating al the plots and tables, where as the tabs are for swapping between basic stats for customer lifetime value/average order value/purchase frequency. These sliders are also going to have a min and max option, the current app.py rough framework has a better example of these.
