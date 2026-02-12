@@ -45,7 +45,7 @@ Based on these insights from the Salescope dashboard, Sarah decides to reallocat
 > **User Story 1:**
 > As a **Regional Sales Director**, I want to **compare customer lifetime value, average order value, and purchase frequency across different geographic regions** so that I can **identify high-performing regions to replicate best practices and underperforming regions that need intervention**.
 > **User Story 2:**
->
+> As a **Customer Success Manager**, I want to **filter customers by churn probability thresholds and analyze which retention strategies (Loyalty Program, Discount, Email Campaign) are most effective for different risk segments** so that I can **proactively intervene with at-risk customers using the most appropriate retention approach**.
 > **User Story 3:**
 
 ### Jobs to Be Done
