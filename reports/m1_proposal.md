@@ -9,8 +9,8 @@ Data Analytics & Business Intelligence Solutions Team
 > **Target audience:** 
 Regional Sales Directors/Managers, Customer Success Managers, and E-commerce Product Managers
 
-Inconsistent regional sales and high customer churn are major challenges for e-commerce growth, often hidden within complex datasets. While companies collect vast amounts of data, they often lack the tools to see why specific regions underperform or which retention strategies actually work. To address this, we propose Salescope, a dashboard featuring role-based views designed to transform raw behavior data into actionable strategies.
-Instead of treating every customer the same, we provide easy access to insights that help companies identify exactly where they are losing money, recognize warning signs before customers walk away, and uncover opportunities to increase revenue and drive growth.
+Inconsistent regional sales and high customer churn are major challenges for e-commerce growth, often hidden within complex datasets. While companies collect vast amounts of data, they often lack the tools to see why specific regions underperform or which retention strategies actually increase revenue, save money, and drive growth. To address this, we propose Salescope, a dashboard featuring role-based views designed to transform raw behavior data into actionable strategies.
+Instead of treating every customer the same, we provide easy access to insights that help companies identify exactly where they are losing money, recognize warning signs before customers walk away, and uncover high-value opportunities for long-term profitability.
 
 The project centers on three core pillars:
 - Regional Performance Analysis: Visualizing geographic trends and outliers to help Regional Sales Directors/Managers identify and support underperforming territories.
