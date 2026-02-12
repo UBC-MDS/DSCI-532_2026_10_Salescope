@@ -42,7 +42,7 @@ app_ui = ui.page_fluid(
                     "Clothing": "Clothing",
                     "Electronics": "Electronics",
                     "Home": "Home",
-                    "Sport": "Sport",
+                    "Sports": "Sports",
                     
                 },
                 selected=[
