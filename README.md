@@ -7,3 +7,11 @@ Salescope is an interactive dashboard that helps e-commerce businesses understan
 ## Dataset
 
 We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights) dataset from Kaggle, which contains 10,000 customer records with purchasing behavior and engagement metrics.
+
+## Team
+
+This dashboard is developed by Group 10 for DSCI 532:
+- Alex Wen ([@alxwen711](https://github.com/alxwen711))
+- Norton Spanorti ([@Spanorti08](https://github.com/Spanorti08))
+- Raghav Sharma ([@raghav9048](https://github.com/raghav9048))
+- Tirth Joshi ([@tirthjoship](https://github.com/tirthjoship))
