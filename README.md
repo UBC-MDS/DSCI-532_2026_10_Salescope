@@ -16,7 +16,43 @@ This dashboard is developed by Group 10 for DSCI 532:
 - Songyang Yu ([@Spanorti08](https://github.com/Spanorti08))
 - Raghav Gupta ([@raghav9048](https://github.com/raghav9048))
 
+## How to Run Locally
 
+Follow these steps to set up and run the Salescope dashboard on your local machine:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope.git
+cd DSCI-532_2026_10_Salescope
+```
+
+### 2. Create the Environment
+
+Create a conda environment using the provided `environment.yml` file:
+
+```bash
+conda env create -f environment.yml
+conda activate Salescope
+```
+
+### 3. Verify the Data
+
+The dataset is already included in the repository at `data/raw/sales_and_customer_insights.csv`. You can verify it exists by checking:
+
+```bash
+ls data/raw/
+```
+
+### 4. Run the Dashboard
+
+Start the Shiny dashboard application:
+
+```bash
+shiny run --reload --launch-browser src/app.py
+```
+
+The dashboard will automatically open in your default web browser. If it does not open automatically, navigate to the URL shown in the terminal (typically `http://127.0.0.1:8000`).
 
 ## License
 
