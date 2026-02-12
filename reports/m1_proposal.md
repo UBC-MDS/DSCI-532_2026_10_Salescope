@@ -59,4 +59,6 @@ Based on these insights from the Salescope dashboard, Sarah decides to reallocat
 
 ## Section 5: App Sketch & Description
 
->
+![Rough draft for the dashboard markup](../img/sketch.jpg)
+
+(Going to add further explanation on this draft/general idea of this draft later today after waking up)
