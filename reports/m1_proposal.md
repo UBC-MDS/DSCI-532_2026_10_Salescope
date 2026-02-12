@@ -47,24 +47,7 @@ Based on these insights from the Salescope dashboard, Sarah decides to reallocat
 > **User Story 2:**
 > As a **Customer Success Manager**, I want to **filter customers by churn probability thresholds and analyze which retention strategies (Loyalty Program, Discount, Email Campaign) are most effective for different risk segments** so that I can **proactively intervene with at-risk customers using the most appropriate retention approach**.
 > **User Story 3:**
-
-### Jobs to Be Done
-*...or as Jobs to Be Done:*
-
-> **JTBD 1:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
->
-> **JTBD 2:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
->
-> **JTBD 3:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
+> As an **E-commerce Product Manager**, I want to **visualize sales patterns across product categories (Electronics, Clothing, Sports, Home) and seasons, including preferred purchase times** so that I can **optimize inventory planning for peak seasons and schedule targeted marketing campaigns during high-conversion periods**. 
 
 ## Section 4: Exploratory Data Analysis
 
