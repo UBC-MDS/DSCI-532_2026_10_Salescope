@@ -22,6 +22,8 @@ Key variables include:
 - `Region`: Identifies geographic location, enabling comparison of customer behavior across regions.
 - `Season` and `Preferred_Purchase_Times`: Capture temporal purchasing patterns that may influence sales trends.
 - `Retention_Strategy`: Describes the strategy currently applied to retain the customer.
+- `Most_Frequent_Category`: Captures the product category a customer purchases most often, which helps segment customers by preference and compare retention/churn patterns across categories.
+- `Time_Between_Purchases`: Measures the typical gap between purchases and provides a signal of engagement/recency, which may relate to churn risk and retention strategy design.
 
 Using this dataset, we may also derive additional features such as customer value segments (e.g., high-value vs. low-value customers) or churn risk categories to further support comparative analysis. These variables allow our target user to explore purchasing trends, identify high-risk or high-value customers, and evaluate how customer behavior varies across regions and seasons, ultimately supporting data-driven decision-making in customer retention and revenue optimization.
 
