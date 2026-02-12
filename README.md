@@ -15,3 +15,7 @@ This dashboard is developed by Group 10 for DSCI 532:
 - Norton Spanorti ([@Spanorti08](https://github.com/Spanorti08))
 - Raghav Sharma ([@raghav9048](https://github.com/raghav9048))
 - Tirth Joshi ([@tirthjoship](https://github.com/tirthjoship))
+
+## License
+
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.
