@@ -11,10 +11,12 @@ We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranal
 ## Team
 
 This dashboard is developed by Group 10 for DSCI 532:
-- Alex Wen ([@alxwen711](https://github.com/alxwen711))
-- Norton Spanorti ([@Spanorti08](https://github.com/Spanorti08))
-- Raghav Sharma ([@raghav9048](https://github.com/raghav9048))
+- Alexander Wen ([@alxwen711](https://github.com/alxwen711))
 - Tirth Joshi ([@tirthjoship](https://github.com/tirthjoship))
+- Songyang Yu ([@Spanorti08](https://github.com/Spanorti08))
+- Raghav Gupta ([@raghav9048](https://github.com/raghav9048))
+
+
 
 ## License
 
