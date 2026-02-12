@@ -51,11 +51,22 @@ Based on these insights from the Salescope dashboard, Sarah decides to reallocat
 
 ## Section 4: Exploratory Data Analysis
 
-> 
->
-> **Analysis:** 
->
-> **Reflection:** 
+We focused on User Story 2 to explore whether different retention strategies are working well for customers at risk of churning. The goal was to see if there are patterns that could help Customer Success Managers make better decisions about which retention approach to use for different customer segments.
+
+**Analysis:**
+
+We created a scatter plot (see `notebooks/eda.ipynb`) showing lifetime value on the x-axis and average days between purchases on the y-axis for a sample of 100 customers. Each dot represents one customer, and we used color to show which retention strategy they are currently on (Loyalty Program, Email Campaign, or Discount). We also varied the opacity based on churn probability, so darker dots indicate customers who are more likely to churn.
+
+Looking at the plot, a few things stand out. Customers who wait longer between purchases generally have higher churn risk, which makes sense since they are less engaged. What is more interesting is that we see high-value customers (above $7,000 in lifetime value) spread across all three retention strategies, but quite a few of the high-risk, high-value customers are currently just getting email campaigns. These are customers the company really does not want to lose, but they might need something more engaging than emails to keep them around.
+
+There is also a noticeable cluster of customers with both high churn probability and high lifetime value who have long gaps between purchases. This group is especially important because losing them would mean losing significant revenue.
+
+**Reflection:**
+
+This analysis shows why the dashboard filtering features from User Story 2 will be useful. Right now, it is hard to spot these mismatches between customer risk levels and retention strategies without digging through the data manually. If a Customer Success Manager can filter by churn probability and compare how different strategies perform, they can quickly identify customers who might benefit from switching from email campaigns to loyalty programs or discounts.
+
+The dashboard will make it easier to find these opportunities and take action before valuable customers churn.
+
 
 ## Section 5: App Sketch & Description
 
