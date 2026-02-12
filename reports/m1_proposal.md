@@ -31,34 +31,23 @@ Using this dataset, we may also derive additional features such as customer valu
 ## Section 3: Research Questions & Usage Scenarios
 
 ### Usage Scenario
-...
+
+Sarah Chen is a Regional Sales Director for North America at a growing e-commerce company. She wants to understand customer behavior patterns across her territory to make informed decisions about retention budget allocation for the upcoming quarter. With limited resources, she needs to identify which regions show higher churn risk and compare how different retention strategies perform across her territory. This information will help her determine where to invest her budget for maximum impact.
+
+When Sarah opens the Salescope dashboard, she sees an overview of key customer metrics organized by region. She notices that some regions appear to have higher average churn probabilities than others, even when average order values look similar. To investigate further, she filters the dashboard to focus on customers with elevated churn risk. Through this exploration, she discovers that many at-risk customers in certain regions are enrolled in email-based retention campaigns, while other regions with better retention outcomes rely more heavily on loyalty programs.
+
+Sarah continues her analysis by examining how purchase frequency relates to churn probability across different regions. She observes that customers who purchase less frequently tend to show higher churn rates, and the current email-based approach may not be effectively re-engaging these customers. By comparing lifetime value distributions, she identifies opportunities to protect revenue by focusing retention efforts on high-value customers who show warning signs of disengagement.
+
+Based on these insights from the Salescope dashboard, Sarah decides to reallocate a portion of her retention budget away from generic email campaigns in underperforming regions. Instead, she plans to implement targeted loyalty programs for customers who show both low purchase frequency and elevated churn risk. She also schedules a follow-up analysis to measure whether this strategy shift improves retention rates over the next two months.
 
 ### User Stories
-*You can choose to frame your detailed requirements as User Stories...*
 
 > **User Story 1:**
->
+> As a **Regional Sales Director**, I want to **compare basic KPIs (such as mean, median, and maximum) for customer lifetime value, average order value, and purchase frequency across different geographic regions** so that I can **identify high-performing regions to replicate best practices and underperforming regions that need intervention**.
 > **User Story 2:**
->
+> As a **Customer Success Manager**, I want to **filter customers by churn probability thresholds and analyze which retention strategies (Loyalty Program, Discount, Email Campaign) are most effective for different risk segments** so that I can **proactively intervene with at-risk customers using the most appropriate retention approach**.
 > **User Story 3:**
-
-### Jobs to Be Done
-*...or as Jobs to Be Done:*
-
-> **JTBD 1:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
->
-> **JTBD 2:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
->
-> **JTBD 3:**
-> **Situation:** 
-> **Motivation:** 
-> **Outcome:** 
+> As an **E-commerce Product Manager**, I want to **visualize sales patterns across product categories (Electronics, Clothing, Sports, Home) and seasons, including preferred purchase times** so that I can **optimize inventory planning for peak seasons and schedule targeted marketing campaigns during high-conversion periods**. 
 
 ## Section 4: Exploratory Data Analysis
 
