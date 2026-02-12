@@ -41,10 +41,9 @@ Sarah continues her analysis by examining how purchase frequency relates to chur
 Based on these insights from the Salescope dashboard, Sarah decides to reallocate a portion of her retention budget away from generic email campaigns in underperforming regions. Instead, she plans to implement targeted loyalty programs for customers who show both low purchase frequency and elevated churn risk. She also schedules a follow-up analysis to measure whether this strategy shift improves retention rates over the next two months.
 
 ### User Stories
-*You can choose to frame your detailed requirements as User Stories...*
 
 > **User Story 1:**
->
+> As a **Regional Sales Director**, I want to **compare customer lifetime value, average order value, and purchase frequency across different geographic regions** so that I can **identify high-performing regions to replicate best practices and underperforming regions that need intervention**.
 > **User Story 2:**
 >
 > **User Story 3:**
