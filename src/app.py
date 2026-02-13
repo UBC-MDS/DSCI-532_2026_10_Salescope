@@ -1,4 +1,5 @@
 from shiny import App, render, ui, reactive
+from shiny.types import ImgData
 import plotly.express as px
 from ridgeplot import ridgeplot
 import seaborn as sns
@@ -113,12 +114,14 @@ app_ui = ui.page_fluid(
         ui.layout_columns(
             ui.card(
                 ui.card_header("High Churn Risk Scatterplot"),
-                output_widget("high_churn_risk"), # not definied placeholder
+                ui.output_image("high_churn_risk"), # placeholder, swap with below for M2
+                #output_widget("high_churn_risk"),
                 full_screen=True,
             ),
             ui.card(
                 ui.card_header("Seasonal and Product Type Heatmap"),
-                output_widget("heatmap"), # not definied placeholder
+                ui.output_image("heatmap"), # placeholder, swap with below for M2
+                #output_widget("heatmap"),
                 full_screen=True,
             ),
             col_widths=[6, 6],
@@ -167,6 +170,18 @@ def server(input, output, session):
     @render.data_frame
     def frequency_df():
         return create_summary_table(sales_df.copy(),"Region","Purchase_Frequency")
+
+    @render.image # Change to widget/plotly for M2
+    def high_churn_risk():
+        img: ImgData = {"src": "img/markup-user2.png"}
+        return img
+    
+    @render.image # Change to widget/plotly for M2
+    def heatmap():
+        img: ImgData = {"src": "img/markup-user3.png"}
+        return img
+    
+    
 
     
 
