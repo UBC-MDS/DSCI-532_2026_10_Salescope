@@ -9,6 +9,7 @@ import pandas as pd
 # use shiny run --reload --launch-browser src/app.py to local test
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
+sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
 
 # UI
 app_ui = ui.page_fluid(
@@ -127,21 +128,47 @@ app_ui = ui.page_fluid(
                             label = "Table partition options:",
                             choices = ["Region","Retention Strategy","Most Frequent Value"]),
             ui.navset_card_tab( # replace each of these with instances of ui.output_data_frame
-                ui.nav_panel("Customer Lifetime Value", "Customer Lifetime Value table"),
-                ui.nav_panel("Value-at-risk", "Value-at-risk table"),
-                ui.nav_panel("Order Value", "Order Value table"),
-                ui.nav_panel("Purchase Frequency", "Purchase Frequency table"),
+                ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
+                ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
+                ui.nav_panel("Order Value", ui.output_data_frame("order_df")),
+                ui.nav_panel("Purchase Frequency", ui.output_data_frame("frequency_df")),
                 id = "multitabtable"
             ),
-            col_widths = [1,11]
+            col_widths = [3,9]
         ),
     ),
 )
 
+def create_summary_table(df,grouping,feature):
+    summary = df.groupby(grouping).agg(
+        Count=(feature, "size"),
+        Mean=(feature, "mean"),
+        Median=(feature, "median"),
+        Maximum=(feature, "max"),
+        Total=(feature, "sum")
+    ).round(2).reset_index()
+    return summary
 
 # Server
 def server(input, output, session):
-    pass
+    
+    @render.data_frame
+    def customer_df():
+        return create_summary_table(sales_df.copy(),"Region","Lifetime_Value")
+
+    @render.data_frame
+    def risk_df():
+        return create_summary_table(sales_df.copy(),"Region","risk_value") # still need to compute risk column here
+
+    @render.data_frame
+    def order_df():
+        return create_summary_table(sales_df.copy(),"Region","Average_Order_Value")
+
+    @render.data_frame
+    def frequency_df():
+        return create_summary_table(sales_df.copy(),"Region","Purchase_Frequency")
+
+    
 
 
 # Create app
