@@ -3,9 +3,12 @@ import plotly.express as px
 from ridgeplot import ridgeplot
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
+import pandas as pd
+
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
+sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 
 # UI
 app_ui = ui.page_fluid(
@@ -14,25 +17,32 @@ app_ui = ui.page_fluid(
     ui.layout_sidebar(
         ui.sidebar(
             ui.input_slider(
-                id="slider_freq",
-                label="Purchase Frequency",
-                min=1,
-                max=19,
-                value=[1, 19],
+                id="slider_churn",
+                label="Churn Rate",
+                min=0.0,
+                max=1.0,
+                value=[0.0, 1.0],
             ),
             ui.input_slider(
-                id="slider_value",
+                id="slider_customer",
+                label="Customer Lifetime Value",
+                min=5,
+                max=89,
+                value=[5, 89],
+            ),
+            ui.input_slider(
+                id="slider_order",
                 label="Average Order Value",
                 min=20,
                 max=200,
                 value=[20, 200],
             ),
             ui.input_slider(
-                id="slider_time",
-                label="Time Between Purchase",
-                min=5,
-                max=89,
-                value=[5, 89],
+                id="slider_freq",
+                label="Purchase Frequency",
+                min=1,
+                max=19,
+                value=[1, 19],
             ),
             
             ui.input_checkbox_group(
@@ -51,8 +61,8 @@ app_ui = ui.page_fluid(
             ),
 
             ui.input_checkbox_group(
-                id="checkbox_group_continent",
-                label="Continent",
+                id="checkbox_group_region",
+                label="Region",
                 choices={
                     "Asia": "Asia",
                     "Europe": "Europe",
@@ -79,34 +89,49 @@ app_ui = ui.page_fluid(
                 ],
             ),
             
-            ui.input_action_button("action_button", "Reset filter"),
+            ui.input_action_button("action_button", "Apply filter"),
             open="desktop",
         ),
         ui.layout_columns(
-            ui.value_box("Average Churn Probability", "0.727"),
-            ui.value_box("Average Lifetime Value", "5432.86"),
+            ui.layout_columns(
+                ui.value_box("Average Lifetime Value", "5432.86"),
+                ui.value_box("Average Churn Rate", "0.727"),
+                ui.value_box("Average Value-At-Risk", "1234.65"),
+                ui.value_box("Average Days Per Purchase", "5.315"),
+                col_widths = (6,6,6,6)
+            ),
+            
             ui.value_box("Count of Datapoints", "1234"),
-            fill=False,
+            col_widths = (8,4), # 12 part ratio
+            # row_heights= (1,2), # direct ratio
+            fill=False
         ),
+       
         ui.layout_columns(
             ui.card(
-                ui.card_header("Retention Strategy vs Lifetime Value"),
-                ui.output_data_frame("tips_data"), # not definied placeholder
+                ui.card_header("High Churn Risk Scatterplot"),
+                output_widget("high_churn_risk"), # not definied placeholder
                 full_screen=True,
             ),
             ui.card(
-                ui.card_header("Launch Date vs Lifetime Value"),
-                output_widget("scatterplot"), # not definied placeholder
+                ui.card_header("Seasonal and Product Type Heatmap"),
+                output_widget("heatmap"), # not definied placeholder
                 full_screen=True,
             ),
             col_widths=[6, 6],
         ),
         ui.layout_columns(
-            ui.card(
-                ui.card_header("Distribution of Lifetime Value"),
-                output_widget("ridge"), # not definied placeholder
-                full_screen=True,
-            )
+            ui.input_select(id = "row_dropdown",
+                            label = "Table partition options:",
+                            choices = ["Region","Retention Strategy","Most Frequent Value"]),
+            ui.navset_card_tab( # replace each of these with instances of ui.output_data_frame
+                ui.nav_panel("Customer Lifetime Value", "Customer Lifetime Value table"),
+                ui.nav_panel("Value-at-risk", "Value-at-risk table"),
+                ui.nav_panel("Order Value", "Order Value table"),
+                ui.nav_panel("Purchase Frequency", "Purchase Frequency table"),
+                id = "multitabtable"
+            ),
+            col_widths = [1,11]
         ),
     ),
 )
