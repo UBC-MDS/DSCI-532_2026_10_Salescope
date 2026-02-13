@@ -45,6 +45,8 @@ app_ui = ui.page_fluid(
                 value=[1, 19],
             ),
             
+            ui.input_date_range("inDateRange", "Input date"),
+
             ui.input_checkbox_group(
                 id="checkbox_group_type",
                 label="Most Common Purchase Type",
