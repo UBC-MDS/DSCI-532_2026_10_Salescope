@@ -1,5 +1,4 @@
 altair
-ansihtml
 anyio
 anywidget
 appdirs
