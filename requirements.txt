@@ -7,7 +7,6 @@ pandas
 pip
 plotly
 pydantic
-python
 quarto
 requests
 shiny
