@@ -124,7 +124,7 @@ semver==3.0.2
 Send2Trash==1.8.2
 setuptools==72.1.0
 shellingham==1.5.0
-shiny==0.0.0
+shiny
 shinywidgets==0.7.1
 six==1.17.0
 smmap==5.0.2
