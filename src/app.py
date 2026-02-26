@@ -105,12 +105,12 @@ main_sidebar = ui.sidebar(
 
 
 # Specialized table for User Story 1
-panel_1 = ui.nav_panel("User Story 1", 
+panel_1 = ui.nav_panel("KPI Tables", 
     ui.layout_columns(
         ui.input_select(id = "row_dropdown",
                         label = "Table partition options:",
                         choices = ["Region","Retention Strategy","Most Frequent Value"]),
-        ui.navset_card_tab( # replace each of these with instances of ui.output_data_frame
+        ui.navset_card_tab(
             ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
             ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
             ui.nav_panel("Order Value", ui.output_data_frame("order_df")),
@@ -122,7 +122,7 @@ panel_1 = ui.nav_panel("User Story 1",
 )
 
 # Specialized plot for User Story 2
-panel_2 = ui.nav_panel("User Story 2", 
+panel_2 = ui.nav_panel("Churn Risk Plot", 
     ui.layout_columns(
         ui.card(
             ui.card_header("High Churn Risk Scatterplot"),
@@ -135,7 +135,7 @@ panel_2 = ui.nav_panel("User Story 2",
 )
 
 # Specialized plot for User Story 3
-panel_3 = ui.nav_panel("User Story 3", 
+panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
     ui.layout_columns(
             ui.card(
                 ui.card_header("Seasonal and Product Type Heatmap"),
@@ -158,9 +158,10 @@ app_ui = ui.page_fluid(
             panel_1,       
             panel_2,
             panel_3,
-            title = "SaleScope"
+            title = "Advanced Figures"
         )   
-    )    
+    ),
+    theme = ui.Theme("lumen")
 )
 
 
