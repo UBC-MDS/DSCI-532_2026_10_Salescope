@@ -12,9 +12,28 @@ import pandas as pd
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
 
+# Macro functions for components
+
+kpi_component = ui.layout_columns(
+    ui.layout_columns(
+        ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
+        ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
+        ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
+        ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
+        col_widths = (6,6,6,6)
+    ),
+    ui.value_box("Count of Datapoints", "1234"),
+    col_widths = (8,4), # 12 part ratio
+    # row_heights= (1,2), # direct ratio
+    fill=False
+)
+
+
+
 # UI
 app_ui = ui.page_fluid(
     ui.tags.style("body { font-size: 0.6em; }"),
+    ui.panel_title("Salescope"),
     ui.layout_sidebar(
         ui.sidebar(
             ui.input_slider(
@@ -90,23 +109,9 @@ app_ui = ui.page_fluid(
             ui.input_action_button("action_button", "Apply filter"),
             open="desktop",
         ),
+        kpi_component,
         ui.navset_bar(
             ui.nav_panel("User Story 1", 
-                ui.panel_title("Salescope"),
-                ui.layout_columns(
-                    ui.layout_columns(
-                        ui.value_box("Average Lifetime Value", "5432.86"),
-                        ui.value_box("Average Churn Rate", "0.727"),
-                        ui.value_box("Average Value-At-Risk", "1234.65"),
-                        ui.value_box("Average Days Per Purchase", "5.315"),
-                        col_widths = (6,6,6,6)
-                    ),
-                    
-                    ui.value_box("Count of Datapoints", "1234"),
-                    col_widths = (8,4), # 12 part ratio
-                    # row_heights= (1,2), # direct ratio
-                    fill=False
-                ),
                 ui.layout_columns(
                     ui.input_select(id = "row_dropdown",
                                     label = "Table partition options:",
@@ -122,21 +127,6 @@ app_ui = ui.page_fluid(
                 ),
             ),       
             ui.nav_panel("User Story 2", 
-                ui.panel_title("Salescope"),
-                ui.layout_columns(
-                    ui.layout_columns(
-                        ui.value_box("Average Lifetime Value", "5432.86"),
-                        ui.value_box("Average Churn Rate", "0.727"),
-                        ui.value_box("Average Value-At-Risk", "1234.65"),
-                        ui.value_box("Average Days Per Purchase", "5.315"),
-                        col_widths = (6,6,6,6)
-                    ),
-                    
-                    ui.value_box("Count of Datapoints", "1234"),
-                    col_widths = (8,4), # 12 part ratio
-                    # row_heights= (1,2), # direct ratio
-                    fill=False
-                ),
                 ui.layout_columns(
                     ui.card(
                         ui.card_header("High Churn Risk Scatterplot"),
@@ -148,21 +138,6 @@ app_ui = ui.page_fluid(
                 ),
             ),
             ui.nav_panel("User Story 3", 
-                ui.panel_title("Salescope"),
-                ui.layout_columns(
-                        ui.layout_columns(
-                            ui.value_box("Average Lifetime Value", "5432.86"),
-                            ui.value_box("Average Churn Rate", "0.727"),
-                            ui.value_box("Average Value-At-Risk", "1234.65"),
-                            ui.value_box("Average Days Per Purchase", "5.315"),
-                            col_widths = (6,6,6,6)
-                        ),
-                        
-                        ui.value_box("Count of Datapoints", "1234"),
-                        col_widths = (8,4), # 12 part ratio
-                        # row_heights= (1,2), # direct ratio
-                        fill=False
-                    ),
                 ui.layout_columns(
                         ui.card(
                             ui.card_header("Seasonal and Product Type Heatmap"),
@@ -175,9 +150,11 @@ app_ui = ui.page_fluid(
             ),
             title = "SaleScope"
         )
+        
     )
     
 )
+
 
 def create_summary_table(df,grouping,feature):
     summary = df.groupby(grouping).agg(
@@ -192,6 +169,24 @@ def create_summary_table(df,grouping,feature):
 # Server
 def server(input, output, session):
     
+    @render.text
+    def kpi_lifetime():
+        return "5432.86"
+
+    @render.text
+    def kpi_churn():
+        return "0.727"
+
+    @render.text
+    def kpi_risk():
+        return "1234.64"
+
+    @render.text
+    def kpi_days():
+        return "5.315"
+
+    
+
     @render.data_frame
     def customer_df():
         return create_summary_table(sales_df.copy(),"Region","Lifetime_Value")
