@@ -28,7 +28,7 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 
 | ID            | Type          | Shiny widget / renderer | Depends on                   | Job story  |
 | ------------- | ------------- | ----------------------- | ---------------------------- | ---------- |
-| `component_1` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
+| `user-navigation` | Navigation| `ui.navset_bar()`, `ui.navset_panel()` | —             | #1, #2, #3 |
 | `component_2` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
 | `component_3` | Output        | `@render.plot`          | `filtered_df`                | #1         |
 | `component_4` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
