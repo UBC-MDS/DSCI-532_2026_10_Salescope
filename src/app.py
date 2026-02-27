@@ -28,9 +28,9 @@ app_ui = ui.page_fluid(
             ui.input_slider(
                 id="slider_customer",
                 label="Customer Lifetime Value",
-                min=5,
-                max=89,
-                value=[5, 89],
+                min=100,
+                max=10000,
+                value=[100, 10000],
             ),
             ui.input_slider(
                 id="slider_order",
@@ -105,7 +105,7 @@ app_ui = ui.page_fluid(
                 col_widths = (6,6,6,6)
             ),
             
-            ui.value_box("Count of Datapoints", "1234"),
+            ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
             col_widths = (8,4), # 12 part ratio
             # row_heights= (1,2), # direct ratio
             fill=False
@@ -155,21 +155,37 @@ def create_summary_table(df,grouping,feature):
 # Server
 def server(input, output, session):
     
+    @reactive.calc
+    def filtered_df():
+        df = sales_df.copy()
+
+        churn_min, churn_max = input.slider_churn()
+        clv_min, clv_max = input.slider_customer()
+        order_min, order_max = input.slider_order()
+        freq_min, freq_max = input.slider_freq()
+
+        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
+        df = df[df["Average_Order_Value"].between(order_min, order_max)]
+        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+
+        return df
+        
     @render.data_frame
     def customer_df():
-        return create_summary_table(sales_df.copy(),"Region","Lifetime_Value")
+        return create_summary_table(filtered_df(),"Region","Lifetime_Value")
 
     @render.data_frame
     def risk_df():
-        return create_summary_table(sales_df.copy(),"Region","risk_value") # still need to compute risk column here
+        return create_summary_table(filtered_df(),"Region","risk_value") # still need to compute risk column here
 
     @render.data_frame
     def order_df():
-        return create_summary_table(sales_df.copy(),"Region","Average_Order_Value")
+        return create_summary_table(filtered_df(),"Region","Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
-        return create_summary_table(sales_df.copy(),"Region","Purchase_Frequency")
+        return create_summary_table(filtered_df(),"Region","Purchase_Frequency")
 
     @render.image # Change to widget/plotly for M2
     def high_churn_risk():
@@ -180,6 +196,11 @@ def server(input, output, session):
     def heatmap():
         img: ImgData = {"src": "img/markup-user3.png"}
         return img
+    
+    @render.text
+    def kpi_count():
+        return f"{len(filtered_df()):,}"
+
     
     
 
