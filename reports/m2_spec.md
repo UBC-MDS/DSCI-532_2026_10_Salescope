@@ -38,7 +38,7 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 | `customer_df` | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `risk_df`     | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `order_df`    | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
-| `frequqncy_df`| Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
+| `frequency_df`| Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `heatmap_metric`  | Input     |`ui.input_radio_buttons()`| -                           | #3         |
 | `heatmap`     | Output        | `@render_widget`        | `filtered_df, heatmap_metric`| #3         |
 
@@ -90,7 +90,7 @@ For each `@reactive.calc` in your diagram, briefly describe:
 
   - Transformation: Server checks what the user selected & runs different calculations:
 
-    - 1. Frequency Count: When the user selects "Frequency", the server counts the number of records using .size(), grouped by "Season" & :Most_Frequent_Category". This shows the total number of transactions.
+    - 1. Frequency Count: When the user selects "Frequency", the server counts the number of records using .size(), grouped by "Season" & "Most_Frequent_Category". This shows the total number of transactions.
 
     - 2. Average LTV: When "Avg Customer Value" is selected, the server calculates the average of the Lifetime_Value column using .mean() for the same groups.
 
