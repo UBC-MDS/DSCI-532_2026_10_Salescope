@@ -29,14 +29,21 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 | ID            | Type          | Shiny widget / renderer | Depends on                   | Job story  |
 | ------------- | ------------- | ----------------------- | ---------------------------- | ---------- |
 | `user-navigation` | Navigation| `ui.navset_bar()`, `ui.navset_panel()` | —             | #1, #2, #3 |
-| `component_2` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
-| `component_3` | Output        | `@render.plot`          | `filtered_df`                | #1         |
-| `component_4` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
+| `slider_*` | Input            | `ui.input_slider()`        | -                         | #1, #2, #3 |
+| `check_box_group_*` | Input   | `ui.input_checkbox_group()` | -                        | #1, #2, #3 |
+| `date_filter` | Input        | `ui.input_date_range()`   | -                           | #1, #2, #3 |
+| `reset` | Reactive Effect     | `@reactive.effect`      | `slider_*`, `check_box_group_*`, `date_filter`                | #1, #2, #3 |
 | `component_5` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
 | `component_6` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
 | `component_7` | Output        | `@render.plot`          | `filtered_df`                | #1         |
 | `component_8` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
 
+Each of the slider and checkbox components are similar to each other and represent the following components:
+
+```
+slider_* -> slider_churn, slider_customer, slider_order, slider_freq
+check_box_group_* -> check_box_group_type, check_box_group_region, check_box_group_strategy
+```
 
 ## Section 3: Reactivity Diagram
 
