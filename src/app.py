@@ -251,6 +251,11 @@ def server(input, output, session):
     @render_widget
     def high_churn_risk():
         df = filtered_df()
+
+        if df.empty:
+            fig = px.scatter(title="No data available for current filters")
+            return fig
+
         fig = px.scatter(
             df,
             x="Lifetime_Value",
@@ -258,6 +263,13 @@ def server(input, output, session):
             color="Retention_Strategy",
             size="Churn_Probability",
             size_max=18,
+            hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
+        )
+        fig.update_layout(
+            title="High Churn Risk Customers by Lifetime Value and Days Between Purchases",
+            xaxis_title="Customer Lifetime Value",
+            yaxis_title="Days Between Purchases",
+            legend_title="Retention Strategy",
         )
         return fig
     
