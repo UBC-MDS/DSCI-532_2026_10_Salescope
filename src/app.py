@@ -251,7 +251,14 @@ def server(input, output, session):
     @render_widget
     def high_churn_risk():
         df = filtered_df()
-        fig = px.scatter(df)
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
+            color="Retention_Strategy",
+            size="Churn_Probability",
+            size_max=18,
+        )
         return fig
     
     @render_widget
