@@ -36,6 +36,7 @@ And these are the updated job stories and their progress as of Milestone 2:
 | `component_7` | Output        | `@render.plot`          | `filtered_df`                | #1         |
 | `component_8` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
 
+Rows component_4-8 will be filled per issues #57, #58, #59 as implementation progresses.
 
 ## Section 3: Reactivity Diagram
 
