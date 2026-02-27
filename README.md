@@ -10,6 +10,9 @@ A stable deployment from the `main` branch can be viewed at [https://019c8d13-56
 
 An updating deployment from the `dev` branch can be viewed at [https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud](https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud)
 
+## Demo
+
+![Salescope Dashboard Demo](img/demo.gif)
 
 ## Dataset
 
