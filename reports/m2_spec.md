@@ -34,8 +34,9 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 | `component_4` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
 | `component_5` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
 | `component_6` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
-| `component_7` | Output        | `@render.plot`          | `filtered_df`                | #1         |
-| `component_8` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
+| `heatmap_metric`  | Input     |`ui.input_radio_buttons()`| -               | #1        | #3
+| `seasonal_heatmap`| Output    | `@render_widget`        | `filtered_df, heatmap_metric`| #3         |
+
 
 
 ## Section 3: Reactivity Diagram
