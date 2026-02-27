@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Known Issues
 
 ### Reflection
+Job Story 1 is done through the multi-tab summary table with grouping by Region, Retention Strategy, or Most Frequent Category. Job Story 2 is done with the scatterplot and sidebar filters. Job Story 3 is done with the heatmap. Layout changed from the M1 sketch to three nav panels (KPI Tables, Churn Risk Plot, Seasonal Product Heatmap) so each user story has its own view.
