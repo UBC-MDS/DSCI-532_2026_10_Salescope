@@ -29,7 +29,7 @@ And these are the updated job stories and their progress as of Milestone 2:
 | ------------- | ------------- | ----------------------- | ---------------------------- | ---------- |
 | `user-navigation` | Navigation    | `ui.navset_bar()`, `ui.nav_panel()` | —             | #1, #2, #3 |
 | `high_churn_risk` | Output        | `@render_widget`        | `filtered_df`                | #2         |
-| `component_3` | Output        | `@render.plot`          | `filtered_df`                | #1         |
+| `row_dropdown`    | Input         | `ui.input_select()`     | —                            | #1         |
 | `component_4` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
 | `component_5` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
 | `component_6` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
