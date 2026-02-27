@@ -248,10 +248,11 @@ def server(input, output, session):
         group = mapping[input.row_dropdown()]
         return create_summary_table(filtered_df(), group, "Purchase_Frequency")
 
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def high_churn_risk():
-        img: ImgData = {"src": "img/markup-user2.png"}
-        return img
+        df = filtered_df()
+        fig = px.scatter(df)
+        return fig
     
     @render_widget
     def heatmap():
