@@ -203,7 +203,17 @@ def server(input, output, session):
             df = df[df["Retention_Strategy"].isin(strategies)]
 
         return df
-        
+    
+    @reactive.effect
+    @reactive.event(input.reset)
+    def reset_filters():
+        # Update the slider inputs to defaults
+        ui.update_slider(
+            id="slider_churn",
+            value=[0.0, 1.0],
+            session = session
+        )    
+
     @render.text
     def kpi_lifetime():
         return "5432.86"
