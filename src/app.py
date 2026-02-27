@@ -245,10 +245,30 @@ def server(input, output, session):
         img: ImgData = {"src": "img/markup-user2.png"}
         return img
     
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def heatmap():
-        img: ImgData = {"src": "img/markup-user3.png"}
-        return img
+        df = filtered_df()
+        
+        if df.empty:
+            return None
+
+        # aggregating data for heatmp
+        plot_data = (
+            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+            .mean().reset_index()   )
+
+        # creating interactive heatmap
+        fig = px.density_heatmap(
+            plot_data, 
+            x="Season", 
+            y="Most_Frequent_Category", 
+            z="Lifetime_Value",
+            title="Avg Customer Value: Season vs. Category",
+            labels={'Lifetime_Value': 'Avg LTV', 'Most_Frequent_Category': 'Product Type'},
+            color_continuous_scale="Viridis")       
+    
+        return fig
+
     
     @render.text
     def kpi_count():
