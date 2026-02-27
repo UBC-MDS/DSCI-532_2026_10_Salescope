@@ -68,7 +68,7 @@ main_sidebar = ui.sidebar(
             "Sports": "Sports",             
         },
         selected=[
-            "Clothing",
+
         ],
     ),
     ui.input_checkbox_group(
@@ -81,7 +81,7 @@ main_sidebar = ui.sidebar(
             "South America": "South America",
         },
         selected=[
-            "North America",
+            
         ],
     ),
     ui.input_checkbox_group(
@@ -93,13 +93,11 @@ main_sidebar = ui.sidebar(
             "Loyalty Program": "Loyalty Program"
         },
         selected=[
-            "Discount",
-            "Email Campaign",
-            "Loyalty Program",
+
         ],
     ),
 
-    ui.input_action_button("action_button", "Apply filter"),
+    ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
 
