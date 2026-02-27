@@ -139,8 +139,7 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
     ui.layout_columns(
             ui.card(
                 ui.card_header("Seasonal and Product Type Heatmap"),
-                ui.output_image("heatmap"), # placeholder, swap with below for M2
-                #output_widget("heatmap"),
+                output_widget("heatmap"),
                 full_screen=True,
             ),
             col_widths=[12],
