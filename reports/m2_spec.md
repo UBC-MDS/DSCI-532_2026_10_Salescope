@@ -50,11 +50,24 @@ Example:
 ````markdown
 ```mermaid
 flowchart TD
-  A[/input_year/] --> F{{filtered_df}}
-  B[/input_region/] --> F
-  F --> P1([plot_trend])
-  F --> P2([tbl_summary])
-  C[/input_color/] --> P3([plot_scatter])
+  A[/slider_churn/] --> F{{filtered_df}}
+  B[/slider_customer/] --> F
+  C[/slider_order/] --> F
+  D[/slider_freq/] --> F
+  E[/checkbox_group_type/] --> F
+  G[/checkbox_group_region/] --> F
+  H[/checkbox_group_strategy/] --> F
+  I[/row_dropdown/] --> O3([customer_df])
+  I --> O4([risk_df])
+  I --> O5([order_df])
+  I --> O6([frequency_df])
+  F --> O1([high_churn_risk])
+  F --> O2([heatmap])
+  F --> O3
+  F --> O4
+  F --> O5
+  F --> O6
+  F --> O7([kpi_count])
 ```
 ````
 
