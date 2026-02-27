@@ -192,6 +192,19 @@ def server(input, output, session):
         df = df[df["Average_Order_Value"].between(order_min, order_max)]
         df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
 
+        types = input.checkbox_group_type() 
+        regions = input.checkbox_group_region() 
+        strategies = input.checkbox_group_strategy() 
+
+        if types:
+            df = df[df["Most_Frequent_Category"].isin(types)]
+
+        if regions:
+            df = df[df["Region"].isin(regions)]
+
+        if strategies:
+            df = df[df["Retention_Strategy"].isin(strategies)]
+
         return df
         
     @render.text
