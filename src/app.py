@@ -146,6 +146,30 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
         ),
 )
 
+panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
+    ui.layout_columns(
+        ui.card(
+            ui.card_header("Heatmap Settings"),
+            ui.input_radio_buttons(
+                "heatmap_metric", 
+                "Select metric:", 
+                {
+                    "mean": "Avg Customer Value", 
+                    "count": "Frequency (Count of Entries)"
+                },
+                selected="mean"
+            ),
+            ui.help_text("Choose 'Frequency' to see total number of transactions per season.")
+        ),
+        ui.card(
+            ui.card_header("Seasonal and Product Type Heatmap"),
+            output_widget("heatmap"),
+            full_screen=True,
+        ),
+        col_widths=[3, 9],
+    ),
+)
+
 # UI
 app_ui = ui.page_fluid(
     ui.tags.style("body { font-size: 0.6em; }"),
