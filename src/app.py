@@ -126,8 +126,7 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
     ui.layout_columns(
         ui.card(
             ui.card_header("High Churn Risk Scatterplot"),
-            ui.output_image("high_churn_risk"), # placeholder, swap with below for M2
-            #output_widget("high_churn_risk"),
+            output_widget("high_churn_risk"),
             full_screen=True,
         ),
         col_widths=[12],
