@@ -57,7 +57,7 @@ main_sidebar = ui.sidebar(
         max=19,
         value=[1, 19],
     ),             
-    ui.input_date_range("inDateRange", "Input date"),
+    ui.input_date_range("date_filter", "Input date"),
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -211,8 +211,45 @@ def server(input, output, session):
         ui.update_slider(
             id="slider_churn",
             value=[0.0, 1.0],
-            session = session
+            session=session
         )    
+        ui.update_slider(
+            id="slider_customer",
+            value=[100, 10000],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_order",
+            value=[20, 200],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_freq",
+            value=[1, 19],
+            session=session
+        )
+        # ui.update_date_range("date_filter"),
+        ui.update_checkbox_group(
+            id="checkbox_group_type",
+            selected=[
+
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_region",
+            selected=[
+                
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_strategy",
+            selected=[
+
+            ],
+            session=session
+        )
 
     @render.text
     def kpi_lifetime():
