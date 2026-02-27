@@ -73,8 +73,8 @@ flowchart TD
 
 ## Section 4: Calculation Details
 
-For each `@reactive.calc` in your diagram, briefly describe:
+### `filtered_df`
 
-- Which inputs it depends on.
-- What transformation it performs (e.g., "filters rows to the selected year range and region(s)").
-- Which outputs consume it.
+- **Inputs:** `slider_churn`, `slider_customer`, `slider_order`, `slider_freq`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`.
+- **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Churn_Probability`, `Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
+- **Outputs:** `high_churn_risk`, `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
