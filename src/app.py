@@ -221,25 +221,34 @@ def server(input, output, session):
 
     @render.text
     def kpi_days():
-        return "5.315"
-
-    
+        return "5.315"    
 
     @render.data_frame
     def customer_df():
-        return create_summary_table(filtered_df(),"Region","Lifetime_Value")
+        mapping = {"Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+                    }
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Lifetime_Value")
 
     @render.data_frame
     def risk_df():
-        return create_summary_table(filtered_df(),"Region","risk_value")
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
-        return create_summary_table(filtered_df(),"Region","Average_Order_Value")
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
-        return create_summary_table(filtered_df(),"Region","Purchase_Frequency")
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Purchase_Frequency")
 
     @render.image # Change to widget/plotly for M2
     def high_churn_risk():
