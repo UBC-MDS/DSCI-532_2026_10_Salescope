@@ -4,6 +4,12 @@
 
 Salescope is an interactive dashboard that helps e-commerce businesses understand their customers better and reduce churn. Regional sales directors can compare performance across different territories, while customer success managers can identify at-risk customers and evaluate which retention strategies work best. The dashboard visualizes purchasing patterns by product category, season, and customer segment to support data-driven decisions about inventory planning and marketing campaigns.
 
+## Deployments
+
+A stable deployment from the `main` branch can be viewed at [https://019c8d13-5610-dd58-6134-331453179c0e.share.connect.posit.cloud](https://019c8d13-5610-dd58-6134-331453179c0e.share.connect.posit.cloud)
+
+An updating deployment from the `dev` branch can be viewed at [https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud](https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud)
+
 ## Dataset
 
 We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights) dataset from Kaggle, which contains 10,000 customer records with purchasing behavior and engagement metrics.
@@ -15,6 +21,12 @@ This dashboard is developed by Group 10 for DSCI 532:
 - Tirth Joshi ([@tirthjoship](https://github.com/tirthjoship))
 - Songyang Yu ([@Spanorti08](https://github.com/Spanorti08))
 - Raghav Gupta ([@raghav9048](https://github.com/raghav9048))
+
+## Demo
+
+<video controls>
+  <source src="img/demo.mp4" type="video/mp4">
+</video>
 
 ## How to Run Locally
 

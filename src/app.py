@@ -6,141 +6,180 @@ import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
 
+#used LLM to know how to show actual count/mean inside the box for heatmap
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
+
+# Isolated components for easier editing
+
+kpi_component = ui.layout_columns(
+    ui.layout_columns(
+        ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
+        ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
+        ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
+        ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
+        col_widths = (6,6,6,6)
+    ),
+    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
+    col_widths = (8,4), # 12 part ratio
+    # row_heights= (1,2), # direct ratio
+    fill=False
+)
+
+main_sidebar = ui.sidebar(
+    ui.input_slider(
+        id="slider_churn",
+        label="Churn Rate",
+        min=0.0,
+        max=1.0,
+        value=[0.0, 1.0],
+    ),
+    ui.input_slider(
+        id="slider_customer",
+        label="Customer Lifetime Value",
+        min=100,
+        max=10000,
+        value=[100, 10000],
+    ),
+    ui.input_slider(
+        id="slider_order",
+        label="Average Order Value",
+        min=20,
+        max=200,
+        value=[20, 200],
+    ),
+    ui.input_slider(
+        id="slider_freq",
+        label="Purchase Frequency",
+        min=1,
+        max=19,
+        value=[1, 19],
+    ),             
+    ui.input_date_range(
+        id="date_range", 
+        label="Filter by launch date",
+        start=min_date,
+        end=max_date,
+        min=min_date,
+        max=max_date
+    ),
+    ui.input_checkbox_group(
+        id="checkbox_group_type",
+        label="Most Common Purchase Type",
+        choices={
+            "Clothing": "Clothing",
+            "Electronics": "Electronics",
+            "Home": "Home",
+            "Sports": "Sports",             
+        },
+        selected=[
+
+        ],
+    ),
+    ui.input_checkbox_group(
+        id="checkbox_group_region",
+        label="Region",
+        choices={
+            "Asia": "Asia",
+            "Europe": "Europe",
+            "North America": "North America",
+            "South America": "South America",
+        },
+        selected=[
+            
+        ],
+    ),
+    ui.input_checkbox_group(
+        id="checkbox_group_strategy",
+        label="Retention Strategy",
+        choices={
+            "Discount": "Discount",
+            "Email Campaign": "Email Campaign",
+            "Loyalty Program": "Loyalty Program"
+        },
+        selected=[
+
+        ],
+    ),
+
+    ui.input_action_button("reset", "Reset filters"),
+    open="desktop",
+)
+
+
+# Specialized table for User Story 1
+panel_1 = ui.nav_panel("KPI Tables", 
+    ui.layout_columns(
+        ui.input_select(id = "row_dropdown",
+                        label = "Table partition options:",
+                        choices = ["Region","Retention Strategy","Most Frequent Value"]),
+        ui.navset_card_tab(
+            ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
+            ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
+            ui.nav_panel("Order Value", ui.output_data_frame("order_df")),
+            ui.nav_panel("Purchase Frequency", ui.output_data_frame("frequency_df")),
+            id = "multitabtable"
+        ),
+        col_widths = [3,9]
+    ),
+)
+
+# Specialized plot for User Story 2
+panel_2 = ui.nav_panel("Churn Risk Plot", 
+    ui.layout_columns(
+        ui.card(
+            output_widget("high_churn_risk"),
+            full_screen=True,
+        ),
+        col_widths=[12],
+    ),
+)
+
+# Specialized plot for User Story 3
+panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
+    ui.layout_columns(
+        ui.card(
+            ui.card_header("Heatmap settings"),
+            ui.input_radio_buttons(
+                "heatmap_metric", 
+                "Select metric:", 
+                {
+                "mean": "Avg customer value", 
+                "count": "Frequency (Count of entries)" },
+                selected="mean"
+               ),
+            ui.help_text("Choose 'Frequency' to see total number of transactions per season.")
+              ),
+        ui.card(
+            ui.card_header("Seasonal & Product Type Heatmap"),
+            output_widget("heatmap"),
+            full_screen=True,
+        ),
+        col_widths=[3, 9], ),
+)
 
 # UI
 app_ui = ui.page_fluid(
     ui.tags.style("body { font-size: 0.6em; }"),
     ui.panel_title("Salescope"),
     ui.layout_sidebar(
-        ui.sidebar(
-            ui.input_slider(
-                id="slider_churn",
-                label="Churn Rate",
-                min=0.0,
-                max=1.0,
-                value=[0.0, 1.0],
-            ),
-            ui.input_slider(
-                id="slider_customer",
-                label="Customer Lifetime Value",
-                min=5,
-                max=89,
-                value=[5, 89],
-            ),
-            ui.input_slider(
-                id="slider_order",
-                label="Average Order Value",
-                min=20,
-                max=200,
-                value=[20, 200],
-            ),
-            ui.input_slider(
-                id="slider_freq",
-                label="Purchase Frequency",
-                min=1,
-                max=19,
-                value=[1, 19],
-            ),
-            
-            ui.input_date_range("inDateRange", "Input date"),
-
-            ui.input_checkbox_group(
-                id="checkbox_group_type",
-                label="Most Common Purchase Type",
-                choices={
-                    "Clothing": "Clothing",
-                    "Electronics": "Electronics",
-                    "Home": "Home",
-                    "Sports": "Sports",
-                    
-                },
-                selected=[
-                    "Clothing",
-                ],
-            ),
-
-            ui.input_checkbox_group(
-                id="checkbox_group_region",
-                label="Region",
-                choices={
-                    "Asia": "Asia",
-                    "Europe": "Europe",
-                    "North America": "North America",
-                    "South America": "South America",
-                },
-                selected=[
-                    "North America",
-                ],
-            ),
-
-            ui.input_checkbox_group(
-                id="checkbox_group_strategy",
-                label="Retention Strategy",
-                choices={
-                    "Discount": "Discount",
-                    "Email Campaign": "Email Campaign",
-                    "Loyalty Program": "Loyalty Program"
-                },
-                selected=[
-                    "Discount",
-                    "Email Campaign",
-                    "Loyalty Program",
-                ],
-            ),
-            
-            ui.input_action_button("action_button", "Apply filter"),
-            open="desktop",
-        ),
-        ui.layout_columns(
-            ui.layout_columns(
-                ui.value_box("Average Lifetime Value", "5432.86"),
-                ui.value_box("Average Churn Rate", "0.727"),
-                ui.value_box("Average Value-At-Risk", "1234.65"),
-                ui.value_box("Average Days Per Purchase", "5.315"),
-                col_widths = (6,6,6,6)
-            ),
-            
-            ui.value_box("Count of Datapoints", "1234"),
-            col_widths = (8,4), # 12 part ratio
-            # row_heights= (1,2), # direct ratio
-            fill=False
-        ),
-       
-        ui.layout_columns(
-            ui.card(
-                ui.card_header("High Churn Risk Scatterplot"),
-                ui.output_image("high_churn_risk"), # placeholder, swap with below for M2
-                #output_widget("high_churn_risk"),
-                full_screen=True,
-            ),
-            ui.card(
-                ui.card_header("Seasonal and Product Type Heatmap"),
-                ui.output_image("heatmap"), # placeholder, swap with below for M2
-                #output_widget("heatmap"),
-                full_screen=True,
-            ),
-            col_widths=[6, 6],
-        ),
-        ui.layout_columns(
-            ui.input_select(id = "row_dropdown",
-                            label = "Table partition options:",
-                            choices = ["Region","Retention Strategy","Most Frequent Value"]),
-            ui.navset_card_tab( # replace each of these with instances of ui.output_data_frame
-                ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
-                ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
-                ui.nav_panel("Order Value", ui.output_data_frame("order_df")),
-                ui.nav_panel("Purchase Frequency", ui.output_data_frame("frequency_df")),
-                id = "multitabtable"
-            ),
-            col_widths = [3,9]
-        ),
+        main_sidebar,
+        kpi_component,
+        ui.navset_bar(
+            panel_1,       
+            panel_2,
+            panel_3,
+            title = "Advanced Figures"
+        )   
     ),
+    theme = ui.Theme("lumen")
 )
+
 
 def create_summary_table(df,grouping,feature):
     summary = df.groupby(grouping).agg(
@@ -155,35 +194,213 @@ def create_summary_table(df,grouping,feature):
 # Server
 def server(input, output, session):
     
+    @reactive.calc
+    def filtered_df():
+        df = sales_df.copy()
+
+        churn_min, churn_max = input.slider_churn()
+        clv_min, clv_max = input.slider_customer()
+        order_min, order_max = input.slider_order()
+        freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
+
+        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
+        df = df[df["Average_Order_Value"].between(order_min, order_max)]
+        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+
+        types = input.checkbox_group_type() 
+        regions = input.checkbox_group_region() 
+        strategies = input.checkbox_group_strategy() 
+
+        if types:
+            df = df[df["Most_Frequent_Category"].isin(types)]
+
+        if regions:
+            df = df[df["Region"].isin(regions)]
+
+        if strategies:
+            df = df[df["Retention_Strategy"].isin(strategies)]
+
+        return df
+    
+    @reactive.effect
+    @reactive.event(input.reset)
+    def reset_filters():
+        # Update the slider inputs to defaults
+        ui.update_slider(
+            id="slider_churn",
+            value=[0.0, 1.0],
+            session=session
+        )    
+        ui.update_slider(
+            id="slider_customer",
+            value=[100, 10000],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_order",
+            value=[20, 200],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_freq",
+            value=[1, 19],
+            session=session
+        )
+        ui.update_date_range(
+            "date_range",
+            start=min_date,
+            end=max_date,
+            min=min_date,
+            max=max_date,
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_type",
+            selected=[
+
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_region",
+            selected=[
+                
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_strategy",
+            selected=[
+
+            ],
+            session=session
+        )
+
+    @render.text
+    def kpi_lifetime():
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['Lifetime_Value'].mean():,.2f}"
+
+    @render.text
+    def kpi_churn():
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Churn_Probability'].mean():.1%}"
+
+    @render.text
+    def kpi_risk():
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['risk_value'].mean():,.2f}"
+
+    @render.text
+    def kpi_days():
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
+
     @render.data_frame
     def customer_df():
-        return create_summary_table(sales_df.copy(),"Region","Lifetime_Value")
+        mapping = {"Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+                    }
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Lifetime_Value")
 
     @render.data_frame
     def risk_df():
-        return create_summary_table(sales_df.copy(),"Region","risk_value") # still need to compute risk column here
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
-        return create_summary_table(sales_df.copy(),"Region","Average_Order_Value")
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
-        return create_summary_table(sales_df.copy(),"Region","Purchase_Frequency")
+        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        group = mapping[input.row_dropdown()]
+        return create_summary_table(filtered_df(), group, "Purchase_Frequency")
 
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def high_churn_risk():
-        img: ImgData = {"src": "img/markup-user2.png"}
-        return img
+        df = filtered_df()
+        churn_min, churn_max = input.slider_churn()
+
+        if df.empty:
+            fig = px.scatter(title="No data available for current filters")
+            return fig
+
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
+            color="Retention_Strategy",
+            size="Churn_Probability",
+            size_max=18,
+            hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
+        )
+        fig.update_layout(
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
+            xaxis_title="Customer Lifetime Value",
+            yaxis_title="Days Between Purchases",
+            legend_title="Retention Strategy",
+        )
+        return fig
     
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def heatmap():
-        img: ImgData = {"src": "img/markup-user3.png"}
-        return img
-    
-    
+        df = filtered_df()
+        
+        if df.empty:
+            return None
+        # fetching value from  radio buttons
+        metric = input.heatmap_metric()
+
+        if metric == "count":
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])
+                .size().reset_index(name="Frequency") )
+            z_col = "Frequency"
+            title_text = "Frequency of Sales: Season vs. Category"
+            label_text = "Total Count"
+        else:
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+                .mean()
+                .reset_index()  )
+            z_col = "Lifetime_Value"
+            title_text = "Avg Customer Value: Season vs. Category"
+            label_text = "Avg LTV"
+
+        fig = px.density_heatmap(
+            plot_data, 
+            x="Season", 
+            y="Most_Frequent_Category", 
+            z=z_col,
+            title=title_text,
+            labels={z_col: label_text, 'Most_Frequent_Category': 'Product Type'},
+            color_continuous_scale="Viridis",
+            text_auto=True ) 
+        
+        return fig
 
     
+    @render.text
+    def kpi_count():
+        return f"{len(filtered_df()):,}"
 
 
 # Create app
