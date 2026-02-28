@@ -32,6 +32,7 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 | `slider_*` | Input            | `ui.input_slider()`        | -                         | #1, #2, #3 |
 | `check_box_group_*` | Input   | `ui.input_checkbox_group()` | -                        | #1, #2, #3 |
 | `date_filter` | Input        | `ui.input_date_range()`   | -                           | #1, #2, #3 |
+| `reset` | Input        | `ui.input_action_button()`   | -                           | #1, #2, #3 |
 | `reset` | Reactive Effect     | `@reactive.effect`      | `slider_*`, `check_box_group_*`, `date_filter`                | #1, #2, #3 |
 | `component_5` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
 | `component_6` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
