@@ -133,9 +133,7 @@ panel_1 = ui.nav_panel("KPI Tables",
 panel_2 = ui.nav_panel("Churn Risk Plot", 
     ui.layout_columns(
         ui.card(
-            ui.card_header("High Churn Risk Scatterplot"),
-            ui.output_image("high_churn_risk"), # placeholder, swap with below for M2
-            #output_widget("high_churn_risk"),
+            output_widget("high_churn_risk"),
             full_screen=True,
         ),
         col_widths=[12],
@@ -336,10 +334,31 @@ def server(input, output, session):
         group = mapping[input.row_dropdown()]
         return create_summary_table(filtered_df(), group, "Purchase_Frequency")
 
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def high_churn_risk():
-        img: ImgData = {"src": "img/markup-user2.png"}
-        return img
+        df = filtered_df()
+        churn_min, churn_max = input.slider_churn()
+
+        if df.empty:
+            fig = px.scatter(title="No data available for current filters")
+            return fig
+
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
+            color="Retention_Strategy",
+            size="Churn_Probability",
+            size_max=18,
+            hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
+        )
+        fig.update_layout(
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
+            xaxis_title="Customer Lifetime Value",
+            yaxis_title="Days Between Purchases",
+            legend_title="Retention Strategy",
+        )
+        return fig
     
     @render_widget
     def heatmap():
