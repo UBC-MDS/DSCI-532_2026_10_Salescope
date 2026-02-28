@@ -26,6 +26,12 @@ This dashboard is developed by Group 10 for DSCI 532:
 - Songyang Yu ([@Spanorti08](https://github.com/Spanorti08))
 - Raghav Gupta ([@raghav9048](https://github.com/raghav9048))
 
+## Demo
+
+<video controls>
+  <source src="img/demo.mp4" type="video/mp4">
+</video>
+
 ## How to Run Locally
 
 Follow these steps to set up and run the Salescope dashboard on your local machine:
