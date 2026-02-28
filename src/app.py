@@ -240,7 +240,12 @@ def server(input, output, session):
             value=[1, 19],
             session=session
         )
-        # ui.update_date_range("date_filter"),
+        ui.update_date_range(
+            "date_filter",
+            start=None,
+            end=None,
+            session=session
+        )
         ui.update_checkbox_group(
             id="checkbox_group_type",
             selected=[
