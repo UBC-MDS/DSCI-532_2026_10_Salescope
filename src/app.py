@@ -12,7 +12,8 @@ import pandas as pd
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Isolated components for easier editing
 
