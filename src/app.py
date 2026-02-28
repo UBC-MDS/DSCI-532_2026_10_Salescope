@@ -12,6 +12,7 @@ import pandas as pd
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 
 # Isolated components for easier editing
 
@@ -58,7 +59,14 @@ main_sidebar = ui.sidebar(
         max=19,
         value=[1, 19],
     ),             
-    ui.input_date_range("inDateRange", "Input date"),
+    ui.input_date_range(
+        id="date_range", 
+        label="Input date",
+        start="2019-12-31",
+        end="2023-01-01",
+        min="2019-12-31",
+        max="2023-01-01"
+    ),
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -197,11 +205,13 @@ def server(input, output, session):
         clv_min, clv_max = input.slider_customer()
         order_min, order_max = input.slider_order()
         freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
 
         df = df[df["Churn_Probability"].between(churn_min, churn_max)]
         df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
         df = df[df["Average_Order_Value"].between(order_min, order_max)]
         df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
 
         types = input.checkbox_group_type() 
         regions = input.checkbox_group_region() 
