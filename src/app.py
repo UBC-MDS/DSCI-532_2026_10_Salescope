@@ -126,7 +126,6 @@ panel_1 = ui.nav_panel("KPI Tables",
 panel_2 = ui.nav_panel("Churn Risk Plot", 
     ui.layout_columns(
         ui.card(
-            ui.card_header("High Churn Risk Scatterplot"),
             output_widget("high_churn_risk"),
             full_screen=True,
         ),
@@ -263,6 +262,7 @@ def server(input, output, session):
     @render_widget
     def high_churn_risk():
         df = filtered_df()
+        churn_min, churn_max = input.slider_churn()
 
         if df.empty:
             fig = px.scatter(title="No data available for current filters")
@@ -278,7 +278,7 @@ def server(input, output, session):
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
         )
         fig.update_layout(
-            title="High Churn Risk Customers by Lifetime Value and Days Between Purchases",
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
             legend_title="Retention Strategy",
