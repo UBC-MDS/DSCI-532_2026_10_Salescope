@@ -23,7 +23,7 @@ kpi_component = ui.layout_columns(
         ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
         col_widths = (6,6,6,6)
     ),
-    ui.value_box("Count of Datapoints", ui.output_ui("kpi_count")),
+    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
     col_widths = (8,4), # 12 part ratio
     # row_heights= (1,2), # direct ratio
     fill=False
@@ -220,19 +220,31 @@ def server(input, output, session):
         
     @render.text
     def kpi_lifetime():
-        return "5432.86"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['Lifetime_Value'].mean():,.2f}"
 
     @render.text
     def kpi_churn():
-        return "0.727"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Churn_Probability'].mean():.1%}"
 
     @render.text
     def kpi_risk():
-        return "1234.64"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['risk_value'].mean():,.2f}"
 
     @render.text
     def kpi_days():
-        return "5.315"    
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
 
     @render.data_frame
     def customer_df():
