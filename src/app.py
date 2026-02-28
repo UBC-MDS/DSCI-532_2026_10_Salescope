@@ -6,11 +6,14 @@ import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
 
+#used LLM to know how to show actual count/mean inside the box for heatmap
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Isolated components for easier editing
 
@@ -22,7 +25,7 @@ kpi_component = ui.layout_columns(
         ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
         col_widths = (6,6,6,6)
     ),
-    ui.value_box("Count of Datapoints", ui.output_ui("kpi_count")),
+    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
     col_widths = (8,4), # 12 part ratio
     # row_heights= (1,2), # direct ratio
     fill=False
@@ -57,7 +60,14 @@ main_sidebar = ui.sidebar(
         max=19,
         value=[1, 19],
     ),             
-    ui.input_date_range("inDateRange", "Input date"),
+    ui.input_date_range(
+        id="date_range", 
+        label="Filter by launch date",
+        start=min_date,
+        end=max_date,
+        min=min_date,
+        max=max_date
+    ),
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -68,7 +78,7 @@ main_sidebar = ui.sidebar(
             "Sports": "Sports",             
         },
         selected=[
-            "Clothing",
+
         ],
     ),
     ui.input_checkbox_group(
@@ -81,7 +91,7 @@ main_sidebar = ui.sidebar(
             "South America": "South America",
         },
         selected=[
-            "North America",
+            
         ],
     ),
     ui.input_checkbox_group(
@@ -93,13 +103,11 @@ main_sidebar = ui.sidebar(
             "Loyalty Program": "Loyalty Program"
         },
         selected=[
-            "Discount",
-            "Email Campaign",
-            "Loyalty Program",
+
         ],
     ),
 
-    ui.input_action_button("action_button", "Apply filter"),
+    ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
 
@@ -125,9 +133,7 @@ panel_1 = ui.nav_panel("KPI Tables",
 panel_2 = ui.nav_panel("Churn Risk Plot", 
     ui.layout_columns(
         ui.card(
-            ui.card_header("High Churn Risk Scatterplot"),
-            ui.output_image("high_churn_risk"), # placeholder, swap with below for M2
-            #output_widget("high_churn_risk"),
+            output_widget("high_churn_risk"),
             full_screen=True,
         ),
         col_widths=[12],
@@ -137,13 +143,24 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
 # Specialized plot for User Story 3
 panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
     ui.layout_columns(
-            ui.card(
-                ui.card_header("Seasonal and Product Type Heatmap"),
-                output_widget("heatmap"),
-                full_screen=True,
-            ),
-            col_widths=[12],
+        ui.card(
+            ui.card_header("Heatmap settings"),
+            ui.input_radio_buttons(
+                "heatmap_metric", 
+                "Select metric:", 
+                {
+                "mean": "Avg customer value", 
+                "count": "Frequency (Count of entries)" },
+                selected="mean"
+               ),
+            ui.help_text("Choose 'Frequency' to see total number of transactions per season.")
+              ),
+        ui.card(
+            ui.card_header("Seasonal & Product Type Heatmap"),
+            output_widget("heatmap"),
+            full_screen=True,
         ),
+        col_widths=[3, 9], ),
 )
 
 # UI
@@ -185,11 +202,13 @@ def server(input, output, session):
         clv_min, clv_max = input.slider_customer()
         order_min, order_max = input.slider_order()
         freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
 
         df = df[df["Churn_Probability"].between(churn_min, churn_max)]
         df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
         df = df[df["Average_Order_Value"].between(order_min, order_max)]
         df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
 
         types = input.checkbox_group_type() 
         regions = input.checkbox_group_region() 
@@ -205,22 +224,88 @@ def server(input, output, session):
             df = df[df["Retention_Strategy"].isin(strategies)]
 
         return df
-        
+    
+    @reactive.effect
+    @reactive.event(input.reset)
+    def reset_filters():
+        # Update the slider inputs to defaults
+        ui.update_slider(
+            id="slider_churn",
+            value=[0.0, 1.0],
+            session=session
+        )    
+        ui.update_slider(
+            id="slider_customer",
+            value=[100, 10000],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_order",
+            value=[20, 200],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_freq",
+            value=[1, 19],
+            session=session
+        )
+        ui.update_date_range(
+            "date_range",
+            start=min_date,
+            end=max_date,
+            min=min_date,
+            max=max_date,
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_type",
+            selected=[
+
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_region",
+            selected=[
+                
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_strategy",
+            selected=[
+
+            ],
+            session=session
+        )
+
     @render.text
     def kpi_lifetime():
-        return "5432.86"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['Lifetime_Value'].mean():,.2f}"
 
     @render.text
     def kpi_churn():
-        return "0.727"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Churn_Probability'].mean():.1%}"
 
     @render.text
     def kpi_risk():
-        return "1234.64"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['risk_value'].mean():,.2f}"
 
     @render.text
     def kpi_days():
-        return "5.315"    
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
 
     @render.data_frame
     def customer_df():
@@ -249,10 +334,31 @@ def server(input, output, session):
         group = mapping[input.row_dropdown()]
         return create_summary_table(filtered_df(), group, "Purchase_Frequency")
 
-    @render.image # Change to widget/plotly for M2
+    @render_widget
     def high_churn_risk():
-        img: ImgData = {"src": "img/markup-user2.png"}
-        return img
+        df = filtered_df()
+        churn_min, churn_max = input.slider_churn()
+
+        if df.empty:
+            fig = px.scatter(title="No data available for current filters")
+            return fig
+
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
+            color="Retention_Strategy",
+            size="Churn_Probability",
+            size_max=18,
+            hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
+        )
+        fig.update_layout(
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
+            xaxis_title="Customer Lifetime Value",
+            yaxis_title="Days Between Purchases",
+            legend_title="Retention Strategy",
+        )
+        return fig
     
     @render_widget
     def heatmap():
@@ -260,22 +366,35 @@ def server(input, output, session):
         
         if df.empty:
             return None
+        # fetching value from  radio buttons
+        metric = input.heatmap_metric()
 
-        # aggregating data for heatmp
-        plot_data = (
-            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
-            .mean().reset_index()   )
+        if metric == "count":
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])
+                .size().reset_index(name="Frequency") )
+            z_col = "Frequency"
+            title_text = "Frequency of Sales: Season vs. Category"
+            label_text = "Total Count"
+        else:
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+                .mean()
+                .reset_index()  )
+            z_col = "Lifetime_Value"
+            title_text = "Avg Customer Value: Season vs. Category"
+            label_text = "Avg LTV"
 
-        # creating interactive heatmap
         fig = px.density_heatmap(
             plot_data, 
             x="Season", 
             y="Most_Frequent_Category", 
-            z="Lifetime_Value",
-            title="Avg Customer Value: Season vs. Category",
-            labels={'Lifetime_Value': 'Avg LTV', 'Most_Frequent_Category': 'Product Type'},
-            color_continuous_scale="Viridis")       
-    
+            z=z_col,
+            title=title_text,
+            labels={z_col: label_text, 'Most_Frequent_Category': 'Product Type'},
+            color_continuous_scale="Viridis",
+            text_auto=True ) 
+        
         return fig
 
     
