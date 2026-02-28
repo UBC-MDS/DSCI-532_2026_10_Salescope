@@ -6,6 +6,7 @@ import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
 
+#used LLM to know how to show actual count/mean inside the box for heatmap
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
@@ -136,13 +137,24 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
 # Specialized plot for User Story 3
 panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
     ui.layout_columns(
-            ui.card(
-                ui.card_header("Seasonal and Product Type Heatmap"),
-                output_widget("heatmap"),
-                full_screen=True,
-            ),
-            col_widths=[12],
+        ui.card(
+            ui.card_header("Heatmap settings"),
+            ui.input_radio_buttons(
+                "heatmap_metric", 
+                "Select metric:", 
+                {
+                "mean": "Avg customer value", 
+                "count": "Frequency (Count of entries)" },
+                selected="mean"
+               ),
+            ui.help_text("Choose 'Frequency' to see total number of transactions per season.")
+              ),
+        ui.card(
+            ui.card_header("Seasonal & Product Type Heatmap"),
+            output_widget("heatmap"),
+            full_screen=True,
         ),
+        col_widths=[3, 9], ),
 )
 
 # UI
@@ -279,22 +291,35 @@ def server(input, output, session):
         
         if df.empty:
             return None
+        # fetching value from  radio buttons
+        metric = input.heatmap_metric()
 
-        # aggregating data for heatmp
-        plot_data = (
-            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
-            .mean().reset_index()   )
+        if metric == "count":
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])
+                .size().reset_index(name="Frequency") )
+            z_col = "Frequency"
+            title_text = "Frequency of Sales: Season vs. Category"
+            label_text = "Total Count"
+        else:
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+                .mean()
+                .reset_index()  )
+            z_col = "Lifetime_Value"
+            title_text = "Avg Customer Value: Season vs. Category"
+            label_text = "Avg LTV"
 
-        # creating interactive heatmap
         fig = px.density_heatmap(
             plot_data, 
             x="Season", 
             y="Most_Frequent_Category", 
-            z="Lifetime_Value",
-            title="Avg Customer Value: Season vs. Category",
-            labels={'Lifetime_Value': 'Avg LTV', 'Most_Frequent_Category': 'Product Type'},
-            color_continuous_scale="Viridis")       
-    
+            z=z_col,
+            title=title_text,
+            labels={z_col: label_text, 'Most_Frequent_Category': 'Product Type'},
+            color_continuous_scale="Viridis",
+            text_auto=True ) 
+        
         return fig
 
     
