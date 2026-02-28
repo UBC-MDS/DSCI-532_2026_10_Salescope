@@ -29,14 +29,31 @@ TODO: Replace each row with the components outlined in issues #56, #57, #58, #59
 | ID            | Type          | Shiny widget / renderer | Depends on                   | Job story  |
 | ------------- | ------------- | ----------------------- | ---------------------------- | ---------- |
 | `user-navigation` | Navigation| `ui.navset_bar()`, `ui.navset_panel()` | —             | #1, #2, #3 |
+| `slider_*` | Input            | `ui.input_slider()`        | -                         | #1, #2, #3 |
+| `check_box_group_*` | Input   | `ui.input_checkbox_group()` | -                        | #1, #2, #3 |
+| `date_range`  | Input         | `ui.input_date_range()`    | -                           | #1, #2, #3 |
+| `reset` | Input        | `ui.input_action_button()`   | -                           | #1, #2, #3 |
+| `reset` | Reactive Effect     | `@reactive.effect`      | `slider_*`, `check_box_group_*`, `date_range`                | #1, #2, #3 |
 | `component_2` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
 | `component_3` | Output        | `@render.plot`          | `filtered_df`                | #1         |
 | `component_4` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
 | `component_5` | Input         | `ui.input_slider()`     | —                            | #1, #2     |
 | `component_6` | Reactive calc | `@reactive.calc`        | `input_year`, `input_region` | #1, #2, #3 |
-| `component_7` | Output        | `@render.plot`          | `filtered_df`                | #1         |
-| `component_8` | Output        | `@render.data_frame`    | `filtered_df`                | #2         |
+| `row_dropdown`| Input         | `ui.input_select()`     | -                            | #1         |
+| `customer_df` | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
+| `risk_df`     | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
+| `order_df`    | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
+| `frequency_df`| Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
+| `heatmap_metric`  | Input     |`ui.input_radio_buttons()`| -                           | #3         |
+| `heatmap`     | Output        | `@render_widget`        | `filtered_df, heatmap_metric`| #3         |
 
+
+Each of the slider and checkbox components are similar to each other and represent the following components:
+
+```
+slider_* -> slider_churn, slider_customer, slider_order, slider_freq
+check_box_group_* -> check_box_group_type, check_box_group_region, check_box_group_strategy
+```
 
 ## Section 3: Reactivity Diagram
 
@@ -63,6 +80,29 @@ flowchart TD
 
 For each `@reactive.calc` in your diagram, briefly describe:
 
-- Which inputs it depends on.
-- What transformation it performs (e.g., "filters rows to the selected year range and region(s)").
-- Which outputs consume it.
+- 1. For Summary Tables (customer_df, risk_df, order_df, frequency_df)
+
+ - Inputs: These four components(customer_df, risk_df, order_df, frequency_df) use the filtered data (filtered_df) & row_dropdown input selected by the user.
+
+ - Transformation: Each output function follows three main steps:
+
+   - Mapping: A dictionary is used to match the user-friendly label from row_dropdown (for eg., "Region") to the actual column name in the dataset.
+
+   - Aggregation: The function calls a shared helper function called create_summary_table.
+
+   - Calculation: The helper function groups the data using .groupby() on the selected column & calculates key statistics- Count (size), Mean, Median, Maximum & Total   (sum) for the specific KPIs.
+
+ - Output: Interactive data table is displayed showing the summarized statistics for the selected metric.
+
+
+- 2. For Heatmap Output:
+
+  - Inputs: This component uses the filtered data (filtered_df) reactive calculation & heatmap_metric radio button input.
+
+  - Transformation: Server checks what the user selected & runs different calculations:
+
+    - 1. Frequency Count: When the user selects "Frequency", the server counts the number of records using .size(), grouped by "Season" & "Most_Frequent_Category". This shows the total number of transactions.
+
+    - 2. Average LTV: When "Avg Customer Value" is selected, the server calculates the average of the Lifetime_Value column using .mean() for the same groups.
+
+  - Outputs: The result is passed to a Plotly density_heatmap which displays an interactive grid. The chart title updates automatically & colors change based on the selected metric.
