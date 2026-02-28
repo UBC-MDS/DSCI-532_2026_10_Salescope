@@ -252,9 +252,11 @@ def server(input, output, session):
             session=session
         )
         ui.update_date_range(
-            "date_filter",
-            start=None,
-            end=None,
+            "date_range",
+            start=min_date,
+            end=max_date,
+            min=min_date,
+            max=max_date,
             session=session
         )
         ui.update_checkbox_group(
