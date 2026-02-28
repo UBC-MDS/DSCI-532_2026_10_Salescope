@@ -61,11 +61,11 @@ main_sidebar = ui.sidebar(
     ),             
     ui.input_date_range(
         id="date_range", 
-        label="Input date",
-        start="2019-12-31",
-        end="2023-01-01",
-        min="2019-12-31",
-        max="2023-01-01"
+        label="Filter by launch date",
+        start=min_date,
+        end=max_date,
+        min=min_date,
+        max=max_date
     ),
     ui.input_checkbox_group(
         id="checkbox_group_type",
