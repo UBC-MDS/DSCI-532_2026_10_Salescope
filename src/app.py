@@ -12,7 +12,8 @@ import pandas as pd
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Isolated components for easier editing
 
@@ -251,9 +252,11 @@ def server(input, output, session):
             session=session
         )
         ui.update_date_range(
-            "date_filter",
-            start=None,
-            end=None,
+            "date_range",
+            start=min_date,
+            end=max_date,
+            min=min_date,
+            max=max_date,
             session=session
         )
         ui.update_checkbox_group(
