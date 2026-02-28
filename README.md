@@ -10,7 +10,6 @@ A stable deployment from the `main` branch can be viewed at [https://019c8d13-56
 
 An updating deployment from the `dev` branch can be viewed at [https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud](https://019c8d16-a100-6bb9-8eb5-58c6097addfa.share.connect.posit.cloud)
 
-
 ## Dataset
 
 We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights) dataset from Kaggle, which contains 10,000 customer records with purchasing behavior and engagement metrics.
@@ -22,6 +21,12 @@ This dashboard is developed by Group 10 for DSCI 532:
 - Tirth Joshi ([@tirthjoship](https://github.com/tirthjoship))
 - Songyang Yu ([@Spanorti08](https://github.com/Spanorti08))
 - Raghav Gupta ([@raghav9048](https://github.com/raghav9048))
+
+## Demo
+
+<video controls>
+  <source src="img/demo.mp4" type="video/mp4">
+</video>
 
 ## How to Run Locally
 
