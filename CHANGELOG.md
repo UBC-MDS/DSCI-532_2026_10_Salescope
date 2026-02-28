@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two Posit Connect Cloud deployments: stable on `main` and auto-updating on `dev`
 
 ### Changed
+- Replaced single-page layout from the M1 sketch with a tabbed navigation system (`ui.navset_bar()` with three `ui.nav_panel()` views: KPI/Tables, Churn Risk Plot, Seasonal Product Heatmap) to reduce cognitive load and give each complex visual adequate screen real estate.
+- Removed `ridgeplot` dependency; ridge plot was dropped in favour of the interactive Plotly scatterplot which better serves the churn-risk job story.
 
 ### Known Issues
 - The app layout may look slightly cramped on very mobile-sized screens due to the multi-column configurations.
