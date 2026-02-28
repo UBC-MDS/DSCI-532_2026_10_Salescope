@@ -97,3 +97,16 @@ flowchart TD
 - **Inputs:** `slider_churn`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`.
 - **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Churn_Probability`, `Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
 - **Outputs:** `high_churn_risk`, `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
+
+## Section 5: Complexity Enhancement — Reset Button
+
+We implemented the **Reset Button** complexity enhancement using `ui.input_action_button()` paired with `@reactive.effect` and `@reactive.event`.
+
+### What was added
+
+A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked, a `@reactive.effect` decorated with `@reactive.event(input.reset)` fires and calls `ui.update_*` functions to restore every slider, checkbox group, and date range widget back to its original default values. This restores `filtered_df` to the full 10,000-row dataset in a single user action.
+
+### Why it improves the user experience
+
+Without the reset button, a user who has applied multiple overlapping filters (for example: a churn slider + two checkbox groups + a date range) must manually undo each control one by one to return to the default view. This creates unnecessary friction, especially for exploratory sessions where users jump between different filter combinations. A single "Reset Filters" click eliminates this pain point, making the dashboard significantly faster to use for real analytical workflows.
+
