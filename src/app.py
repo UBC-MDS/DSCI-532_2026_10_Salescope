@@ -6,6 +6,7 @@ import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
 
+#used LLM to know how to show actual count/mean inside the box for heatmap
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
@@ -22,7 +23,7 @@ kpi_component = ui.layout_columns(
         ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
         col_widths = (6,6,6,6)
     ),
-    ui.value_box("Count of Datapoints", ui.output_ui("kpi_count")),
+    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
     col_widths = (8,4), # 12 part ratio
     # row_heights= (1,2), # direct ratio
     fill=False
@@ -135,13 +136,24 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
 # Specialized plot for User Story 3
 panel_3 = ui.nav_panel("Seasonal Product Heatmap", 
     ui.layout_columns(
-            ui.card(
-                ui.card_header("Seasonal and Product Type Heatmap"),
-                output_widget("heatmap"),
-                full_screen=True,
-            ),
-            col_widths=[12],
+        ui.card(
+            ui.card_header("Heatmap settings"),
+            ui.input_radio_buttons(
+                "heatmap_metric", 
+                "Select metric:", 
+                {
+                "mean": "Avg customer value", 
+                "count": "Frequency (Count of entries)" },
+                selected="mean"
+               ),
+            ui.help_text("Choose 'Frequency' to see total number of transactions per season.")
+              ),
+        ui.card(
+            ui.card_header("Seasonal & Product Type Heatmap"),
+            output_widget("heatmap"),
+            full_screen=True,
         ),
+        col_widths=[3, 9], ),
 )
 
 # UI
@@ -253,19 +265,31 @@ def server(input, output, session):
 
     @render.text
     def kpi_lifetime():
-        return "5432.86"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['Lifetime_Value'].mean():,.2f}"
 
     @render.text
     def kpi_churn():
-        return "0.727"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Churn_Probability'].mean():.1%}"
 
     @render.text
     def kpi_risk():
-        return "1234.64"
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"${df['risk_value'].mean():,.2f}"
 
     @render.text
     def kpi_days():
-        return "5.315"    
+        df = filtered_df()
+        if df.empty:
+            return "—"
+        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
 
     @render.data_frame
     def customer_df():
@@ -305,22 +329,35 @@ def server(input, output, session):
         
         if df.empty:
             return None
+        # fetching value from  radio buttons
+        metric = input.heatmap_metric()
 
-        # aggregating data for heatmp
-        plot_data = (
-            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
-            .mean().reset_index()   )
+        if metric == "count":
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])
+                .size().reset_index(name="Frequency") )
+            z_col = "Frequency"
+            title_text = "Frequency of Sales: Season vs. Category"
+            label_text = "Total Count"
+        else:
+            plot_data = (
+                df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+                .mean()
+                .reset_index()  )
+            z_col = "Lifetime_Value"
+            title_text = "Avg Customer Value: Season vs. Category"
+            label_text = "Avg LTV"
 
-        # creating interactive heatmap
         fig = px.density_heatmap(
             plot_data, 
             x="Season", 
             y="Most_Frequent_Category", 
-            z="Lifetime_Value",
-            title="Avg Customer Value: Season vs. Category",
-            labels={'Lifetime_Value': 'Avg LTV', 'Most_Frequent_Category': 'Product Type'},
-            color_continuous_scale="Viridis")       
-    
+            z=z_col,
+            title=title_text,
+            labels={z_col: label_text, 'Most_Frequent_Category': 'Product Type'},
+            color_continuous_scale="Viridis",
+            text_auto=True ) 
+        
         return fig
 
     
