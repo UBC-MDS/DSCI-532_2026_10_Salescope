@@ -77,7 +77,7 @@ main_sidebar = ui.sidebar(
             "Sports": "Sports",             
         },
         selected=[
-            "Clothing",
+
         ],
     ),
     ui.input_checkbox_group(
@@ -90,7 +90,7 @@ main_sidebar = ui.sidebar(
             "South America": "South America",
         },
         selected=[
-            "North America",
+            
         ],
     ),
     ui.input_checkbox_group(
@@ -102,13 +102,11 @@ main_sidebar = ui.sidebar(
             "Loyalty Program": "Loyalty Program"
         },
         selected=[
-            "Discount",
-            "Email Campaign",
-            "Loyalty Program",
+
         ],
     ),
 
-    ui.input_action_button("action_button", "Apply filter"),
+    ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
 
@@ -227,7 +225,59 @@ def server(input, output, session):
             df = df[df["Retention_Strategy"].isin(strategies)]
 
         return df
-        
+    
+    @reactive.effect
+    @reactive.event(input.reset)
+    def reset_filters():
+        # Update the slider inputs to defaults
+        ui.update_slider(
+            id="slider_churn",
+            value=[0.0, 1.0],
+            session=session
+        )    
+        ui.update_slider(
+            id="slider_customer",
+            value=[100, 10000],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_order",
+            value=[20, 200],
+            session=session
+        )
+        ui.update_slider(
+            id="slider_freq",
+            value=[1, 19],
+            session=session
+        )
+        ui.update_date_range(
+            "date_filter",
+            start=None,
+            end=None,
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_type",
+            selected=[
+
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_region",
+            selected=[
+                
+            ],
+            session=session
+        )
+        ui.update_checkbox_group(
+            id="checkbox_group_strategy",
+            selected=[
+
+            ],
+            session=session
+        )
+
     @render.text
     def kpi_lifetime():
         df = filtered_df()
