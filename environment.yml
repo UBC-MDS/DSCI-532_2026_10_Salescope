@@ -17,7 +17,6 @@ dependencies:
   - pandas=2.3.1
   - pandoc=3.6.3
   - pandocfilters=1.5.0
-  - pip=25.3
   - plotly=6.0.1
   - pydantic=2.11.7
   - pytest=8.4.1
@@ -36,3 +35,7 @@ dependencies:
   - seaborn=0.13.2
   - shinywidgets=0.7.1
   - anywidget=0.9.18
+  - pip=25.3
+    # - chatlas=0.18.2
+    # - dotenv=0.9.9
+    # - querychat=0.5.1
