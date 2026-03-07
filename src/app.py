@@ -54,12 +54,28 @@ kpi_component = ui.layout_columns(
 )
 
 main_sidebar = ui.sidebar(
-    ui.input_slider(
-        id="slider_churn",
-        label="Churn Rate",
+    ui.input_numeric(
+        id="num_churn_min",
+        label="Churn rate min",
+        value=0.0,
         min=0.0,
         max=1.0,
-        value=[0.0, 1.0],
+        step=0.01,
+    ),
+    ui.input_numeric(
+        id="num_churn_max",
+        label="Churn rate max",
+        value=1.0,
+        min=0.0,
+        max=1.0,
+        step=0.01,
+    ),
+    ui.input_slider(
+        id="slider_churn_decrease",
+        label="Churn rate decrease (%)",
+        min=0,
+        max=100,
+        value=0,
     ),
     ui.input_slider(
         id="slider_customer",
