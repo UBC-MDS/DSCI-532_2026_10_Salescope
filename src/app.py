@@ -90,6 +90,11 @@ main_sidebar = ui.sidebar(
         min=min_date,
         max=max_date
     ),
+    ui.input_checkbox(
+    id="use_ai_filter",
+    label="Use AI filtered data for dashboard",
+    value=False,
+    ),
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -128,7 +133,6 @@ main_sidebar = ui.sidebar(
 
         ],
     ),
-
     ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
@@ -240,6 +244,12 @@ def server(input, output, session):
     def ai_filtered_df():
         return qc_vals.df()
 
+    @reactive.calc
+    def dashboard_df():
+        if input.use_ai_filter():
+            return ai_filtered_df()
+        return filtered_df()
+
     @render.data_frame
     def ai_data_table():
         return ai_filtered_df()
@@ -328,6 +338,12 @@ def server(input, output, session):
             session=session
         )
 
+        ui.update_checkbox(
+            id="use_ai_filter",
+            value=False,
+            session=session
+        )
+
     @render.text
     def kpi_lifetime():
         df = filtered_df()
@@ -385,7 +401,7 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        df = filtered_df()
+        df = dashboard_df()
         churn_min, churn_max = input.slider_churn()
 
         if df.empty:
@@ -411,7 +427,7 @@ def server(input, output, session):
     
     @render_widget
     def heatmap():
-        df = ai_filtered_df() if input.top_navbar() == "AI Insights" else filtered_df()
+        df = dashboard_df()
         
         if df.empty:
             return None
@@ -449,7 +465,7 @@ def server(input, output, session):
     
     @render.text
     def kpi_count():
-        df = ai_filtered_df() if input.top_navbar() == "AI Insights" else filtered_df()
+        df = dashboard_df()
         return f"{len(df):,}"
 
 
