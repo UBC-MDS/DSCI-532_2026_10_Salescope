@@ -305,8 +305,8 @@ def server(input, output, session):
         )
         ui.update_date_range(
             "date_range",
-            start=min_date,
-            end=max_date,
+            start=default_start,
+            end=default_end,
             min=min_date,
             max=max_date,
             session=session
