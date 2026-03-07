@@ -85,9 +85,17 @@ flowchart TD
   I --> O4([risk_df])
   I --> O5([order_df])
   I --> O6([frequency_df])
-  F --> C{{churn_plot_df}}
+  J --> C_df{{churn_plot_df}}
+  K --> C_df
+  A --> C_df
+  B --> C_df
+  C --> C_df
+  D --> C_df
+  E --> C_df
+  G --> C_df
+  H --> C_df
   F -.-> O1([high_churn_risk])
-  C -.-> O1
+  C_df -.-> O1
   F --> O2([heatmap])
   F --> O3
   F --> O4
