@@ -1,7 +1,6 @@
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
-from ridgeplot import ridgeplot
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
