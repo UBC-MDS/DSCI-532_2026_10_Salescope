@@ -430,16 +430,16 @@ def server(input, output, session):
                 df.groupby(["Season", "Most_Frequent_Category"])
                 .size().reset_index(name="Frequency") )
             z_col = "Frequency"
-            title_text = "Frequency of Sales: Season vs. Category"
-            label_text = "Total Count"
+            title_text = "Sales Frequency: Season vs. Category"
+            label_text = "Total Sales Count"
         else:
             plot_data = (
                 df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
                 .mean()
                 .reset_index()  )
             z_col = "Lifetime_Value"
-            title_text = "Avg Customer Value: Season vs. Category"
-            label_text = "Avg LTV"
+            title_text = "Avg Value: Season vs. Category"
+            label_text = "Avg LTV ($)"
 
         fig = px.density_heatmap(
             plot_data, 
