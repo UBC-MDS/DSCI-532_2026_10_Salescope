@@ -310,12 +310,22 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.reset)
     def reset_filters():
-        # Update the slider inputs to defaults
-        ui.update_slider(
-            id="slider_churn",
-            value=[0.0, 1.0],
+        # Update the inputs to defaults
+        ui.update_numeric(
+            id="num_churn_min",
+            value=0.0,
             session=session
-        )    
+        )
+        ui.update_numeric(
+            id="num_churn_max",
+            value=1.0,
+            session=session
+        )
+        ui.update_slider(
+            id="slider_churn_decrease",
+            value=0,
+            session=session
+        )
         ui.update_slider(
             id="slider_customer",
             value=[100, 10000],
