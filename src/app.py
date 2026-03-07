@@ -429,7 +429,12 @@ def server(input, output, session):
     @render_widget
     def high_churn_risk():
         df = filtered_df()
-        churn_min, churn_max = input.slider_churn()
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        pct_decrease = input.slider_churn_decrease()
+        reduced_max = churn_max * (1 - pct_decrease / 100)
 
         if df.empty:
             fig = px.scatter(title="No data available for current filters")
@@ -445,7 +450,7 @@ def server(input, output, session):
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
         )
         fig.update_layout(
-            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
             legend_title="Retention Strategy",
