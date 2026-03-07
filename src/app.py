@@ -23,6 +23,11 @@ sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
+# Determine the most recent quarter in the data
+latest_quarter = pd.Period(max_date, freq='Q')
+default_start = latest_quarter.start_time.date()
+default_end = latest_quarter.end_time.date()
+
 qc = querychat.QueryChat(
     sales_df.copy(),
     "Salescope",
