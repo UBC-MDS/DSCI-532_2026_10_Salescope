@@ -90,8 +90,8 @@ main_sidebar = ui.sidebar(
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
-        start=min_date,
-        end=max_date,
+        start=default_start,
+        end=default_end,
         min=min_date,
         max=max_date
     ),
