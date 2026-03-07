@@ -39,7 +39,8 @@ And these are the updated job stories and their progress as of Milestone 2:
 | `date_range`  | Input         | `ui.input_date_range()`    | -                           | #1, #2, #3 |
 | `reset` | Input        | `ui.input_action_button()`   | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range`  | #1, #2, #3 |
 | `filtered_df` | Reactive calc | `@reactive.calc`        | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range` | #1, #2, #3 |
-| `high_churn_risk` | Output        | `@render_widget`        | `filtered_df`                | #2         |
+| `churn_plot_df` | Reactive calc | `@reactive.calc` | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range` | #2 |
+| `high_churn_risk` | Output        | `@render_widget`        | `filtered_df`, `churn_plot_df`                | #2         |
 | `row_dropdown`    | Input         | `ui.input_select()`     | —                            | #1         |
 | `customer_df` | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `risk_df`     | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
@@ -84,7 +85,9 @@ flowchart TD
   I --> O4([risk_df])
   I --> O5([order_df])
   I --> O6([frequency_df])
-  F --> O1([high_churn_risk])
+  F --> C{{churn_plot_df}}
+  F -.-> O1([high_churn_risk])
+  C -.-> O1
   F --> O2([heatmap])
   F --> O3
   F --> O4
@@ -100,7 +103,13 @@ flowchart TD
 
 - **Inputs:** `num_churn_min`, `num_churn_max`, `slider_churn_decrease`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`. Note: The default date range view is explicitly set to the most recent quarter in the dataset.
 - **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. `Churn_Probability` is filtered using the `num_churn_min` and `num_churn_max` boundaries, then further reduced (setting `reduced_max` and the `in_reduced_churn_range` column) according to `slider_churn_decrease`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
-- **Outputs:** `high_churn_risk`, `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
+- **Outputs:** `high_churn_risk` (if `slider_churn_decrease` is 0), `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
+
+### `churn_plot_df`
+
+- **Inputs:** Operates utilizing the same core logic parameters as `filtered_df` (tracking all global sliders and checkboxes). 
+- **Transformation:** Bypasses the strict `reduced_max` threshold cull triggered when the `slider_churn_decrease` goes above 0. Evaluates that top percentage grouping with a mapping boolean column: `in_reduced_churn_range`.
+- **Outputs:** `high_churn_risk` (Active selectively when `slider_churn_decrease` > 0 to plot the chopped-off metric bands concurrently).
 
 ## Section 5: Complexity Enhancement — Reset Button
 
