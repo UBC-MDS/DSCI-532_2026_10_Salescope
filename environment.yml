@@ -27,7 +27,7 @@ dependencies:
   - tabulate=0.9.0
   - tinycss2=1.4.0
   - urllib3=2.5.0
-  - vegafusion=2.0.2
+  - vegafusion=1.6.9
   - vegafusion-jupyter=1.6.9
   - wheel=0.45.1
   - scipy=1.16.0
@@ -35,7 +35,11 @@ dependencies:
   - seaborn=0.13.2
   - shinywidgets=0.7.1
   - anywidget=0.9.18
+  - anthropic=0.50.0
+  - narwhals=2.17.0
   - pip=25.3
-    # - chatlas=0.18.2
-    # - dotenv=0.9.9
-    # - querychat=0.5.1
+  - pip:
+    - chatlas==0.15.2
+    - dotenv==0.9.9
+    - querychat==0.5.1
+    - libsass==0.23.0
