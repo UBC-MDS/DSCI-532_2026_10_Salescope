@@ -266,6 +266,44 @@ def server(input, output, session):
         yield ai_filtered_df().to_csv(index=False)
 
     @reactive.calc
+    def churn_plot_df():
+        df = sales_df.copy()
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        pct_decrease = input.slider_churn_decrease()
+
+        clv_min, clv_max = input.slider_customer()
+        order_min, order_max = input.slider_order()
+        freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
+
+        reduced_max = churn_max * (1 - pct_decrease / 100)
+
+        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+            
+        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
+        
+        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
+        df = df[df["Average_Order_Value"].between(order_min, order_max)]
+        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+
+        types = input.checkbox_group_type() 
+        regions = input.checkbox_group_region() 
+        strategies = input.checkbox_group_strategy() 
+
+        if types:
+            df = df[df["Most_Frequent_Category"].isin(types)]
+        if regions:
+            df = df[df["Region"].isin(regions)]
+        if strategies:
+            df = df[df["Retention_Strategy"].isin(strategies)]
+
+        return df
+
+    @reactive.calc
     def filtered_df():
         df = sales_df.copy()
         churn_min_raw = input.num_churn_min()
