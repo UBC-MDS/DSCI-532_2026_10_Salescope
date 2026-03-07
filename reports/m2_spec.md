@@ -94,7 +94,7 @@ flowchart TD
 
 ### `filtered_df`
 
-- **Inputs:** `slider_churn`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`.
+- **Inputs:** `slider_churn`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`. Note: The default date range view is explicitly set to the most recent quarter in the dataset.
 - **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Churn_Probability`, `Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
 - **Outputs:** `high_churn_risk`, `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
 
@@ -104,7 +104,7 @@ We implemented the **Reset Button** complexity enhancement using `ui.input_actio
 
 ### What was added
 
-A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked, a `@reactive.effect` decorated with `@reactive.event(input.reset)` fires and calls `ui.update_*` functions to restore every slider, checkbox group, and date range widget back to its original default values. This restores `filtered_df` to the full 10,000-row dataset in a single user action.
+A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked, a `@reactive.effect` decorated with `@reactive.event(input.reset)` fires and calls `ui.update_*` functions to restore every slider, checkbox group, and date range widget back to its original default values. Note that for the date range, the initial default is the most recent quarter, not the full dataset, so clicking reset restores the app to that specific quarter view rather than all time. This restores `filtered_df` to default settings in a single user action.
 
 ### Why it improves the user experience
 
