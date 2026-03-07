@@ -48,12 +48,6 @@ conda env create -f environment.yml
 conda activate Salescope
 ```
 
-Then use the following command to download the packages necessary for the AI Integration:
-
-```bash
-pip install chatlas dotenv querychat
-```
-
 ### 3. Verify the Data
 
 The dataset is already included in the repository at `data/raw/sales_and_customer_insights.csv`. You can verify it exists by checking:
