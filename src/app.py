@@ -409,8 +409,8 @@ def server(input, output, session):
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
         )
         fig.update_layout(
-            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
-            xaxis_title="Customer Lifetime Value",
+            title=f"Customers by LTV and Days Between Purchases (Churn: {churn_min}-{churn_max})",
+            xaxis_title="Customer Lifetime Value ($)",
             yaxis_title="Days Between Purchases",
             legend_title="Retention Strategy",
         )
