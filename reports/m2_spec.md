@@ -33,11 +33,12 @@ And these are the updated job stories and their progress as of Milestone 2:
 | ID            | Type          | Shiny widget / renderer | Depends on                   | Job story  |
 | ------------- | ------------- | ----------------------- | ---------------------------- | ---------- |
 | `user-navigation` | Navigation| `ui.navset_bar()`, `ui.nav_panel()` | —             | #1, #2, #3 |
+| `num_churn_*` | Input            | `ui.input_numeric()`        | -                         | #1, #2, #3 |
 | `slider_*` | Input            | `ui.input_slider()`        | -                         | #1, #2, #3 |
 | `check_box_group_*` | Input   | `ui.input_checkbox_group()` | -                        | #1, #2, #3 |
 | `date_range`  | Input         | `ui.input_date_range()`    | -                           | #1, #2, #3 |
-| `reset` | Input        | `ui.input_action_button()`   | `slider_*`, `check_box_group_*`, `date_range`  | #1, #2, #3 |
-| `filtered_df` | Reactive calc | `@reactive.calc`        | `slider_*`, `check_box_group_*`, `date_range` | #1, #2, #3 |
+| `reset` | Input        | `ui.input_action_button()`   | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range`  | #1, #2, #3 |
+| `filtered_df` | Reactive calc | `@reactive.calc`        | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range` | #1, #2, #3 |
 | `high_churn_risk` | Output        | `@render_widget`        | `filtered_df`                | #2         |
 | `row_dropdown`    | Input         | `ui.input_select()`     | —                            | #1         |
 | `customer_df` | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
@@ -52,7 +53,8 @@ Rows component_4-8 will be filled per issues #57, #58, #59 as implementation pro
 Each of the slider and checkbox components are similar to each other and represent the following components:
 
 ```
-slider_* -> slider_churn, slider_customer, slider_order, slider_freq
+num_churn_* -> num_churn_min, num_churn_max
+slider_* -> slider_churn_decrease, slider_customer, slider_order, slider_freq
 check_box_group_* -> check_box_group_type, check_box_group_region, check_box_group_strategy
 ```
 
@@ -69,7 +71,9 @@ Example:
 ````markdown
 ```mermaid
 flowchart TD
-  A[/slider_churn/] --> F{{filtered_df}}
+  J[/num_churn_min/] --> F{{filtered_df}}
+  K[/num_churn_max/] --> F
+  A[/slider_churn_decrease/] --> F
   B[/slider_customer/] --> F
   C[/slider_order/] --> F
   D[/slider_freq/] --> F
@@ -94,8 +98,8 @@ flowchart TD
 
 ### `filtered_df`
 
-- **Inputs:** `slider_churn`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`.
-- **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Churn_Probability`, `Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
+- **Inputs:** `num_churn_min`, `num_churn_max`, `slider_churn_decrease`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`. Note: The default date range view is explicitly set to the most recent quarter in the dataset.
+- **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. `Churn_Probability` is filtered using the `num_churn_min` and `num_churn_max` boundaries, then further reduced (setting `reduced_max` and the `in_reduced_churn_range` column) according to `slider_churn_decrease`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
 - **Outputs:** `high_churn_risk`, `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`.
 
 ## Section 5: Complexity Enhancement — Reset Button
