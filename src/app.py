@@ -466,23 +466,32 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
+        df = churn_plot_df() if pct_decrease > 0 else filtered_df()
+        
         churn_min_raw = input.num_churn_min()
         churn_max_raw = input.num_churn_max()
         churn_min = min(churn_min_raw, churn_max_raw)
         churn_max = max(churn_min_raw, churn_max_raw)
-        pct_decrease = input.slider_churn_decrease()
         reduced_max = churn_max * (1 - pct_decrease / 100)
 
         if df.empty:
             fig = px.scatter(title="No data available for current filters")
             return fig
 
+        if pct_decrease > 0:
+            df["status"] = df["in_reduced_churn_range"].map({True: "In Range", False: "Excluded"})
+            color_col = "status"
+            legend_title = "Within Reduced Range"
+        else:
+            color_col = "Retention_Strategy"
+            legend_title = "Retention Strategy"
+
         fig = px.scatter(
             df,
             x="Lifetime_Value",
             y="Time_Between_Purchases",
-            color="Retention_Strategy",
+            color=color_col,
             size="Churn_Probability",
             size_max=18,
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
@@ -491,7 +500,7 @@ def server(input, output, session):
             title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
-            legend_title="Retention Strategy",
+            legend_title=legend_title,
         )
         return fig
     
