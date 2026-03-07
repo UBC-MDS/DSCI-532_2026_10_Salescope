@@ -234,10 +234,19 @@ def create_summary_table(df,grouping,feature):
 # Server
 def server(input, output, session):
     
+    qc_vals = qc.server()
+    
+    @reactive.calc
+    def ai_filtered_df():
+        return qc_vals.df()
+
+    @render.data_frame
+    def ai_data_table():
+        return ai_filtered_df()
+    
     @reactive.calc
     def filtered_df():
         df = sales_df.copy()
-
         churn_min, churn_max = input.slider_churn()
         clv_min, clv_max = input.slider_customer()
         order_min, order_max = input.slider_order()
