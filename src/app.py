@@ -385,7 +385,7 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        df = filtered_df()
+        df = ai_filtered_df() if input.top_navbar() == "AI Insights" else filtered_df()
         churn_min, churn_max = input.slider_churn()
 
         if df.empty:
