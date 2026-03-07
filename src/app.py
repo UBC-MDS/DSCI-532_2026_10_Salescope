@@ -5,17 +5,39 @@ from ridgeplot import ridgeplot
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
+import os
+from dotenv import load_dotenv
+import querychat
+from chatlas import ChatAnthropic
+import duckdb
 
-#used LLM to know how to show actual count/mean inside the box for heatmap
+# used LLM to know how to show actual count/mean inside the box for heatmap
+# used querychat-explore.ipynb notes for querychat integration
 
 # use shiny run --reload --launch-browser src/app.py to local test
+load_dotenv()
+API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
 sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
-# Isolated components for easier editing
+qc = querychat.QueryChat(
+    sales_df.copy(),
+    "Salescope",
+    greeting=" Hi! I'm your Salescope Assistant. Feel free to ask me to filter by region, category, churn risk or other relevant questions!",
+    data_description="""
+    This is Sales insights dataset
+    Columns:
+    - Region: Asia, Europe, North America, South America
+    - Most_Frequent_Category: Clothing, Electronics, Home, Sports
+    - Lifetime_Value: Numerical float
+    - Churn_Probability: Float (0 to 1)
+    - Retention_Strategy: Discount, Email Campaign, Loyalty Program
+    """,
+    client=ChatAnthropic(model="claude-sonnet-4-0", api_key=API_KEY),
+)
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
@@ -163,23 +185,41 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
         col_widths=[3, 9], ),
 )
 
-# UI
-app_ui = ui.page_fluid(
-    ui.tags.style("body { font-size: 0.6em; }"),
-    ui.panel_title("Salescope"),
+#panel for AI insights
+panel_ai = ui.nav_panel("AI Insights", 
     ui.layout_sidebar(
-        main_sidebar,
-        kpi_component,
-        ui.navset_bar(
-            panel_1,       
-            panel_2,
-            panel_3,
-            title = "Advanced Figures"
-        )   
-    ),
-    theme = ui.Theme("lumen")
+        #AI chat interface
+        qc.sidebar(),
+        ui.layout_columns(
+            ui.card(
+                ui.card_header("AI Filtered Data"),
+                ui.output_data_frame("ai_data_table")
+            )
+        )
+    )
 )
 
+# UI
+app_ui = ui.page_navbar(
+    ui.nav_panel(
+        "Advanced Figures",
+        ui.navset_card_tab(
+            panel_1,
+            panel_2,
+            panel_3, 
+            id="advanced_nav"
+        )
+    ),
+    panel_ai, 
+    title="Salescope", 
+    sidebar=main_sidebar,
+    header=ui.TagList(
+        ui.tags.style("body { font-size: 0.8em; }"), 
+        kpi_component,
+    ),
+    id="top_navbar",
+    theme=ui.Theme("lumen")
+)    
 
 def create_summary_table(df,grouping,feature):
     summary = df.groupby(grouping).agg(
@@ -194,10 +234,19 @@ def create_summary_table(df,grouping,feature):
 # Server
 def server(input, output, session):
     
+    qc_vals = qc.server()
+    
+    @reactive.calc
+    def ai_filtered_df():
+        return qc_vals.df()
+
+    @render.data_frame
+    def ai_data_table():
+        return ai_filtered_df()
+    
     @reactive.calc
     def filtered_df():
         df = sales_df.copy()
-
         churn_min, churn_max = input.slider_churn()
         clv_min, clv_max = input.slider_customer()
         order_min, order_max = input.slider_order()
