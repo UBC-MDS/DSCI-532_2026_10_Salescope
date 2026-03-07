@@ -411,7 +411,7 @@ def server(input, output, session):
     
     @render_widget
     def heatmap():
-        df = filtered_df()
+        df = ai_filtered_df() if input.top_navbar() == "AI Insights" else filtered_df()
         
         if df.empty:
             return None
@@ -449,7 +449,8 @@ def server(input, output, session):
     
     @render.text
     def kpi_count():
-        return f"{len(filtered_df()):,}"
+        df = ai_filtered_df() if input.top_navbar() == "AI Insights" else filtered_df()
+        return f"{len(df):,}"
 
 
 # Create app
