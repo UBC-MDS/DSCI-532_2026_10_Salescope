@@ -20,3 +20,8 @@ seaborn==0.13.2
 shinywidgets==0.7.1
 anywidget==0.9.18
 libsass==0.23.0
+chatlas==0.15.2
+querychat==0.5.1
+anthropic==0.50.0
+narwhals==2.17.0
+python-dotenv==1.1.0

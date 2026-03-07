@@ -190,6 +190,7 @@ panel_ai = ui.nav_panel("AI Insights",
     ui.layout_sidebar(
         #AI chat interface
         qc.sidebar(),
+        ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
         ui.layout_columns(
             ui.card(
                 ui.card_header("AI Filtered Data"),
@@ -244,6 +245,10 @@ def server(input, output, session):
     def ai_data_table():
         return ai_filtered_df()
     
+    @render.download(filename="sales_and_customer_insights_ai_filtered.csv")
+    def download_ai_filtered():
+        yield ai_filtered_df().to_csv(index=False)
+
     @reactive.calc
     def filtered_df():
         df = sales_df.copy()
