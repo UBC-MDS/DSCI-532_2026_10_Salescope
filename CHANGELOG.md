@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Default filter view set to most recent quarter; reset button restores to this default (Issue #104).
 
+### Changed
+- Clarified KPI labels and chart titles to reflect filtered segments and units (Issue #102).
+
 ## [0.2.0] - 2026-02-28
 
 ### Added
