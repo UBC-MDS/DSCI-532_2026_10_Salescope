@@ -185,22 +185,41 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
         col_widths=[3, 9], ),
 )
 
-# UI
-app_ui = ui.page_fluid(
-    ui.tags.style("body { font-size: 0.6em; }"),
-    ui.panel_title("Salescope"),
+#panel for AI insights
+panel_ai = ui.nav_panel("AI Insights", 
     ui.layout_sidebar(
-        main_sidebar,
-        kpi_component,
-        ui.navset_bar(
-            panel_1,       
-            panel_2,
-            panel_3,
-            title = "Advanced Figures"
-        )   
-    ),
-    theme = ui.Theme("lumen")
+        #AI chat interface
+        qc.sidebar(),
+        ui.layout_columns(
+            ui.card(
+                ui.card_header("AI Filtered Data"),
+                ui.output_data_frame("ai_data_table")
+            )
+        )
+    )
 )
+
+# UI
+app_ui = ui.page_navbar(
+    ui.nav_panel(
+        "Advanced Figures",
+        ui.navset_card_tab(
+            panel_1,
+            panel_2,
+            panel_3, 
+            id="advanced_nav"
+        )
+    ),
+    panel_ai, 
+    title="Salescope", 
+    sidebar=main_sidebar,
+    header=ui.TagList(
+        ui.tags.style("body { font-size: 0.8em; }"), 
+        kpi_component,
+    ),
+    id="top_navbar",
+    theme=ui.Theme("lumen")
+)    
 
 def create_summary_table(df,grouping,feature):
     summary = df.groupby(grouping).agg(
