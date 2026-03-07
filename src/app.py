@@ -26,7 +26,7 @@ min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date
 qc = querychat.QueryChat(
     sales_df.copy(),
     "Salescope",
-    greeting=" Hi! I'm your Salescope Assistant. Feel free to ask me to filter by region, category or churn risk!",
+    greeting=" Hi! I'm your Salescope Assistant. Feel free to ask me to filter by region, category, churn risk or other relevant questions!",
     data_description="""
     This is Sales insights dataset
     Columns:
