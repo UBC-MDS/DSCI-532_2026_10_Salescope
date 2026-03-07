@@ -21,6 +21,7 @@ dependencies:
   - pydantic=2.11.7
   - pytest=8.4.1
   - python=3.12.12
+  - python-dotenv==1.1.0
   - quarto=1.8.27
   - requests=2.32.4
   - shiny=1.4.0
@@ -40,6 +41,5 @@ dependencies:
   - pip=25.3
   - pip:
     - chatlas==0.15.2
-    - dotenv==0.9.9
     - querychat==0.5.1
     - libsass==0.23.0

@@ -247,7 +247,7 @@ def server(input, output, session):
     
     @render.download(filename="sales_and_customer_insights_ai_filtered.csv")
     def download_ai_filtered():
-        yield ai_filtered_df().to_csv()
+        yield ai_filtered_df().to_csv(index=False)
 
     @reactive.calc
     def filtered_df():
