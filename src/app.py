@@ -348,9 +348,12 @@ def server(input, output, session):
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min, clv_max = input.slider_customer()
-        order_min, order_max = input.slider_order()
-        freq_min, freq_max = input.slider_freq()
+        clv_min = min(input.num_clv_min(), input.num_clv_max())
+        clv_max = max(input.num_clv_min(), input.num_clv_max())
+        order_min = min(input.num_order_min(), input.num_order_max())
+        order_max = max(input.num_order_min(), input.num_order_max())
+        freq_min = min(input.num_freq_min(), input.num_freq_max())
+        freq_max = max(input.num_freq_min(), input.num_freq_max())
         date_start, date_end = input.date_range()
 
         reduced_max = churn_max * (1 - pct_decrease / 100)
@@ -386,9 +389,12 @@ def server(input, output, session):
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min, clv_max = input.slider_customer()
-        order_min, order_max = input.slider_order()
-        freq_min, freq_max = input.slider_freq()
+        clv_min = min(input.num_clv_min(), input.num_clv_max())
+        clv_max = max(input.num_clv_min(), input.num_clv_max())
+        order_min = min(input.num_order_min(), input.num_order_max())
+        order_max = max(input.num_order_min(), input.num_order_max())
+        freq_min = min(input.num_freq_min(), input.num_freq_max())
+        freq_max = max(input.num_freq_min(), input.num_freq_max())
         date_start, date_end = input.date_range()
 
         # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
@@ -438,19 +444,34 @@ def server(input, output, session):
             value=0,
             session=session
         )
-        ui.update_slider(
-            id="slider_customer",
-            value=[100, 10000],
+        ui.update_numeric(
+            id="num_clv_min",
+            value=100,
             session=session
         )
-        ui.update_slider(
-            id="slider_order",
-            value=[20, 200],
+        ui.update_numeric(
+            id="num_clv_max",
+            value=10000,
             session=session
         )
-        ui.update_slider(
-            id="slider_freq",
-            value=[1, 19],
+        ui.update_numeric(
+            id="num_order_min",
+            value=20,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_order_max",
+            value=200,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_freq_min",
+            value=1,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_freq_max",
+            value=19,
             session=session
         )
         ui.update_date_range(
