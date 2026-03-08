@@ -413,18 +413,26 @@ def server(input, output, session):
     @reactive.calc
     def churn_plot_df():
         df = sales_df.copy()
-        churn_min_raw = input.num_churn_min()
-        churn_max_raw = input.num_churn_max()
+        churn_min_raw = input.num_churn_min() or 0.0
+        churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min = min(input.num_clv_min(), input.num_clv_max())
-        clv_max = max(input.num_clv_min(), input.num_clv_max())
-        order_min = min(input.num_order_min(), input.num_order_max())
-        order_max = max(input.num_order_min(), input.num_order_max())
-        freq_min = min(input.num_freq_min(), input.num_freq_max())
-        freq_max = max(input.num_freq_min(), input.num_freq_max())
+        clv_min_raw = input.num_clv_min() or 100
+        clv_max_raw = input.num_clv_max() or 10000
+        clv_min = min(clv_min_raw, clv_max_raw)
+        clv_max = max(clv_min_raw, clv_max_raw)
+
+        order_min_raw = input.num_order_min() or 20
+        order_max_raw = input.num_order_max() or 200
+        order_min = min(order_min_raw, order_max_raw)
+        order_max = max(order_min_raw, order_max_raw)
+
+        freq_min_raw = input.num_freq_min() or 1
+        freq_max_raw = input.num_freq_max() or 19
+        freq_min = min(freq_min_raw, freq_max_raw)
+        freq_max = max(freq_min_raw, freq_max_raw)
         date_start, date_end = input.date_range()
 
         reduced_max = churn_max * (1 - pct_decrease / 100)
@@ -454,18 +462,26 @@ def server(input, output, session):
     @reactive.calc
     def filtered_df():
         df = sales_df.copy()
-        churn_min_raw = input.num_churn_min()
-        churn_max_raw = input.num_churn_max()
+        churn_min_raw = input.num_churn_min() or 0.0
+        churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min = min(input.num_clv_min(), input.num_clv_max())
-        clv_max = max(input.num_clv_min(), input.num_clv_max())
-        order_min = min(input.num_order_min(), input.num_order_max())
-        order_max = max(input.num_order_min(), input.num_order_max())
-        freq_min = min(input.num_freq_min(), input.num_freq_max())
-        freq_max = max(input.num_freq_min(), input.num_freq_max())
+        clv_min_raw = input.num_clv_min() or 100
+        clv_max_raw = input.num_clv_max() or 10000
+        clv_min = min(clv_min_raw, clv_max_raw)
+        clv_max = max(clv_min_raw, clv_max_raw)
+
+        order_min_raw = input.num_order_min() or 20
+        order_max_raw = input.num_order_max() or 200
+        order_min = min(order_min_raw, order_max_raw)
+        order_max = max(order_min_raw, order_max_raw)
+
+        freq_min_raw = input.num_freq_min() or 1
+        freq_max_raw = input.num_freq_max() or 19
+        freq_min = min(freq_min_raw, freq_max_raw)
+        freq_max = max(freq_min_raw, freq_max_raw)
         date_start, date_end = input.date_range()
 
         # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
