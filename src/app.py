@@ -45,13 +45,13 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
-        ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_text("kpi_lifetime")),
-        ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_text("kpi_risk")),
+        ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_ui("kpi_lifetime")),
+        ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_ui("kpi_risk")),
         col_widths=(12, 12)
     ),
     ui.layout_columns(
-        ui.value_box("Avg Churn (Filtered Base)", ui.output_text("kpi_churn")),
-        ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_text("kpi_days")),
+        ui.value_box("Avg Churn (Filtered Base)", ui.output_ui("kpi_churn")),
+        ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_ui("kpi_days")),
         col_widths=(12, 12)
     ),
     ui.layout_columns(
@@ -439,28 +439,28 @@ def server(input, output, session):
             session=session
         )
 
-    @render.text
+    @render.ui
     def kpi_lifetime():
         df = filtered_df()
         if df.empty:
             return "—"
         return f"${df['Lifetime_Value'].mean():,.2f}"
 
-    @render.text
+    @render.ui
     def kpi_churn():
         df = filtered_df()
         if df.empty:
             return "—"
         return f"{df['Churn_Probability'].mean():.1%}"
 
-    @render.text
+    @render.ui
     def kpi_risk():
         df = filtered_df()
         if df.empty:
             return "—"
         return f"${df['risk_value'].mean():,.2f}"
 
-    @render.text
+    @render.ui
     def kpi_days():
         df = filtered_df()
         if df.empty:
