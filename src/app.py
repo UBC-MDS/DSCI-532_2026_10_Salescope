@@ -332,6 +332,15 @@ def server(input, output, session):
     def download_ai_filtered():
         yield ai_filtered_df().to_csv(index=False)
 
+    @render_widget
+    def ai_tab_scatter():
+        df = ai_filtered_df()
+        
+        if df is None or df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        return px.scatter(title="Placeholder for scatter plot")
+
     @reactive.calc
     def churn_plot_df():
         df = sales_df.copy()
