@@ -654,8 +654,8 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        pct_decrease = input.slider_churn_decrease()
-        df = churn_plot_df() if pct_decrease > 0 else filtered_df()
+        df = dashboard_df()
+        pct_decrease = input.slider_churn_decrease()        
         
         churn_min_raw = input.num_churn_min()
         churn_max_raw = input.num_churn_max()
@@ -694,7 +694,7 @@ def server(input, output, session):
     
     @render_widget
     def quartile_churn_risk():
-        df = filtered_df()
+        df = dashboard_df()
         
         if df.empty:
             return px.scatter(title="No data available for current filters")
@@ -715,7 +715,7 @@ def server(input, output, session):
     
     @render_widget
     def quarter_bubbles():
-        df = filtered_df()
+        df = dashboard_df()
         
         if df.empty:
             return px.scatter(title="No data available for current filters")
