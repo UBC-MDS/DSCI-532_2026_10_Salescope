@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default filter view set to most recent quarter; reset button restores to this default (Issue #104).
 - Replaced the previous churn rate range slider with two independent numerical inputs and a new "Churn rate decrease (%)" slider to directly simulate churn reduction models (Closes #98).
 - Added a quartile box plot alongside the scatter plot in the Churn Risk Plot tab to show churn probability distributions across retention strategies (Issue #99).
+- Added comparison subtext to the main KPIs indicating the metric delta (amount and direction) when the churn decrease slider is active (Closes #103).
 
 ### Changed
 - Reworked the Churn Risk Plot to color points by their status ("In Range" vs "Excluded") whenever the churn decrease slider is active, making it easier to see which customers are impacted by the simulated churn reduction (Closes #105).
