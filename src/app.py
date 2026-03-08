@@ -262,7 +262,12 @@ panel_ai = ui.nav_panel("AI Insights",
             ui.card(
                 ui.card_header("AI Filtered Data"),
                 ui.output_data_frame("ai_data_table")
-            )
+            ),
+            ui.card(
+                output_widget("ai_tab_scatter"),
+                full_screen=True
+            ),
+            col_widths=(12, 12)
         )
     )
 )
