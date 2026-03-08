@@ -454,8 +454,9 @@ def server(input, output, session):
                 base_val = df_base['Lifetime_Value'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
                 subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -473,8 +474,9 @@ def server(input, output, session):
                 base_val = df_base['Churn_Probability'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
                 subtext = f"{sign}{abs(delta):.1%}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
