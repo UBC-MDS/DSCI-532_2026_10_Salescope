@@ -1,7 +1,6 @@
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
-from ridgeplot import ridgeplot
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
@@ -59,12 +58,28 @@ kpi_component = ui.layout_columns(
 )
 
 main_sidebar = ui.sidebar(
-    ui.input_slider(
-        id="slider_churn",
-        label="Churn Rate",
+    ui.input_numeric(
+        id="num_churn_min",
+        label="Churn rate min",
+        value=0.0,
         min=0.0,
         max=1.0,
-        value=[0.0, 1.0],
+        step=0.01,
+    ),
+    ui.input_numeric(
+        id="num_churn_max",
+        label="Churn rate max",
+        value=1.0,
+        min=0.0,
+        max=1.0,
+        step=0.01,
+    ),
+    ui.input_slider(
+        id="slider_churn_decrease",
+        label="Churn rate decrease (%)",
+        min=0,
+        max=100,
+        value=0,
     ),
     ui.input_slider(
         id="slider_customer",
@@ -163,7 +178,11 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
             output_widget("high_churn_risk"),
             full_screen=True,
         ),
-        col_widths=[12],
+        ui.card(
+            output_widget("quartile_churn_risk"),
+            full_screen=True,
+        ),
+        col_widths=[8, 4],
     ),
 )
 
@@ -195,6 +214,7 @@ panel_ai = ui.nav_panel("AI Insights",
     ui.layout_sidebar(
         #AI chat interface
         qc.sidebar(),
+        ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
         ui.layout_columns(
             ui.card(
                 ui.card_header("AI Filtered Data"),
@@ -249,16 +269,70 @@ def server(input, output, session):
     def ai_data_table():
         return ai_filtered_df()
     
+    @render.download(filename="sales_and_customer_insights_ai_filtered.csv")
+    def download_ai_filtered():
+        yield ai_filtered_df().to_csv(index=False)
+
     @reactive.calc
-    def filtered_df():
+    def churn_plot_df():
         df = sales_df.copy()
-        churn_min, churn_max = input.slider_churn()
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        pct_decrease = input.slider_churn_decrease()
+
         clv_min, clv_max = input.slider_customer()
         order_min, order_max = input.slider_order()
         freq_min, freq_max = input.slider_freq()
         date_start, date_end = input.date_range()
 
+        reduced_max = churn_max * (1 - pct_decrease / 100)
+
         df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+            
+        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
+        
+        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
+        df = df[df["Average_Order_Value"].between(order_min, order_max)]
+        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+
+        types = input.checkbox_group_type() 
+        regions = input.checkbox_group_region() 
+        strategies = input.checkbox_group_strategy() 
+
+        if types:
+            df = df[df["Most_Frequent_Category"].isin(types)]
+        if regions:
+            df = df[df["Region"].isin(regions)]
+        if strategies:
+            df = df[df["Retention_Strategy"].isin(strategies)]
+
+        return df
+
+    @reactive.calc
+    def filtered_df():
+        df = sales_df.copy()
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        pct_decrease = input.slider_churn_decrease()
+
+        clv_min, clv_max = input.slider_customer()
+        order_min, order_max = input.slider_order()
+        freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
+
+        # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
+        reduced_max = churn_max * (1 - pct_decrease / 100)
+
+        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+        if pct_decrease > 0:
+            df = df[df["Churn_Probability"] <= reduced_max]
+            
+        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
         df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
         df = df[df["Average_Order_Value"].between(order_min, order_max)]
         df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
@@ -282,12 +356,22 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.reset)
     def reset_filters():
-        # Update the slider inputs to defaults
-        ui.update_slider(
-            id="slider_churn",
-            value=[0.0, 1.0],
+        # Update the inputs to defaults
+        ui.update_numeric(
+            id="num_churn_min",
+            value=0.0,
             session=session
-        )    
+        )
+        ui.update_numeric(
+            id="num_churn_max",
+            value=1.0,
+            session=session
+        )
+        ui.update_slider(
+            id="slider_churn_decrease",
+            value=0,
+            session=session
+        )
         ui.update_slider(
             id="slider_customer",
             value=[100, 10000],
@@ -390,27 +474,62 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        df = filtered_df()
-        churn_min, churn_max = input.slider_churn()
+        pct_decrease = input.slider_churn_decrease()
+        df = churn_plot_df() if pct_decrease > 0 else filtered_df()
+        
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        reduced_max = churn_max * (1 - pct_decrease / 100)
 
         if df.empty:
             fig = px.scatter(title="No data available for current filters")
             return fig
 
+        if pct_decrease > 0:
+            df["status"] = df["in_reduced_churn_range"].map({True: "In Range", False: "Excluded"})
+            color_col = "status"
+            legend_title = "Within Reduced Range"
+        else:
+            color_col = "Retention_Strategy"
+            legend_title = "Retention Strategy"
+
         fig = px.scatter(
             df,
             x="Lifetime_Value",
             y="Time_Between_Purchases",
-            color="Retention_Strategy",
+            color=color_col,
             size="Churn_Probability",
             size_max=18,
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
         )
         fig.update_layout(
-            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min} to {churn_max}",
+            title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
-            legend_title="Retention Strategy",
+            legend_title=legend_title,
+        )
+        return fig
+    
+    @render_widget
+    def quartile_churn_risk():
+        df = filtered_df()
+        
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        fig = px.box(
+            df,
+            x="Retention_Strategy",
+            y="Churn_Probability",
+            color="Retention_Strategy",
+        )
+        fig.update_layout(
+            title="Churn Probability quartiles by Retention Strategy",
+            xaxis_title="Retention Strategy",
+            yaxis_title="Churn Probability",
+            showlegend=False
         )
         return fig
     
