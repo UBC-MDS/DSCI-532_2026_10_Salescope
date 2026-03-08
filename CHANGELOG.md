@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a quartile box plot alongside the scatter plot in the Churn Risk Plot tab to show churn probability distributions across retention strategies (Issue #99).
 - Added comparison subtext to the main KPIs indicating the metric delta (amount and direction) when the churn decrease slider is active (Closes #103).
 - Added Q1–Q4 quarter bubbles visualization to track dynamic performance clusters by season (Closes #127).
+- Added `docs/AI_INTEGRATION_TESTING.md` containing manual AI checklist evaluation protocols matching Issue #97 definitions (Closes #97).
 
 ### Changed
 - Reworked the Churn Risk Plot to color points by their status ("In Range" vs "Excluded") whenever the churn decrease slider is active, making it easier to see which customers are impacted by the simulated churn reduction (Closes #105).
