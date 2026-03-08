@@ -277,7 +277,16 @@ panel_ai = ui.nav_panel("AI Insights",
             ui.card(
                 ui.card_header("AI Filtered Data"),
                 ui.output_data_frame("ai_data_table")
-            )
+            ),
+            ui.card(
+                output_widget("ai_tab_scatter"),
+                full_screen=True
+            ),
+            ui.card(
+                output_widget("ai_tab_heatmap"),
+                full_screen=True
+            ),
+            col_widths=(12, 12, 12)
         )
     )
 )
@@ -341,6 +350,65 @@ def server(input, output, session):
     @render.download(filename="sales_and_customer_insights_ai_filtered.csv")
     def download_ai_filtered():
         yield ai_filtered_df().to_csv(index=False)
+
+    @render_widget
+    def ai_tab_scatter():
+        df = ai_filtered_df()
+        
+        if df is None or df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        req_cols = ["Lifetime_Value", "Time_Between_Purchases"]
+        missing_cols = [col for col in req_cols if col not in df.columns]
+        if missing_cols:
+            return px.scatter(title=f"Missing expected columns from AI filter: {', '.join(missing_cols)}")
+
+        hover_cols = ["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"]
+        actual_hover = [c for c in hover_cols if c in df.columns]
+
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
+            color="Retention_Strategy" if "Retention_Strategy" in df.columns else None,
+            size="Churn_Probability" if "Churn_Probability" in df.columns else None,
+            hover_data=actual_hover,
+            size_max=18
+        )
+        fig.update_layout(
+            title="AI-filtered: Customers by LTV and Days Between Purchases",
+            xaxis_title="Customer Lifetime Value ($)",
+            yaxis_title="Days Between Purchases"
+        )
+        return fig
+
+    @render_widget
+    def ai_tab_heatmap():
+        df = ai_filtered_df()
+        if df is None or df.empty:
+            return px.scatter(title="No data available for current filters")
+        req_cols = ["Season", "Most_Frequent_Category", "Lifetime_Value"]
+        missing_cols = [c for c in req_cols if c not in df.columns]
+        if missing_cols:
+            return px.scatter(
+                title=f"Missing expected columns from AI filter: {', '.join(missing_cols)}"
+            )
+        plot_data = (
+            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+            .mean()
+            .reset_index()
+        )
+        fig = px.density_heatmap(
+            plot_data,
+            x="Season",
+            y="Most_Frequent_Category",
+            z="Lifetime_Value",
+            title="AI-filtered: Avg LTV by Season vs. Category",
+            labels={"Lifetime_Value": "Avg LTV ($)", "Most_Frequent_Category": "Product Type"},
+            color_continuous_scale="Viridis",
+            text_auto=True,
+        )
+        return fig
 
     @reactive.calc
     def churn_plot_df():
