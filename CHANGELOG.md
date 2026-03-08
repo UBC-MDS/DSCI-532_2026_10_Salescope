@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reworked the Churn Risk Plot to color points by their status ("In Range" vs "Excluded") whenever the churn decrease slider is active, making it easier to see which customers are impacted by the simulated churn reduction (Closes #105).
 
+### Changed
+- Clarified KPI labels and chart titles to reflect filtered segments and units (Issue #102).
+
 ## [0.2.0] - 2026-02-28
 
 ### Added

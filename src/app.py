@@ -45,15 +45,21 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
-        ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
-        ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
-        ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
-        ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
-        col_widths = (6,6,6,6)
+        ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_text("kpi_lifetime")),
+        ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_text("kpi_risk")),
+        col_widths=(12, 12)
     ),
-    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
-    col_widths = (8,4), # 12 part ratio
-    # row_heights= (1,2), # direct ratio
+    ui.layout_columns(
+        ui.value_box("Avg Churn (Filtered Base)", ui.output_text("kpi_churn")),
+        ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_text("kpi_days")),
+        col_widths=(12, 12)
+    ),
+    ui.layout_columns(
+        ui.value_box("Count of Datapoints (Filtered Base)", ui.output_text("kpi_count")),
+        ui.markdown("## Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
+        col_widths=(12, 12)
+    ),
+    col_widths=(4, 4, 4),  # 12 part ratio
     fill=False
 )
 
@@ -522,7 +528,7 @@ def server(input, output, session):
         )
         fig.update_layout(
             title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
-            xaxis_title="Customer Lifetime Value",
+            xaxis_title="Customer Lifetime Value ($)",
             yaxis_title="Days Between Purchases",
             legend_title=legend_title,
         )
@@ -563,16 +569,16 @@ def server(input, output, session):
                 df.groupby(["Season", "Most_Frequent_Category"])
                 .size().reset_index(name="Frequency") )
             z_col = "Frequency"
-            title_text = "Frequency of Sales: Season vs. Category"
-            label_text = "Total Count"
+            title_text = "Sales Frequency: Season vs. Category"
+            label_text = "Total Sales Count"
         else:
             plot_data = (
                 df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
                 .mean()
                 .reset_index()  )
             z_col = "Lifetime_Value"
-            title_text = "Avg Customer Value: Season vs. Category"
-            label_text = "Avg LTV"
+            title_text = "Avg Value: Season vs. Category"
+            label_text = "Avg LTV ($)"
 
         fig = px.density_heatmap(
             plot_data, 
