@@ -267,7 +267,11 @@ panel_ai = ui.nav_panel("AI Insights",
                 output_widget("ai_tab_scatter"),
                 full_screen=True
             ),
-            col_widths=(12, 12)
+            ui.card(
+                output_widget("ai_tab_heatmap"),
+                full_screen=True
+            ),
+            col_widths=(12, 12, 12)
         )
     )
 )
