@@ -1,7 +1,6 @@
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
-from ridgeplot import ridgeplot
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
@@ -270,6 +269,44 @@ def server(input, output, session):
         yield ai_filtered_df().to_csv(index=False)
 
     @reactive.calc
+    def churn_plot_df():
+        df = sales_df.copy()
+        churn_min_raw = input.num_churn_min()
+        churn_max_raw = input.num_churn_max()
+        churn_min = min(churn_min_raw, churn_max_raw)
+        churn_max = max(churn_min_raw, churn_max_raw)
+        pct_decrease = input.slider_churn_decrease()
+
+        clv_min, clv_max = input.slider_customer()
+        order_min, order_max = input.slider_order()
+        freq_min, freq_max = input.slider_freq()
+        date_start, date_end = input.date_range()
+
+        reduced_max = churn_max * (1 - pct_decrease / 100)
+
+        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
+            
+        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
+        
+        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
+        df = df[df["Average_Order_Value"].between(order_min, order_max)]
+        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
+        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+
+        types = input.checkbox_group_type() 
+        regions = input.checkbox_group_region() 
+        strategies = input.checkbox_group_strategy() 
+
+        if types:
+            df = df[df["Most_Frequent_Category"].isin(types)]
+        if regions:
+            df = df[df["Region"].isin(regions)]
+        if strategies:
+            df = df[df["Retention_Strategy"].isin(strategies)]
+
+        return df
+
+    @reactive.calc
     def filtered_df():
         df = sales_df.copy()
         churn_min_raw = input.num_churn_min()
@@ -432,23 +469,32 @@ def server(input, output, session):
 
     @render_widget
     def high_churn_risk():
-        df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
+        df = churn_plot_df() if pct_decrease > 0 else filtered_df()
+        
         churn_min_raw = input.num_churn_min()
         churn_max_raw = input.num_churn_max()
         churn_min = min(churn_min_raw, churn_max_raw)
         churn_max = max(churn_min_raw, churn_max_raw)
-        pct_decrease = input.slider_churn_decrease()
         reduced_max = churn_max * (1 - pct_decrease / 100)
 
         if df.empty:
             fig = px.scatter(title="No data available for current filters")
             return fig
 
+        if pct_decrease > 0:
+            df["status"] = df["in_reduced_churn_range"].map({True: "In Range", False: "Excluded"})
+            color_col = "status"
+            legend_title = "Within Reduced Range"
+        else:
+            color_col = "Retention_Strategy"
+            legend_title = "Retention Strategy"
+
         fig = px.scatter(
             df,
             x="Lifetime_Value",
             y="Time_Between_Purchases",
-            color="Retention_Strategy",
+            color=color_col,
             size="Churn_Probability",
             size_max=18,
             hover_data=["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"],
@@ -457,7 +503,7 @@ def server(input, output, session):
             title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
-            legend_title="Retention Strategy",
+            legend_title=legend_title,
         )
         return fig
     
