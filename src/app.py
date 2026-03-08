@@ -52,7 +52,7 @@ kpi_component = ui.layout_columns(
         col_widths = (6,6,6,6)
     ),
     ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
-    col_widths = (8,4), # 12 part ratio
+    col_widths = (9,3), # 12 part ratio, de-emphasize count
     # row_heights= (1,2), # direct ratio
     fill=False
 )
