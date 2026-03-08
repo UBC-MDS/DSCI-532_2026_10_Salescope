@@ -41,6 +41,7 @@ And these are the updated job stories and their progress as of Milestone 2:
 | `filtered_df` | Reactive calc | `@reactive.calc`        | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range` | #1, #2, #3 |
 | `churn_plot_df` | Reactive calc | `@reactive.calc` | `num_churn_*`, `slider_*`, `check_box_group_*`, `date_range` | #2 |
 | `high_churn_risk` | Output        | `@render_widget`        | `filtered_df`, `churn_plot_df`                | #2         |
+| `quartile_churn_risk` | Output    | `@render_widget`        | `filtered_df`                | #2         |
 | `row_dropdown`    | Input         | `ui.input_select()`     | —                            | #1         |
 | `customer_df` | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `risk_df`     | Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
@@ -94,8 +95,9 @@ flowchart TD
   E --> C_df
   G --> C_df
   H --> C_df
-  F -.-> O1([high_churn_risk])
   C_df -.-> O1
+  F --> O1([high_churn_risk])
+  F --> O8([quartile_churn_risk])
   F --> O2([heatmap])
   F --> O3
   F --> O4
