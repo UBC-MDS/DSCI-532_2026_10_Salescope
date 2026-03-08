@@ -127,7 +127,7 @@ We implemented the **Reset Button** complexity enhancement using `ui.input_actio
 
 ### What was added
 
-A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked, a `@reactive.effect` decorated with `@reactive.event(input.reset)` fires and calls `ui.update_*` functions to restore every slider, checkbox group, and date range widget back to its original default values. This restores `filtered_df` to the full 10,000-row dataset in a single user action.
+A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked, a `@reactive.effect` decorated with `@reactive.event(input.reset)` fires and calls `ui.update_*` functions to restore every slider, checkbox group, and date range widget back to its original default values. Note that for the date range, the initial default is the most recent quarter, not the full dataset, so clicking reset restores the app to that specific quarter view rather than all time. This restores `filtered_df` to default settings in a single user action.
 
 ### Why it improves the user experience
 

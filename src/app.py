@@ -22,6 +22,11 @@ sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
+# Determine the most recent quarter in the data
+latest_quarter = pd.Period(max_date, freq='Q')
+default_start = latest_quarter.start_time.date()
+default_end = latest_quarter.end_time.date()
+
 qc = querychat.QueryChat(
     sales_df.copy(),
     "Salescope",
@@ -100,8 +105,8 @@ main_sidebar = ui.sidebar(
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
-        start=min_date,
-        end=max_date,
+        start=max(default_start,min_date),
+        end=min(default_end,max_date),
         min=min_date,
         max=max_date
     ),
@@ -384,8 +389,8 @@ def server(input, output, session):
         )
         ui.update_date_range(
             "date_range",
-            start=min_date,
-            end=max_date,
+            start=default_start,
+            end=default_end,
             min=min_date,
             max=max_date,
             session=session
