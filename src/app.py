@@ -215,7 +215,12 @@ app_ui = ui.page_navbar(
     title="Salescope", 
     sidebar=main_sidebar,
     header=ui.TagList(
-        ui.tags.style("body { font-size: 0.8em; }"), 
+        ui.tags.style("""
+            body { font-size: 1em; }
+            .sidebar { font-size: 1.05em; }
+            h2, h3 { font-size: 1.2em; }
+            .nav-tabs .nav-link { font-size: 1.05em; }
+        """),
         kpi_component,
     ),
     id="top_navbar",
