@@ -68,7 +68,21 @@ conda env create -f environment.yml
 conda activate Salescope
 ```
 
-### 3. Verify the Data
+### 3. Set up an Anthropic API key
+
+The **AI Explorer** tab requires an **Anthropic API key**. An API key is required to enable the querychat functionality on your local machine.
+
+* Create a `.env` file in the root of the repository:
+    ```bash
+    touch .env
+    ```
+
+* Add your API key to the file:
+    ```text
+    ANTHROPIC_API_KEY=your_api_key_here
+    ```
+
+### 4. Verify the Data
 
 The dataset is already included in the repository at `data/raw/sales_and_customer_insights.csv`. You can verify it exists by checking:
 
@@ -76,7 +90,7 @@ The dataset is already included in the repository at `data/raw/sales_and_custome
 ls data/raw/
 ```
 
-### 4. Run the Dashboard
+### 5. Run the Dashboard
 
 Start the Shiny dashboard application:
 
