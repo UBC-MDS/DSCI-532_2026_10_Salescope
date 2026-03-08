@@ -45,21 +45,54 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
-        ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_ui("kpi_lifetime")),
-        ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_ui("kpi_risk")),
-        col_widths=(12, 12)
+        ui.layout_columns(
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Lifetime Value (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_lifetime")
+            ),
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Value-At-Risk (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_risk")
+            ),
+            col_widths=(12, 12)
+        ),
+        ui.layout_columns(
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Churn (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_churn")
+            ),
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Days Between Purchase (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_days")
+            ),
+            col_widths=(12, 12)
+        ),
+    col_widths=(6, 6)
     ),
     ui.layout_columns(
-        ui.value_box("Avg Churn (Filtered Base)", ui.output_ui("kpi_churn")),
-        ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_ui("kpi_days")),
+        ui.value_box(            
+            ui.tags.span(
+                "Count of Datapoints (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_text("kpi_count")
+        ),
+        ui.markdown("### Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
         col_widths=(12, 12)
     ),
-    ui.layout_columns(
-        ui.value_box("Count of Datapoints (Filtered Base)", ui.output_text("kpi_count")),
-        ui.markdown("## Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
-        col_widths=(12, 12)
-    ),
-    col_widths=(4, 4, 4),  # 12 part ratio
+    col_widths=(9, 3),  # 12 part ratio
     fill=False
 )
 
@@ -246,10 +279,10 @@ app_ui = ui.page_navbar(
         )
     ),
     panel_ai, 
-    title="Salescope", 
+    title="Salescope — Customer Retention & Churn Insights", 
     sidebar=main_sidebar,
     header=ui.TagList(
-        ui.tags.style("body { font-size: 0.8em; }"), 
+        ui.markdown("#### Data-driven customer retention and churn analysis."),
         kpi_component,
     ),
     id="top_navbar",
@@ -648,7 +681,10 @@ def server(input, output, session):
     @render.text
     def kpi_count():
         df = dashboard_df()
-        return f"{len(df):,}"
+        count = len(df)
+        if count < 50:
+            return f"{count:,} ⚠️ Low sample"
+        return f"{count:,}"
 
 
 # Create app
