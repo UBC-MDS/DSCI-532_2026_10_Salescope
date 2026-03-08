@@ -494,8 +494,9 @@ def server(input, output, session):
                 base_val = df_base['risk_value'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
                 subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -513,8 +514,9 @@ def server(input, output, session):
                 base_val = df_base['Time_Between_Purchases'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
                 subtext = f"{sign}{abs(delta):,.2f} days"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.data_frame
