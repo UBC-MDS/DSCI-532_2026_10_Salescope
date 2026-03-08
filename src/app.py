@@ -57,7 +57,7 @@ kpi_component = ui.layout_columns(
     ),
     ui.layout_columns(
         ui.value_box("Count of Datapoints (Filtered Base)", ui.output_text("kpi_count")),
-        ui.markdown("*Note: All KPIs and charts on this page reflect current filter settings, defaulting to the most recent quarter.*"),
+        ui.markdown("## Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
         col_widths=(12, 12)
     ),
     col_widths=(4, 4, 4),  # 12 part ratio
