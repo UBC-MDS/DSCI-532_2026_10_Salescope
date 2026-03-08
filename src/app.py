@@ -50,14 +50,14 @@ kpi_component = ui.layout_columns(
                 "Avg Lifetime Value (Filtered Base)",
                 style="font-size:1.25em; font-weight:600;"
             ), 
-            ui.output_text("kpi_lifetime")
+            ui.output_ui("kpi_lifetime")
         ),
         ui.value_box(
             ui.tags.span(
                 "Avg Value-At-Risk (Filtered Base)",
                 style="font-size:1.25em; font-weight:600;"
             ), 
-            ui.output_text("kpi_risk")
+            ui.output_ui("kpi_risk")
         ),
         col_widths=(12, 12)
     ),
@@ -67,14 +67,14 @@ kpi_component = ui.layout_columns(
                 "Avg Churn (Filtered Base)",
                 style="font-size:1.25em; font-weight:600;"
             ), 
-            ui.output_text("kpi_churn")
+            ui.output_ui("kpi_churn")
         ),
         ui.value_box(
             ui.tags.span(
                 "Avg Days Between Purchase (Filtered Base)",
                 style="font-size:1.25em; font-weight:600;"
             ), 
-            ui.output_text("kpi_days")
+            ui.output_ui("kpi_days")
         ),
         col_widths=(12, 12)
     ),
@@ -474,33 +474,81 @@ def server(input, output, session):
             session=session
         )
 
-    @render.text
+    @render.ui
     def kpi_lifetime():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"${df['Lifetime_Value'].mean():,.2f}"
+        val = df['Lifetime_Value'].mean()
+        val_str = f"${val:,.2f}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Lifetime_Value'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                subtext = f"{sign}${abs(delta):,.2f}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_churn():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"{df['Churn_Probability'].mean():.1%}"
+        val = df['Churn_Probability'].mean()
+        val_str = f"{val:.1%}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Churn_Probability'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                subtext = f"{sign}{abs(delta):.1%}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_risk():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"${df['risk_value'].mean():,.2f}"
+        val = df['risk_value'].mean()
+        val_str = f"${val:,.2f}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['risk_value'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                subtext = f"{sign}${abs(delta):,.2f}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_days():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
+        val = df['Time_Between_Purchases'].mean()
+        val_str = f"{val:,.2f} days"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Time_Between_Purchases'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                subtext = f"{sign}{abs(delta):,.2f} days"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8;'>{subtext}</div>")
+        return val_str
 
     @render.data_frame
     def customer_df():

@@ -119,7 +119,7 @@ flowchart TD
 
 - **Inputs:** Operates utilizing the same core logic parameters as `filtered_df` (tracking all global sliders and checkboxes). 
 - **Transformation:** Bypasses the strict `reduced_max` threshold cull triggered when the `slider_churn_decrease` goes above 0. Evaluates that top percentage grouping with a mapping boolean column: `in_reduced_churn_range`.
-- **Outputs:** `high_churn_risk` (Active selectively when `slider_churn_decrease` > 0 to plot the chopped-off metric bands concurrently).
+- **Outputs:** `high_churn_risk` (Active selectively when `slider_churn_decrease` > 0 to plot the chopped-off metric bands concurrently) and baseline mapping computations for main KPI output strings (`kpi_lifetime`, `kpi_churn`, `kpi_risk`, `kpi_days`) tracking comparative change deltas.
 
 ## Section 5: Complexity Enhancement — Reset Button
 
