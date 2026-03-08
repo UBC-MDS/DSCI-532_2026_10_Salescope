@@ -367,6 +367,13 @@ def server(input, output, session):
         )
         return fig
 
+    @render_widget
+    def ai_tab_heatmap():
+        df = ai_filtered_df()
+        if df is None or df.empty:
+            return px.scatter(title="No data available for current filters")
+        return px.scatter(title="Placeholder ai_tab_heatmap")
+
     @reactive.calc
     def churn_plot_df():
         df = sales_df.copy()
