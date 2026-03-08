@@ -602,7 +602,7 @@ def server(input, output, session):
     def risk_df():
         mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "risk_value")
+        return create_summary_table(dashboard_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
