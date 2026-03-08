@@ -372,6 +372,17 @@ def server(input, output, session):
         df = ai_filtered_df()
         if df is None or df.empty:
             return px.scatter(title="No data available for current filters")
+        req_cols = ["Season", "Most_Frequent_Category", "Lifetime_Value"]
+        missing_cols = [c for c in req_cols if c not in df.columns]
+        if missing_cols:
+            return px.scatter(
+                title=f"Missing expected columns from AI filter: {', '.join(missing_cols)}"
+            )
+        plot_data = (
+            df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
+            .mean()
+            .reset_index()
+        )
         return px.scatter(title="Placeholder ai_tab_heatmap")
 
     @reactive.calc
