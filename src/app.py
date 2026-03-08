@@ -632,25 +632,25 @@ def server(input, output, session):
             "Most Frequent Value": "Most_Frequent_Category"
                     }
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "Lifetime_Value")
+        return create_summary_table(dashboard_df(), group, "Lifetime_Value")
 
     @render.data_frame
     def risk_df():
         mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "risk_value")
+        return create_summary_table(dashboard_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
         mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "Average_Order_Value")
+        return create_summary_table(dashboard_df(), group, "Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
         mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "Purchase_Frequency")
+        return create_summary_table(dashboard_df(), group, "Purchase_Frequency")
 
     @render_widget
     def high_churn_risk():
