@@ -614,7 +614,7 @@ def server(input, output, session):
     def frequency_df():
         mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "Purchase_Frequency")
+        return create_summary_table(dashboard_df(), group, "Purchase_Frequency")
 
     @render_widget
     def high_churn_risk():
