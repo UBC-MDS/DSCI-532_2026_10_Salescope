@@ -26,15 +26,24 @@ This dashboard is developed by Group 10 for DSCI 532:
 
 ### Milestone 2 Demo For Basic Filter Use
 
-<video controls>
-  <source src="img/milestone2_demo.mp4" type="video/mp4">
-</video>
+![Milestone 2 Demo](img/milestone2_demo.gif)
 
 ### Milestone 3 Demo For AI Filtering
 
-<video controls>
-  <source src="img/milestone3_demo.mp4" type="video/mp4">
-</video>
+![Milestone 3 Demo](img/milestone3_demo.gif)
+
+## Using AI Assistant
+The **AI Insights** tab provides a natural language interface to your customer data, allowing for rapid exploration without manual slider adjustments.
+
+* **What the AI Tab Does**: It translates human-readable queries into precise data filters.
+* **Query Example**: You can enter requests such as "Show data for customers who belong to North America region only".
+* **Dynamic Results**: The app instantly generates a preview table and synchronizes all global dashboard plots to reflect the AI-filtered subset.
+
+## **How to Use Querychat**
+1.  **Enter Query**: Type your request (e.g., "Show data for customers who belong to North America region only") into the chat box.
+2.  **Sync Dashboard**: Go to the **Advanced Figures** tab and enable the **"Use AI filtered data for dashboard"** toggle present in the sidebar.
+3.  **Download Results**: You may also download the specific AI-filtered results by clicking the **"Download Filtered Dataframe"** button located within the AI interface.
+4.  **Analyze**: View the updated **Churn Risk Plots**, **Seasonal Product Heatmap**, and **KPI tables** to see the live impact on KPIs.
 
 ## How to Run Locally
 
@@ -56,7 +65,21 @@ conda env create -f environment.yml
 conda activate Salescope
 ```
 
-### 3. Verify the Data
+### 3. Set up an Anthropic API key
+
+The **AI Explorer** tab requires an **Anthropic API key**. An API key is required to enable the querychat functionality on your local machine.
+
+* Create a `.env` file in the root of the repository:
+    ```bash
+    touch .env
+    ```
+
+* Add your API key to the file:
+    ```text
+    ANTHROPIC_API_KEY=your_api_key_here
+    ```
+
+### 4. Verify the Data
 
 The dataset is already included in the repository at `data/raw/sales_and_customer_insights.csv`. You can verify it exists by checking:
 
@@ -64,7 +87,7 @@ The dataset is already included in the repository at `data/raw/sales_and_custome
 ls data/raw/
 ```
 
-### 4. Run the Dashboard
+### 5. Run the Dashboard
 
 Start the Shiny dashboard application:
 
