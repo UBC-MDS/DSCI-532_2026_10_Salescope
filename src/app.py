@@ -339,7 +339,20 @@ def server(input, output, session):
         if df is None or df.empty:
             return px.scatter(title="No data available for current filters")
 
-        return px.scatter(title="Placeholder for scatter plot")
+        fig = px.scatter(
+            df,
+            x="Lifetime_Value" if "Lifetime_Value" in df.columns else None,
+            y="Time_Between_Purchases" if "Time_Between_Purchases" in df.columns else None,
+            color="Retention_Strategy" if "Retention_Strategy" in df.columns else None,
+            size="Churn_Probability" if "Churn_Probability" in df.columns else None,
+            size_max=18
+        )
+        fig.update_layout(
+            title="AI-filtered: Customers by LTV and Days Between Purchases",
+            xaxis_title="Customer Lifetime Value ($)",
+            yaxis_title="Days Between Purchases"
+        )
+        return fig
 
     @reactive.calc
     def churn_plot_df():
