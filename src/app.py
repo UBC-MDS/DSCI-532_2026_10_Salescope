@@ -596,7 +596,7 @@ def server(input, output, session):
             "Most Frequent Value": "Most_Frequent_Category"
                     }
         group = mapping[input.row_dropdown()]
-        return create_summary_table(filtered_df(), group, "Lifetime_Value")
+        return create_summary_table(dashboard_df(), group, "Lifetime_Value")
 
     @render.data_frame
     def risk_df():
