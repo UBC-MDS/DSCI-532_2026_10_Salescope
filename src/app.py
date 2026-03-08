@@ -44,17 +44,12 @@ qc = querychat.QueryChat(
 )
 
 kpi_component = ui.layout_columns(
-    ui.layout_columns(
-        ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
-        ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
-        ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
-        ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
-        col_widths = (6,6,6,6)
-    ),
+    ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
+    ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
     ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
-    col_widths = (8,4), # 12 part ratio
-    # row_heights= (1,2), # direct ratio
-    fill=False
+    ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
+    ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
+    col_widths=(4, 4, 4, 6, 6)
 )
 
 main_sidebar = ui.sidebar(
@@ -590,7 +585,10 @@ def server(input, output, session):
     @render.text
     def kpi_count():
         df = dashboard_df()
-        return f"{len(df):,}"
+        count = len(df)
+        if count < 50:
+            return f"{count:,} ⚠️ Low sample"
+        return f"{count:,}"
 
 
 # Create app
