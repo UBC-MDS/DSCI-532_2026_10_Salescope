@@ -117,27 +117,36 @@ main_sidebar = ui.sidebar(
         max=100,
         value=0,
     ),
-    ui.input_slider(
-        id="slider_customer",
-        label="Customer Lifetime Value",
-        min=100,
-        max=10000,
-        value=[100, 10000],
+    ui.input_numeric(
+        id="num_clv_min",
+        label="Customer Lifetime Value min",
+        value=100, min=100, max=10000, step=50
     ),
-    ui.input_slider(
-        id="slider_order",
-        label="Average Order Value",
-        min=20,
-        max=200,
-        value=[20, 200],
+    ui.input_numeric(
+        id="num_clv_max",
+        label="Customer Lifetime Value max",
+        value=10000, min=100, max=10000, step=50
     ),
-    ui.input_slider(
-        id="slider_freq",
-        label="Purchase Frequency",
-        min=1,
-        max=19,
-        value=[1, 19],
-    ),             
+    ui.input_numeric(
+        id="num_order_min",
+        label="Average Order Value min",
+        value=20, min=20, max=200, step=5
+    ),
+    ui.input_numeric(
+        id="num_order_max",
+        label="Average Order Value max",
+        value=200, min=20, max=200, step=5
+    ),
+    ui.input_numeric(
+        id="num_freq_min",
+        label="Purchase Frequency min",
+        value=1, min=1, max=19, step=1
+    ),
+    ui.input_numeric(
+        id="num_freq_max",
+        label="Purchase Frequency max",
+        value=19, min=1, max=19, step=1
+    ),
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
