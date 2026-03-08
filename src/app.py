@@ -619,7 +619,11 @@ def server(input, output, session):
     @render_widget
     def high_churn_risk():
         pct_decrease = input.slider_churn_decrease()
-        df = churn_plot_df() if pct_decrease > 0 else filtered_df()
+        df = filtered_df()
+        if input.use_ai_filter(): 
+            df = ai_filtered_df()
+        elif pct_decrease > 0: 
+            df = churn_plot_df()
         
         churn_min_raw = input.num_churn_min()
         churn_max_raw = input.num_churn_max()
@@ -631,13 +635,14 @@ def server(input, output, session):
             fig = px.scatter(title="No data available for current filters")
             return fig
 
-        if pct_decrease > 0:
+        if pct_decrease > 0 and not input.use_ai_filter():
             df["status"] = df["in_reduced_churn_range"].map({True: "In Range", False: "Excluded"})
             color_col = "status"
             legend_title = "Within Reduced Range"
         else:
             color_col = "Retention_Strategy"
             legend_title = "Retention Strategy"
+
 
         fig = px.scatter(
             df,
