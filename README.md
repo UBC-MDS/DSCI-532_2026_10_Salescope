@@ -36,6 +36,18 @@ This dashboard is developed by Group 10 for DSCI 532:
   <source src="img/milestone3_demo.mp4" type="video/mp4">
 </video>
 
+## Using AI Assistant
+The **AI Insights** tab provides a natural language interface to your customer data, allowing for rapid exploration without manual slider adjustments.
+
+* **What the AI Tab Does**: It translates human-readable queries into precise data filters.
+* **Query Example**: You can enter requests such as "Show data for customers who belong to North America region only".
+* **Dynamic Results**: The app instantly generates a preview table and synchronizes all global dashboard plots to reflect the AI-filtered subset.
+
+## **How to Use Querychat**
+1.  **Enter Query**: Type your request (e.g., "Show data for customers who belong to North America region only") into the chat box.
+2.  **Sync Dashboard**: Go to the **Advanced Figures** tab and enable the **"Use AI filtered data for dashboard"** toggle present in the sidebar.
+3.  **Analyze**: View the updated **Churn Risk Plots**, **Seasonal Product Heatmap**, and **KPI tables** to see the live impact on KPIs.
+
 ## How to Run Locally
 
 Follow these steps to set up and run the Salescope dashboard on your local machine:
