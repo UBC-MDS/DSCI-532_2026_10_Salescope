@@ -240,9 +240,10 @@ app_ui = ui.page_navbar(
         )
     ),
     panel_ai, 
-    title="Salescope", 
+    title="Salescope — Customer Retention & Churn Insights", 
     sidebar=main_sidebar,
     header=ui.TagList(
+        ui.markdown("##### Data-driven customer retention and churn analysis."),
         kpi_component,
     ),
     id="top_navbar",

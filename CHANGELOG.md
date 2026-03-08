@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Reworked the Churn Risk Plot to color points by their status ("In Range" vs "Excluded") whenever the churn decrease slider is active, making it easier to see which customers are impacted by the simulated churn reduction (Closes #105).
 - Restored default text size for improved readability across dashboard text and KPI labels (Closes #124).
+- Added "Customer Retention & Churn Insights" to the primary app title parameter and injected a markdown subheading to immediately convey dashboard context without necessitating sidebar reference (Closes #128).
 
 ## [0.2.0] - 2026-02-28
 
