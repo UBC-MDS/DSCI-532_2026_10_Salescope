@@ -339,12 +339,21 @@ def server(input, output, session):
         if df is None or df.empty:
             return px.scatter(title="No data available for current filters")
 
+        req_cols = ["Lifetime_Value", "Time_Between_Purchases"]
+        missing_cols = [col for col in req_cols if col not in df.columns]
+        if missing_cols:
+            return px.scatter(title=f"Missing expected columns from AI filter: {', '.join(missing_cols)}")
+
+        hover_cols = ["Customer_ID", "Region", "Churn_Probability", "Purchase_Frequency"]
+        actual_hover = [c for c in hover_cols if c in df.columns]
+
         fig = px.scatter(
             df,
-            x="Lifetime_Value" if "Lifetime_Value" in df.columns else None,
-            y="Time_Between_Purchases" if "Time_Between_Purchases" in df.columns else None,
+            x="Lifetime_Value",
+            y="Time_Between_Purchases",
             color="Retention_Strategy" if "Retention_Strategy" in df.columns else None,
             size="Churn_Probability" if "Churn_Probability" in df.columns else None,
+            hover_data=actual_hover,
             size_max=18
         )
         fig.update_layout(
