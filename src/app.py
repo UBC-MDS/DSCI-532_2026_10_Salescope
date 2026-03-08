@@ -677,7 +677,10 @@ def server(input, output, session):
     @render.text
     def kpi_count():
         df = dashboard_df()
-        return f"{len(df):,}"
+        count = len(df)
+        if count < 50:
+            return f"{count:,} ⚠️ Low sample"
+        return f"{count:,}"
 
 
 # Create app
