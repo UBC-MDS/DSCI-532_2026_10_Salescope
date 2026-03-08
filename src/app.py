@@ -764,7 +764,9 @@ def server(input, output, session):
         df = dashboard_df()
         
         if df.empty:
-            return None
+            fig = px.density_heatmap(title="No data available for current filters")
+            return fig
+            
         # fetching value from  radio buttons
         metric = input.heatmap_metric()
 
