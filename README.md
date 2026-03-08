@@ -46,7 +46,8 @@ The **AI Insights** tab provides a natural language interface to your customer d
 ## **How to Use Querychat**
 1.  **Enter Query**: Type your request (e.g., "Show data for customers who belong to North America region only") into the chat box.
 2.  **Sync Dashboard**: Go to the **Advanced Figures** tab and enable the **"Use AI filtered data for dashboard"** toggle present in the sidebar.
-3.  **Analyze**: View the updated **Churn Risk Plots**, **Seasonal Product Heatmap**, and **KPI tables** to see the live impact on KPIs.
+3.  **Download Results**: You may also download the specific AI-filtered results by clicking the **"Download Filtered Dataframe"** button located within the AI interface.
+4.  **Analyze**: View the updated **Churn Risk Plots**, **Seasonal Product Heatmap**, and **KPI tables** to see the live impact on KPIs.
 
 ## How to Run Locally
 
