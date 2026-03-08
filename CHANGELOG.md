@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Replaced the previous churn rate range slider with two independent numerical inputs and a new "Churn rate decrease (%)" slider to directly simulate churn reduction models (Closes #98).
+- Added a quartile box plot alongside the scatter plot in the Churn Risk Plot tab to show churn probability distributions across retention strategies (Issue #99).
 
 ## [0.2.0] - 2026-02-28
 

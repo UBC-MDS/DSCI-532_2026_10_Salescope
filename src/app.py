@@ -174,7 +174,11 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
             output_widget("high_churn_risk"),
             full_screen=True,
         ),
-        col_widths=[12],
+        ui.card(
+            output_widget("quartile_churn_risk"),
+            full_screen=True,
+        ),
+        col_widths=[8, 4],
     ),
 )
 
@@ -454,6 +458,27 @@ def server(input, output, session):
             xaxis_title="Customer Lifetime Value",
             yaxis_title="Days Between Purchases",
             legend_title="Retention Strategy",
+        )
+        return fig
+    
+    @render_widget
+    def quartile_churn_risk():
+        df = filtered_df()
+        
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        fig = px.box(
+            df,
+            x="Retention_Strategy",
+            y="Churn_Probability",
+            color="Retention_Strategy",
+        )
+        fig.update_layout(
+            title="Churn Probability quartiles by Retention Strategy",
+            xaxis_title="Retention Strategy",
+            yaxis_title="Churn Probability",
+            showlegend=False
         )
         return fig
     
