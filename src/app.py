@@ -383,7 +383,17 @@ def server(input, output, session):
             .mean()
             .reset_index()
         )
-        return px.scatter(title="Placeholder ai_tab_heatmap")
+        fig = px.density_heatmap(
+            plot_data,
+            x="Season",
+            y="Most_Frequent_Category",
+            z="Lifetime_Value",
+            title="AI-filtered: Avg LTV by Season vs. Category",
+            labels={"Lifetime_Value": "Avg LTV ($)", "Most_Frequent_Category": "Product Type"},
+            color_continuous_scale="Viridis",
+            text_auto=True,
+        )
+        return fig
 
     @reactive.calc
     def churn_plot_df():
