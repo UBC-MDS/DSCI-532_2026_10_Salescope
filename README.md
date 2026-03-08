@@ -24,8 +24,16 @@ This dashboard is developed by Group 10 for DSCI 532:
 
 ## Demo
 
+### Milestone 2 Demo For Basic Filter Use
+
 <video controls>
-  <source src="img/demo.mp4" type="video/mp4">
+  <source src="img/milestone2_demo.mp4" type="video/mp4">
+</video>
+
+### Milestone 3 Demo For AI Filtering
+
+<video controls>
+  <source src="img/milestone3_demo.mp4" type="video/mp4">
 </video>
 
 ## How to Run Locally
