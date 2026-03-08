@@ -45,17 +45,47 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
-        ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_ui("kpi_lifetime")),
-        ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_ui("kpi_risk")),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Lifetime Value (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_ui("kpi_lifetime")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Value-At-Risk (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_ui("kpi_risk")
+        ),
         col_widths=(12, 12)
     ),
     ui.layout_columns(
-        ui.value_box("Avg Churn (Filtered Base)", ui.output_ui("kpi_churn")),
-        ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_ui("kpi_days")),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Churn (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_ui("kpi_churn")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Days Between Purchase (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_ui("kpi_days")
+        ),
         col_widths=(12, 12)
     ),
     ui.layout_columns(
-        ui.value_box("Count of Datapoints (Filtered Base)", ui.output_text("kpi_count")),
+        ui.value_box(            
+            ui.tags.span(
+                "Count of Datapoints (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_text("kpi_count")
+        ),
         ui.markdown("## Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
         col_widths=(12, 12)
     ),
@@ -249,7 +279,12 @@ app_ui = ui.page_navbar(
     title="Salescope", 
     sidebar=main_sidebar,
     header=ui.TagList(
-        ui.tags.style("body { font-size: 0.8em; }"), 
+        ui.tags.style("""
+            body { font-size: 1em; }
+            .sidebar { font-size: 1.05em; }
+            h2, h3 { font-size: 1.2em; }
+            .nav-tabs .nav-link { font-size: 1.05em; }
+        """),
         kpi_component,
     ),
     id="top_navbar",
