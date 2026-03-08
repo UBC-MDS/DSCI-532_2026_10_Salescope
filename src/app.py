@@ -120,27 +120,36 @@ main_sidebar = ui.sidebar(
         max=100,
         value=0,
     ),
-    ui.input_slider(
-        id="slider_customer",
-        label="Customer Lifetime Value",
-        min=100,
-        max=10000,
-        value=[100, 10000],
+    ui.input_numeric(
+        id="num_clv_min",
+        label="Customer Lifetime Value min",
+        value=100, min=100, max=10000, step=50
     ),
-    ui.input_slider(
-        id="slider_order",
-        label="Average Order Value",
-        min=20,
-        max=200,
-        value=[20, 200],
+    ui.input_numeric(
+        id="num_clv_max",
+        label="Customer Lifetime Value max",
+        value=10000, min=100, max=10000, step=50
     ),
-    ui.input_slider(
-        id="slider_freq",
-        label="Purchase Frequency",
-        min=1,
-        max=19,
-        value=[1, 19],
-    ),             
+    ui.input_numeric(
+        id="num_order_min",
+        label="Average Order Value min",
+        value=20, min=20, max=200, step=5
+    ),
+    ui.input_numeric(
+        id="num_order_max",
+        label="Average Order Value max",
+        value=200, min=20, max=200, step=5
+    ),
+    ui.input_numeric(
+        id="num_freq_min",
+        label="Purchase Frequency min",
+        value=1, min=1, max=19, step=1
+    ),
+    ui.input_numeric(
+        id="num_freq_max",
+        label="Purchase Frequency max",
+        value=19, min=1, max=19, step=1
+    ),
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
@@ -227,6 +236,12 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
         ),
         col_widths=[8, 4],
     ),
+    ui.layout_columns(
+        ui.card(
+            output_widget("quarter_bubbles"),
+            full_screen=True,
+        )
+    )
 )
 
 # Specialized plot for User Story 3
@@ -404,9 +419,12 @@ def server(input, output, session):
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min, clv_max = input.slider_customer()
-        order_min, order_max = input.slider_order()
-        freq_min, freq_max = input.slider_freq()
+        clv_min = min(input.num_clv_min(), input.num_clv_max())
+        clv_max = max(input.num_clv_min(), input.num_clv_max())
+        order_min = min(input.num_order_min(), input.num_order_max())
+        order_max = max(input.num_order_min(), input.num_order_max())
+        freq_min = min(input.num_freq_min(), input.num_freq_max())
+        freq_max = max(input.num_freq_min(), input.num_freq_max())
         date_start, date_end = input.date_range()
 
         reduced_max = churn_max * (1 - pct_decrease / 100)
@@ -442,9 +460,12 @@ def server(input, output, session):
         churn_max = max(churn_min_raw, churn_max_raw)
         pct_decrease = input.slider_churn_decrease()
 
-        clv_min, clv_max = input.slider_customer()
-        order_min, order_max = input.slider_order()
-        freq_min, freq_max = input.slider_freq()
+        clv_min = min(input.num_clv_min(), input.num_clv_max())
+        clv_max = max(input.num_clv_min(), input.num_clv_max())
+        order_min = min(input.num_order_min(), input.num_order_max())
+        order_max = max(input.num_order_min(), input.num_order_max())
+        freq_min = min(input.num_freq_min(), input.num_freq_max())
+        freq_max = max(input.num_freq_min(), input.num_freq_max())
         date_start, date_end = input.date_range()
 
         # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
@@ -494,19 +515,34 @@ def server(input, output, session):
             value=0,
             session=session
         )
-        ui.update_slider(
-            id="slider_customer",
-            value=[100, 10000],
+        ui.update_numeric(
+            id="num_clv_min",
+            value=100,
             session=session
         )
-        ui.update_slider(
-            id="slider_order",
-            value=[20, 200],
+        ui.update_numeric(
+            id="num_clv_max",
+            value=10000,
             session=session
         )
-        ui.update_slider(
-            id="slider_freq",
-            value=[1, 19],
+        ui.update_numeric(
+            id="num_order_min",
+            value=20,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_order_max",
+            value=200,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_freq_min",
+            value=1,
+            session=session
+        )
+        ui.update_numeric(
+            id="num_freq_max",
+            value=19,
             session=session
         )
         ui.update_date_range(
@@ -742,6 +778,43 @@ def server(input, output, session):
             xaxis_title="Retention Strategy",
             yaxis_title="Churn Probability",
             showlegend=False
+        )
+        return fig
+    
+    @render_widget
+    def quarter_bubbles():
+        df = filtered_df()
+        
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        df_plot = df.copy()
+        df_plot['Quarter'] = 'Q' + df_plot['Launch_Date'].dt.quarter.astype(str)
+        
+        agg_df = df_plot.groupby(['Quarter', 'Retention_Strategy']).agg(
+            Avg_LTV=('Lifetime_Value', 'mean'),
+            Count=('Customer_ID', 'size'),
+            Avg_Churn=('Churn_Probability', 'mean')
+        ).reset_index()
+        
+        # Sort quarters Q1 to Q4
+        agg_df = agg_df.sort_values(by="Quarter")
+
+        fig = px.scatter(
+            agg_df,
+            x="Quarter",
+            y="Retention_Strategy",
+            size="Avg_LTV",
+            color="Avg_Churn",
+            hover_data=["Count"],
+            size_max=35,
+            color_continuous_scale="RdYlGn_r"
+        )
+        fig.update_layout(
+            title="Q1-Q4 Trend: Retention Strategy by Avg LTV (Size) & Churn Risk (Color)",
+            xaxis_title="Quarter",
+            yaxis_title="Retention Strategy",
+            coloraxis_colorbar=dict(title="Churn Prob")
         )
         return fig
     
