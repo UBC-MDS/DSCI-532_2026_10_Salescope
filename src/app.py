@@ -723,7 +723,9 @@ def server(input, output, session):
     @render_widget
     def quarter_bubbles():
         df = filtered_df()
-        
+        if input.use_ai_filter(): 
+            df = ai_filtered_df()
+            
         if df.empty:
             return px.scatter(title="No data available for current filters")
 
