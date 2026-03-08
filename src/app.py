@@ -47,16 +47,20 @@ qc = querychat.QueryChat(
 kpi_component = ui.layout_columns(
     ui.layout_columns(
         ui.value_box("Avg Lifetime Value (Filtered Base)", ui.output_text("kpi_lifetime")),
-        ui.value_box("Avg Churn (Filtered Base)", ui.output_text("kpi_churn")),
         ui.value_box("Avg Value-At-Risk (Filtered Base)", ui.output_text("kpi_risk")),
+        col_widths=(12, 12)
+    ),
+    ui.layout_columns(
+        ui.value_box("Avg Churn (Filtered Base)", ui.output_text("kpi_churn")),
         ui.value_box("Avg Days Between Purchases (Filtered Base)", ui.output_text("kpi_days")),
-        col_widths = (6,6,6,6)
+        col_widths=(12, 12)
     ),
     ui.layout_columns(
         ui.value_box("Count of Datapoints (Filtered Base)", ui.output_text("kpi_count")),
         ui.markdown("*Note: All KPIs and charts on this page reflect current filter settings, defaulting to the most recent quarter.*"),
+        col_widths=(12, 12)
     ),
-    col_widths = (8,4), # 12 part ratio
+    col_widths=(4, 4, 4),  # 12 part ratio
     fill=False
 )
 
