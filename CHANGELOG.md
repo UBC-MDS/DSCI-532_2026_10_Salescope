@@ -11,10 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default filter view set to most recent quarter; reset button restores to this default (Issue #104).
 - Replaced the previous churn rate range slider with two independent numerical inputs and a new "Churn rate decrease (%)" slider to directly simulate churn reduction models (Closes #98).
 - Added a quartile box plot alongside the scatter plot in the Churn Risk Plot tab to show churn probability distributions across retention strategies (Issue #99).
-- Added `docs/AI_INTEGRATION_TESTING.md` containing manual AI checklist evaluation protocols matching Issue #97 definitions.
+- Added comparison subtext to the main KPIs indicating the metric delta (amount and direction) when the churn decrease slider is active (Closes #103).
+- Added `docs/AI_INTEGRATION_TESTING.md` containing manual AI checklist evaluation protocols matching Issue #97 definitions (Closes #97).
 
 ### Changed
 - Reworked the Churn Risk Plot to color points by their status ("In Range" vs "Excluded") whenever the churn decrease slider is active, making it easier to see which customers are impacted by the simulated churn reduction (Closes #105).
+- Added red/green color coding to the KPI comparison delta subtext to quickly indicate positive or negative performance changes (Closes #129).
+- Restored default text size for improved readability across dashboard text and KPI labels (Closes #124).
+- Added "Customer Retention & Churn Insights" to the primary app title parameter and injected a markdown subheading to immediately convey dashboard context without necessitating sidebar reference (Closes #128).
+- De-emphasized the "Count of Datapoints" KPI to keep main analytics prominent (Closes #125).
+
+### Changed
+- Clarified KPI labels and chart titles to reflect filtered segments and units (Issue #102).
 
 ## [0.2.0] - 2026-02-28
 

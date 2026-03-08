@@ -45,15 +45,54 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.layout_columns(
     ui.layout_columns(
-        ui.value_box("Average Lifetime Value", ui.output_text("kpi_lifetime")),
-        ui.value_box("Average Churn Rate", ui.output_text("kpi_churn")),
-        ui.value_box("Average Value-At-Risk", ui.output_text("kpi_risk")),
-        ui.value_box("Average Days Per Purchase", ui.output_text("kpi_days")),
-        col_widths = (6,6,6,6)
+        ui.layout_columns(
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Lifetime Value (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_lifetime")
+            ),
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Value-At-Risk (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_risk")
+            ),
+            col_widths=(12, 12)
+        ),
+        ui.layout_columns(
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Churn (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_churn")
+            ),
+            ui.value_box(
+                ui.tags.span(
+                    "Avg Days Between Purchase (Filtered Base)",
+                    style="font-size:1.25em; font-weight:600;"
+                ), 
+                ui.output_ui("kpi_days")
+            ),
+            col_widths=(12, 12)
+        ),
+    col_widths=(6, 6)
     ),
-    ui.value_box("Count of Datapoints", ui.output_text("kpi_count")),
-    col_widths = (8,4), # 12 part ratio
-    # row_heights= (1,2), # direct ratio
+    ui.layout_columns(
+        ui.value_box(            
+            ui.tags.span(
+                "Count of Datapoints (Filtered Base)",
+                style="font-size:1.25em; font-weight:600;"
+            ), 
+            ui.output_text("kpi_count")
+        ),
+        ui.markdown("### Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
+        col_widths=(12, 12)
+    ),
+    col_widths=(9, 3),  # 12 part ratio
     fill=False
 )
 
@@ -240,11 +279,16 @@ app_ui = ui.page_navbar(
         )
     ),
     panel_ai, 
-    title="Salescope", 
+    title="Salescope — Customer Retention & Churn Insights", 
     sidebar=main_sidebar,
     header=ui.TagList(
-        ui.tags.style("body { font-size: 0.8em; }"), 
+        ui.markdown("#### Data-driven customer retention and churn analysis."),
         kpi_component,
+        ui.card(
+            ui.card_header("💡 Actionable Insights & Next Steps", style="font-weight: bold; font-size: 1.1em; background-color: #f8f9fa; padding: 0.5rem 1rem;"),
+            ui.output_ui("decision_cues"),
+            style="margin-bottom: 20px; border-left: 4px solid #007bc2;"
+        )
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
@@ -433,33 +477,117 @@ def server(input, output, session):
             session=session
         )
 
-    @render.text
+    @render.ui
     def kpi_lifetime():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"${df['Lifetime_Value'].mean():,.2f}"
+        val = df['Lifetime_Value'].mean()
+        val_str = f"${val:,.2f}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Lifetime_Value'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
+                subtext = f"{sign}${abs(delta):,.2f}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_churn():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"{df['Churn_Probability'].mean():.1%}"
+        val = df['Churn_Probability'].mean()
+        val_str = f"{val:.1%}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Churn_Probability'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{sign}{abs(delta):.1%}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_risk():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"${df['risk_value'].mean():,.2f}"
+        val = df['risk_value'].mean()
+        val_str = f"${val:,.2f}"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['risk_value'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{sign}${abs(delta):,.2f}"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+        return val_str
 
-    @render.text
+    @render.ui
     def kpi_days():
         df = filtered_df()
+        pct_decrease = input.slider_churn_decrease()
         if df.empty:
             return "—"
-        return f"{df['Time_Between_Purchases'].mean():,.2f} days"
+        val = df['Time_Between_Purchases'].mean()
+        val_str = f"{val:,.2f} days"
+        
+        if pct_decrease > 0:
+            df_base = churn_plot_df()
+            if not df_base.empty:
+                base_val = df_base['Time_Between_Purchases'].mean()
+                delta = val - base_val
+                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{sign}{abs(delta):,.2f} days"
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+        return val_str
+
+    @render.ui
+    def decision_cues():
+        df = filtered_df()
+        if df.empty:
+            return ui.markdown("No data available to generate insights.")
+        
+        cues = []
+        
+        # Cue 1: Region with highest churn
+        if "Region" in df.columns and "Churn_Probability" in df.columns:
+            region_churn = df.groupby("Region")["Churn_Probability"].mean()
+            if not region_churn.empty:
+                high_risk = region_churn.idxmax()
+                val = region_churn.max()
+                if val > 0.4:
+                    cues.append(f"**Focus on {high_risk}**: This region has the highest average churn risk ({val:.1%}). Consider localized retention campaigns.")
+                else:
+                    cues.append(f"**Stable Regions**: Across all regions, churn remains manageable (highest: {high_risk} at {val:.1%}).")
+
+        # Cue 2: Retention strategy with highest CLV
+        if "Retention_Strategy" in df.columns and "Lifetime_Value" in df.columns:
+            strat_ltv = df.groupby("Retention_Strategy")["Lifetime_Value"].mean()
+            if not strat_ltv.empty:
+                best_strat = strat_ltv.idxmax()
+                cues.append(f"**Scale {best_strat}**: This retention strategy is currently driving the highest Average Lifetime Value (${strat_ltv.max():,.0f}).")
+            
+        if not cues:
+            return ui.markdown("Data distribution appears stable. No immediate critical interventions flagged.")
+            
+        markup = "".join([f"- {cue}\n" for cue in cues])
+        return ui.markdown(markup)
 
     @render.data_frame
     def customer_df():
@@ -522,7 +650,7 @@ def server(input, output, session):
         )
         fig.update_layout(
             title=f"Customers by Lifetime Value and Days Between Purchases, Churn Risk From {churn_min:0.2f} to {reduced_max:0.2f}",
-            xaxis_title="Customer Lifetime Value",
+            xaxis_title="Customer Lifetime Value ($)",
             yaxis_title="Days Between Purchases",
             legend_title=legend_title,
         )
@@ -563,16 +691,16 @@ def server(input, output, session):
                 df.groupby(["Season", "Most_Frequent_Category"])
                 .size().reset_index(name="Frequency") )
             z_col = "Frequency"
-            title_text = "Frequency of Sales: Season vs. Category"
-            label_text = "Total Count"
+            title_text = "Sales Frequency: Season vs. Category"
+            label_text = "Total Sales Count"
         else:
             plot_data = (
                 df.groupby(["Season", "Most_Frequent_Category"])["Lifetime_Value"]
                 .mean()
                 .reset_index()  )
             z_col = "Lifetime_Value"
-            title_text = "Avg Customer Value: Season vs. Category"
-            label_text = "Avg LTV"
+            title_text = "Avg Value: Season vs. Category"
+            label_text = "Avg LTV ($)"
 
         fig = px.density_heatmap(
             plot_data, 
@@ -590,7 +718,10 @@ def server(input, output, session):
     @render.text
     def kpi_count():
         df = dashboard_df()
-        return f"{len(df):,}"
+        count = len(df)
+        if count < 50:
+            return f"{count:,} ⚠️ Low sample"
+        return f"{count:,}"
 
 
 # Create app
