@@ -224,6 +224,12 @@ panel_2 = ui.nav_panel("Churn Risk Plot",
         ),
         col_widths=[8, 4],
     ),
+    ui.layout_columns(
+        ui.card(
+            output_widget("quarter_bubbles"),
+            full_screen=True,
+        )
+    )
 )
 
 # Specialized plot for User Story 3
@@ -635,6 +641,43 @@ def server(input, output, session):
             xaxis_title="Retention Strategy",
             yaxis_title="Churn Probability",
             showlegend=False
+        )
+        return fig
+    
+    @render_widget
+    def quarter_bubbles():
+        df = filtered_df()
+        
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        df_plot = df.copy()
+        df_plot['Quarter'] = 'Q' + df_plot['Launch_Date'].dt.quarter.astype(str)
+        
+        agg_df = df_plot.groupby(['Quarter', 'Retention_Strategy']).agg(
+            Avg_LTV=('Lifetime_Value', 'mean'),
+            Count=('Customer_ID', 'size'),
+            Avg_Churn=('Churn_Probability', 'mean')
+        ).reset_index()
+        
+        # Sort quarters Q1 to Q4
+        agg_df = agg_df.sort_values(by="Quarter")
+
+        fig = px.scatter(
+            agg_df,
+            x="Quarter",
+            y="Retention_Strategy",
+            size="Avg_LTV",
+            color="Avg_Churn",
+            hover_data=["Count"],
+            size_max=35,
+            color_continuous_scale="RdYlGn_r"
+        )
+        fig.update_layout(
+            title="Q1-Q4 Trend: Retention Strategy by Avg LTV (Size) & Churn Risk (Color)",
+            xaxis_title="Quarter",
+            yaxis_title="Retention Strategy",
+            coloraxis_colorbar=dict(title="Churn Prob")
         )
         return fig
     
