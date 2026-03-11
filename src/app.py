@@ -307,12 +307,7 @@ app_ui = ui.page_navbar(
     sidebar=main_sidebar,
     header=ui.TagList(
         ui.markdown("#### Data-driven customer retention and churn analysis."),
-        kpi_component,
-        ui.card(
-            ui.card_header("💡 Actionable Insights & Next Steps", style="font-weight: bold; font-size: 1.1em; background-color: #f8f9fa; padding: 0.5rem 1rem;"),
-            ui.output_ui("decision_cues"),
-            style="margin-bottom: 20px; border-left: 4px solid #007bc2;"
-        )
+        ui.output_ui("conditional_kpis")
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
@@ -708,6 +703,23 @@ def server(input, output, session):
             
         markup = "".join([f"- {cue}\n" for cue in cues])
         return ui.markdown(markup)
+    
+    @render.ui
+    def conditional_kpis():
+        if input.top_navbar() == "AI Insights":
+            return None
+
+        return ui.TagList(
+            kpi_component,
+            ui.card(
+                ui.card_header(
+                    "💡 Actionable Insights & Next Steps",
+                    style="font-weight: bold; font-size: 1.1em; background-color: #f8f9fa; padding: 0.5rem 1rem;"
+                ),
+                ui.output_ui("decision_cues"),
+                style="margin-bottom: 20px; border-left: 4px solid #007bc2;"
+            )
+        )
 
     @render.data_frame
     def customer_df():
