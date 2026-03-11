@@ -268,26 +268,39 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
 )
 
 #panel for AI insights
-panel_ai = ui.nav_panel("AI Insights", 
-    ui.layout_sidebar(
-        #AI chat interface
-        qc.sidebar(),
-        ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
-        ui.layout_columns(
-            ui.card(
-                ui.card_header("AI Filtered Data"),
-                ui.output_data_frame("ai_data_table")
-            ),
-            ui.card(
-                output_widget("ai_tab_scatter"),
-                full_screen=True
-            ),
-            ui.card(
-                output_widget("ai_tab_heatmap"),
-                full_screen=True
-            ),
-            col_widths=(12, 12, 12)
-        )
+panel_ai = ui.nav_panel(
+    "AI Insights",
+    ui.div(
+        ui.tags.style("""
+            .ai-chat-scroll-fix .bslib-sidebar-layout > .sidebar {
+                max-height: 80vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            .ai-chat-scroll-fix .bslib-sidebar-layout {
+                align-items: flex-start !important;
+            }
+        """),
+        ui.layout_sidebar(
+            qc.sidebar(),
+            ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
+            ui.layout_columns(
+                ui.card(
+                    ui.card_header("AI Filtered Data"),
+                    ui.output_data_frame("ai_data_table")
+                ),
+                ui.card(
+                    output_widget("ai_tab_scatter"),
+                    full_screen=True
+                ),
+                ui.card(
+                    output_widget("ai_tab_heatmap"),
+                    full_screen=True
+                ),
+                col_widths=(12, 12, 12)
+            )
+        ),
+        class_="ai-chat-scroll-fix"
     )
 )
 
