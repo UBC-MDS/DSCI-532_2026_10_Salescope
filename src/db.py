@@ -24,10 +24,19 @@ def build_filtered_query(
     churn_max=None,
     clv_min=None,
     clv_max=None,
+    order_min=None,
+    order_max=None,
+    freq_min=None,
+    freq_max=None,
+    date_start=None,
+    date_end=None,
+    types=None,
+    regions=None,
+    strategies=None,
 ):
     """
-    Build a filtered ibis query that runs inside DuckDB.
-    This will later replace pandas filtering in the dashboard.
+    Build a filtered ibis query that applies dashboard filters in DuckDB
+    before materializing the result into a pandas DataFrame.
     """
 
     t = get_base_table()
@@ -43,6 +52,33 @@ def build_filtered_query(
 
     if clv_max is not None:
         t = t.filter(t.Lifetime_Value <= clv_max)
+
+    if order_min is not None:
+        t = t.filter(t.Average_Order_Value >= order_min)
+
+    if order_max is not None:
+        t = t.filter(t.Average_Order_Value <= order_max)
+
+    if freq_min is not None:
+        t = t.filter(t.Purchase_Frequency >= freq_min)
+
+    if freq_max is not None:
+        t = t.filter(t.Purchase_Frequency <= freq_max)
+
+    if date_start is not None:
+        t = t.filter(t.Launch_Date >= date_start)
+
+    if date_end is not None:
+        t = t.filter(t.Launch_Date <= date_end)
+
+    if types:
+        t = t.filter(t.Most_Frequent_Category.isin(types))
+
+    if regions:
+        t = t.filter(t.Region.isin(regions))
+
+    if strategies:
+        t = t.filter(t.Retention_Strategy.isin(strategies))
 
     return t
 
