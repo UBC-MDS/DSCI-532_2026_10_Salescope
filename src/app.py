@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic
 import duckdb
+from db import get_base_dataframe
 
 # used LLM to know how to show actual count/mean inside the box for heatmap
 # used querychat-explore.ipynb notes for querychat integration
@@ -17,9 +18,8 @@ import duckdb
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
-sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+sales_df = get_base_dataframe()
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Determine the most recent quarter in the data
