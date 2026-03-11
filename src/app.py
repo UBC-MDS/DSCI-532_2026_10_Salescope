@@ -18,7 +18,7 @@ from db import get_base_dataframe, execute_filtered_query
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-sales_df = get_base_dataframe()
+sales_df = execute_filtered_query()
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
