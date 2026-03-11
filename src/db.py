@@ -9,6 +9,12 @@ def get_base_table():
     """
     Returns the base ibis table connected to the parquet dataset.
     """
+    if not DATA_PATH.exists():
+        raise FileNotFoundError(
+            f"Parquet dataset not found at {DATA_PATH}. "
+            "Run `python scripts/make_parquet.py` to regenerate it."
+        )
+
     return con.read_parquet(DATA_PATH)
 
 
