@@ -277,6 +277,9 @@ panel_ai = ui.nav_panel(
                 overflow-y: auto;
                 overflow-x: hidden;
             }
+            .ai-chat-scroll-fix .bslib-sidebar-layout {
+                align-items: flex-start !important;
+            }
         """),
         ui.layout_sidebar(
             qc.sidebar(),
