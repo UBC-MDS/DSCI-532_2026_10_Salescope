@@ -39,3 +39,19 @@ def test_create_summary_table_returns_expected_aggregates():
     assert asia_row["Maximum"] == 1000.00
     assert asia_row["Total"] == 1500.00
 
+
+def test_filter_sales_data_applies_reduced_churn_threshold():
+
+    """Verifies churn reduction filtering removes records above the reduced threshold because several charts depend on this scenario logic."""
+
+    df = make_test_df()
+
+    result = filter_sales_data(
+        df,
+        churn_min=0.0,
+        churn_max=1.0,
+        pct_decrease=50,
+        apply_reduced_churn=True,
+    )
+
+    assert set(result["Customer_ID"]) == {1, 2, 3}
