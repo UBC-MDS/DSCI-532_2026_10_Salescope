@@ -349,7 +349,7 @@ app_ui = ui.page_navbar(
         ui.navset_card_tab(
             panel_1,
             panel_2,
-            panel_3,            , 
+            panel_3,
             panel_4,
             id="advanced_nav"
         )
