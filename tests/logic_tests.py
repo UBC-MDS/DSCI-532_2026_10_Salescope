@@ -55,3 +55,21 @@ def test_filter_sales_data_applies_reduced_churn_threshold():
     )
 
     assert set(result["Customer_ID"]) == {1, 2, 3}
+
+
+def test_filter_sales_data_keeps_only_selected_region_and_category():
+
+    """Verifies categorical filters combine correctly so the dashboard does not show rows from unselected segments."""
+
+    df = make_test_df()
+
+    result = filter_sales_data(
+        df,
+        regions=["Asia"],
+        types=["Electronics"],
+        date_start="2024-01-01",
+        date_end="2024-12-31",
+    )
+
+    assert len(result) == 1
+    assert result.iloc[0]["Customer_ID"] == 2
