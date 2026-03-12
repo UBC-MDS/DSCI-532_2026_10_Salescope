@@ -1,3 +1,4 @@
+from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -14,6 +15,7 @@ import duckdb
 # used querychat-explore.ipynb notes for querychat integration
 
 # use shiny run --reload --launch-browser src/app.py to local test
+
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
@@ -326,16 +328,6 @@ app_ui = ui.page_navbar(
     theme=ui.Theme("lumen")
 )    
 
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
-    return summary
-
 # Server
 def server(input, output, session):
     
@@ -420,105 +412,49 @@ def server(input, output, session):
 
     @reactive.calc
     def churn_plot_df():
-        df = sales_df.copy()
-        churn_min_raw = input.num_churn_min() or 0.0
-        churn_max_raw = input.num_churn_max() or 1.0
-        churn_min = min(churn_min_raw, churn_max_raw)
-        churn_max = max(churn_min_raw, churn_max_raw)
-        pct_decrease = input.slider_churn_decrease()
-
-        clv_min_raw = input.num_clv_min() or 100
-        clv_max_raw = input.num_clv_max() or 10000
-        clv_min = min(clv_min_raw, clv_max_raw)
-        clv_max = max(clv_min_raw, clv_max_raw)
-
-        order_min_raw = input.num_order_min() or 20
-        order_max_raw = input.num_order_max() or 200
-        order_min = min(order_min_raw, order_max_raw)
-        order_max = max(order_min_raw, order_max_raw)
-
-        freq_min_raw = input.num_freq_min() or 1
-        freq_max_raw = input.num_freq_max() or 19
-        freq_min = min(freq_min_raw, freq_max_raw)
-        freq_max = max(freq_min_raw, freq_max_raw)
         date_start, date_end = input.date_range()
 
-        reduced_max = churn_max * (1 - pct_decrease / 100)
-
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
-
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-        if regions:
-            df = df[df["Region"].isin(regions)]
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
-
-        return df
+        return filter_sales_data(
+            sales_df,
+            churn_min=input.num_churn_min(),
+            churn_max=input.num_churn_max(),
+            pct_decrease=input.slider_churn_decrease(),
+            clv_min=input.num_clv_min(),
+            clv_max=input.num_clv_max(),
+            order_min=input.num_order_min(),
+            order_max=input.num_order_max(),
+            freq_min=input.num_freq_min(),
+            freq_max=input.num_freq_max(),
+            date_start=date_start,
+            date_end=date_end,
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+            apply_reduced_churn=False,
+        )
 
     @reactive.calc
     def filtered_df():
-        df = sales_df.copy()
-        churn_min_raw = input.num_churn_min() or 0.0
-        churn_max_raw = input.num_churn_max() or 1.0
-        churn_min = min(churn_min_raw, churn_max_raw)
-        churn_max = max(churn_min_raw, churn_max_raw)
-        pct_decrease = input.slider_churn_decrease()
-
-        clv_min_raw = input.num_clv_min() or 100
-        clv_max_raw = input.num_clv_max() or 10000
-        clv_min = min(clv_min_raw, clv_max_raw)
-        clv_max = max(clv_min_raw, clv_max_raw)
-
-        order_min_raw = input.num_order_min() or 20
-        order_max_raw = input.num_order_max() or 200
-        order_min = min(order_min_raw, order_max_raw)
-        order_max = max(order_min_raw, order_max_raw)
-
-        freq_min_raw = input.num_freq_min() or 1
-        freq_max_raw = input.num_freq_max() or 19
-        freq_min = min(freq_min_raw, freq_max_raw)
-        freq_max = max(freq_min_raw, freq_max_raw)
         date_start, date_end = input.date_range()
 
-        # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
-        reduced_max = churn_max * (1 - pct_decrease / 100)
-
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-        if pct_decrease > 0:
-            df = df[df["Churn_Probability"] <= reduced_max]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
-
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-
-        if regions:
-            df = df[df["Region"].isin(regions)]
-
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
-
-        return df
+        return filter_sales_data(
+            sales_df,
+            churn_min=input.num_churn_min(),
+            churn_max=input.num_churn_max(),
+            pct_decrease=input.slider_churn_decrease(),
+            clv_min=input.num_clv_min(),
+            clv_max=input.num_clv_max(),
+            order_min=input.num_order_min(),
+            order_max=input.num_order_max(),
+            freq_min=input.num_freq_min(),
+            freq_max=input.num_freq_max(),
+            date_start=date_start,
+            date_end=date_end,
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+            apply_reduced_churn=True,
+        )
     
     @reactive.effect
     @reactive.event(input.reset)
