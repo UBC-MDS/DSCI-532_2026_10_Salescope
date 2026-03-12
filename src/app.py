@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
+from pathlib import Path
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
@@ -237,7 +238,7 @@ main_sidebar = ui.sidebar(
 
         ],
     ),
-    ui.input_action_button("reset", "Reset filters"),
+    ui.input_action_button("reset", "Reset filters", class_="salescope-primary-btn"),
     open="desktop",
 )
 
@@ -336,7 +337,7 @@ panel_ai = ui.nav_panel(
                 ui.output_ui("scope_mode_info"),
                 style="margin-bottom: 8px;",
             ),
-            ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
+            ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe", class_="salescope-primary-btn"),
             ui.layout_columns(
                 ui.card(
                     ui.card_header("AI Filtered Data"),
@@ -370,9 +371,31 @@ app_ui = ui.page_navbar(
         )
     ),
     panel_ai, 
-    title="Salescope — Customer Retention & Churn Insights", 
+    title=ui.TagList(
+        ui.img(
+            src="salescope_logo_icon.png",
+            height="28px",
+            style="margin-right: 8px; border-radius: 4px;",
+        ),
+        "Salescope — Customer Retention & Churn Insights",
+    ),
     sidebar=main_sidebar,
     header=ui.TagList(
+        ui.tags.style(
+            """
+            .salescope-primary-btn {
+                background-color: #007bc2;
+                border-color: #007bc2;
+            }
+            .salescope-primary-btn:hover {
+                background-color: #005c8e;
+                border-color: #005c8e;
+            }
+            .salescope-accent-card > .card-header {
+                border-left: 4px solid #FF9F1C;
+            }
+            """
+        ),
         ui.markdown("#### Data-driven customer retention and churn analysis."),
         ui.output_ui("conditional_kpis")
     ),
@@ -716,9 +739,9 @@ def server(input, output, session):
                 base_val = df_base['Lifetime_Value'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
+                color = "#28a745" if delta > 0 else "#dc3545" if delta < 0 else "inherit"
                 subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -736,9 +759,9 @@ def server(input, output, session):
                 base_val = df_base['Churn_Probability'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
                 subtext = f"{sign}{abs(delta):.1%}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -756,9 +779,9 @@ def server(input, output, session):
                 base_val = df_base['risk_value'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
                 subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -776,9 +799,9 @@ def server(input, output, session):
                 base_val = df_base['Time_Between_Purchases'].mean()
                 delta = val - base_val
                 sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
                 subtext = f"{sign}{abs(delta):,.2f} days"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
         return val_str
 
     @render.ui
@@ -826,7 +849,8 @@ def server(input, output, session):
                     style="font-weight: bold; font-size: 1.1em; background-color: #f8f9fa; padding: 0.5rem 1rem;"
                 ),
                 ui.output_ui("decision_cues"),
-                style="margin-bottom: 20px; border-left: 4px solid #007bc2;"
+                class_="salescope-accent-card",
+                style="margin-bottom: 20px; border-left: 4px solid #FF9F1C;"
             )
         )
 
@@ -1014,4 +1038,5 @@ def server(input, output, session):
 
 
 # Create app
-app = App(app_ui, server)
+www_dir = Path(__file__).parent.parent / "www"
+app = App(app_ui, server, static_assets=www_dir)

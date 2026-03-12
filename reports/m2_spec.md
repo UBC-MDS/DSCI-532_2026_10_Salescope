@@ -140,3 +140,10 @@ Without the reset button, a user who has applied multiple overlapping filters (f
 - **Churn Probability**: The modeled risk score (0–1) indicating the likelihood a customer will churn.
 - **KPI**: Key Performance Indicator. Metrics used to evaluate the success or status of an objective.
 
+## Branding and Colour Palette
+
+To improve accessibility and brand coherence, the following scheme was applied across the dashboard:
+- **Primary Action (Salescope Blue `#007bc2`)**: Used for the primary "Reset filters" and "Download Filtered Dataframe" action buttons.
+- **Accent Insight (Salescope Orange `#FF9F1C`)**: Used as a highlight accent border for the "Actionable Insights & Next Steps" card to draw user attention.
+- **Positive Indicator (Green `#28a745`)**: Used semantically for improved KPIs (e.g. increase in LTV, decrease in churn probability).
+- **Negative Indicator (Red `#dc3545`)**: Used semantically for worsening KPIs (e.g. drop in LTV, increase in churn risk).
