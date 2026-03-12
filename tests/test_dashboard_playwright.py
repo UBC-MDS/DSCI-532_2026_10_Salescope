@@ -73,3 +73,17 @@ def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     purchase_checkbox.expect_selected(["Clothing", "Electronics"])
 
     controller.OutputText(page, "kpi_count").expect_value("4 ⚠️ Low sample")
+
+
+def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> None:
+    
+    """Retention strategy filter reduces datapoints."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    strategy_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_strategy")
+    strategy_checkbox.set(["Discount", "Email Campaign"])
+    strategy_checkbox.expect_selected(["Discount", "Email Campaign"])
+
+    controller.OutputText(page, "kpi_count").expect_value("5 ⚠️ Low sample")
