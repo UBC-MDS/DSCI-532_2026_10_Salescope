@@ -61,3 +61,15 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
     controller.OutputText(page, "kpi_count").expect_value("3 ⚠️ Low sample")
     controller.OutputDataFrame(page, "customer_df").expect_nrow(1)
 
+def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
+    
+    """Purchase type filter reduces datapoints."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    purchase_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_type")
+    purchase_checkbox.set(["Clothing", "Electronics"])
+    purchase_checkbox.expect_selected(["Clothing", "Electronics"])
+
+    controller.OutputText(page, "kpi_count").expect_value("4 ⚠️ Low sample")
