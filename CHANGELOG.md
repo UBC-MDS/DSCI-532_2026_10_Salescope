@@ -19,9 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-<!-- Bugs resolved since M3. -->
+<!-- Bugs resolved since M3. This section will be updated with the exact checklist of issues once complete. -->
 
-- **Feedback prioritization issue link:** #...
+- **Feedback prioritization issue link:** #149
+
+The specific list of feedback issues logged and fixed for Milestone 4 can be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
 
 ### Known Issues
 
@@ -29,12 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Release Highlight: Querychat Customization
 
-<!-- One short paragraph describing what you built and what it does for the user. -->
-
 - **Option chosen:** A
 - **PR:** #161, #162, #163
 - **Why this option over the others:** This new feature provides the LLM additional context over the dataset enabling the ability to respond to more specialized queries. Presistent LLM Logging was considered for this task but would have lacked the improvement in AI answer quality and would also have added additional complexity in maintenance of an additional database. 
 - **Feature prioritization issue link:** #155
+
+A complete description for our decision to create this advanced feature and the technical functionality can be found as part of our [Milestone 4 Report](./reports/m4_spec.md).
+
 
 ### Collaboration
 
