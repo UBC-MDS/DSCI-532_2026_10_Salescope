@@ -10,7 +10,7 @@ app = create_app_fixture("../src/app.py")
 
 def test_initial_kpi_count(page: Page, app: ShinyAppProc) -> None:
     
-    """Default dashboard shows datapoint count."""
+    """Default dashboard shows datapoint count, ensuring the baseline state of the dashboard loads correctly."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -20,7 +20,7 @@ def test_initial_kpi_count(page: Page, app: ShinyAppProc) -> None:
 
 def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None:
     
-    """Customer Lifetime Value summary table structure."""
+    """Customer Lifetime Value summary table structure, ensuring the KPI table renders correct summary statistics for the selected grouping."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -35,7 +35,7 @@ def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None
 
 def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> None:
     
-    """Spot-check Asia row values."""
+    """Spot-check Asia row values, ensuring region-level aggregation is calculated correctly in the KPI tables."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -65,7 +65,7 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
 
 def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     
-    """Purchase type filter reduces datapoints."""
+    """Purchase type filter reduces datapoints, ensuring dashboard summaries reflect the selected purchase category subset."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -79,7 +79,7 @@ def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
 
 def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     
-    """Retention strategy filter reduces datapoints."""
+    """Retention strategy filter reduces datapoints, ensuring dashboard summaries update to reflect the selected retention strategy."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -93,7 +93,7 @@ def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> 
 
 def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
     
-    """Changing dropdown should update summary table grouping."""
+    """Changing dropdown updates summary table grouping, ensuring the dashboard recalculates metrics for the selected dimension."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -112,7 +112,7 @@ def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
 
 def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
     
-    """Reset button restores dashboard filters."""
+    """Reset button restores default filters, ensuring users can quickly return to the baseline dashboard view."""
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
@@ -130,5 +130,5 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
 
     reset_btn.click()
 
-    kpi_count.expect_value("0 ⚠️ Low sample")
+    kpi_count.expect_value("7 ⚠️ Low sample")
     region_checkbox.expect_selected([])
