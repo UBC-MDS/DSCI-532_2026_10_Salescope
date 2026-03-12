@@ -1,4 +1,5 @@
 import pandas as pd
+#Note : Used LLM to write functions.
 
 def normalize_range(min_val, max_val, default_min, default_max):
     """
