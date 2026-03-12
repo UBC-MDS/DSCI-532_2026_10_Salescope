@@ -91,20 +91,10 @@ ls data/raw/
 
 The Playwright tests verify key dashboard behaviors such as filter updates, table changes and reset behavior.
 
-Step 1: Start the Dashboard
-
-In one terminal, run:
+Run the Playwright dashboard tests with:
 
 ```bash
-shiny run --reload src/app.py
-```
-
-Leave this terminal running.
-
-Step 2: Run the Playwright Tests (in the other terminal)
-
-```bash
-pytest tests/test_dashboard_playwright.py --base-url http://127.0.0.1:8000 --headed -v
+pytest tests/test_dashboard_playwright.py -v
 ```
 
 ### 5. Run the Dashboard
