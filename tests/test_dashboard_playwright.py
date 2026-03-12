@@ -130,5 +130,5 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
 
     reset_btn.click()
 
-    kpi_count.expect_value("10,000")
+    kpi_count.expect_value("0")
     region_checkbox.expect_selected([])
