@@ -16,3 +16,26 @@ def make_test_df():
         "Time_Between_Purchases": [10, 20, 30, 40],
         "Launch_Date": pd.to_datetime(["2024-01-10", "2024-02-10", "2024-03-10", "2024-04-10"]),
     })
+
+def test_normalize_range_swaps_reversed_inputs():
+
+    """Verifies reversed numeric bounds are corrected so dashboard filters still behave correctly."""
+
+    assert normalize_range(10, 2, 0, 100) == (2, 10)
+
+
+def test_create_summary_table_returns_expected_aggregates():
+
+    """Verifies grouped summary metrics are correct because KPI tables depend on exact aggregation results."""
+
+    df = make_test_df()
+
+    result = create_summary_table(df, "Region", "Lifetime_Value")
+
+    asia_row = result[result["Region"] == "Asia"].iloc[0]
+    assert asia_row["Count"] == 2
+    assert asia_row["Mean"] == 750.00
+    assert asia_row["Median"] == 750.00
+    assert asia_row["Maximum"] == 1000.00
+    assert asia_row["Total"] == 1500.00
+
