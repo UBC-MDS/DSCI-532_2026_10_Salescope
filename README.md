@@ -87,6 +87,26 @@ The dataset is already included in the repository at `data/raw/sales_and_custome
 ls data/raw/
 ```
 
+### 5.4 Dashboard UI Playwright Tests
+
+The Playwright tests verify key dashboard behaviors such as filter updates, table changes and reset behavior.
+
+Step 1: Start the Dashboard
+
+In one terminal, run:
+
+```bash
+shiny run --reload src/app.py
+```
+
+Leave this terminal running.
+
+Step 2: Run the Playwright Tests (in the other terminal)
+
+```bash
+pytest tests/test_dashboard_playwright.py --base-url http://127.0.0.1:8000 --headed -v
+```
+
 ### 5. Run the Dashboard
 
 Start the Shiny dashboard application:
