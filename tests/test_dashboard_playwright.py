@@ -87,3 +87,22 @@ def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> 
     strategy_checkbox.expect_selected(["Discount", "Email Campaign"])
 
     controller.OutputText(page, "kpi_count").expect_value("5 ⚠️ Low sample")
+
+
+def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
+    
+    """Changing dropdown should update summary table grouping."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    row_dropdown = controller.InputSelect(page, "row_dropdown")
+    customer_df = controller.OutputDataFrame(page, "customer_df")
+
+    row_dropdown.set("Retention Strategy")
+
+    customer_df.expect_ncol(6)
+    customer_df.expect_column_labels(
+        ["Retention_Strategy", "Count", "Mean", "Median", "Maximum", "Total"]
+    )
+    customer_df.expect_nrow(3)
