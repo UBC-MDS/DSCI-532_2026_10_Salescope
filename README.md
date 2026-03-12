@@ -87,7 +87,38 @@ The dataset is already included in the repository at `data/raw/sales_and_custome
 ls data/raw/
 ```
 
-### 5. Run the Dashboard
+### 5. Testing
+
+This project includes automated tests for both the dashboard logic and the dashboard interface behavior.
+
+### 5.1 Run All Tests
+
+Run all tests from the project root with:
+
+```bash
+python -m pytest -v
+```
+
+### 5.2 Logic Unit Tests
+
+The logic unit tests verify the core filtering and aggregation functions used by the dashboard.
+
+Run the logic unit tests with:
+
+```bash
+python -m pytest tests/logic_tests.py -v
+```
+
+### 5.3 Logic Verification Notebook
+
+A supplementary notebook is included to compare expected and actual results for different dashboard filter selections.
+
+notebooks/logic_tests.ipynb
+
+Run all cells in the notebook to inspect representative logic scenarios manually.
+
+
+### 6. Run the Dashboard
 
 Start the Shiny dashboard application:
 
