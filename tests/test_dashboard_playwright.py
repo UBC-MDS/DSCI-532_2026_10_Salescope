@@ -44,6 +44,7 @@ def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> No
     customer_df.expect_cell("Asia", row=0, col=0)
     customer_df.expect_cell("3", row=0, col=1)
 
+
 def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
 
     
@@ -60,6 +61,7 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
 
     controller.OutputText(page, "kpi_count").expect_value("3 ⚠️ Low sample")
     controller.OutputDataFrame(page, "customer_df").expect_nrow(1)
+
 
 def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     
@@ -106,3 +108,27 @@ def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
         ["Retention_Strategy", "Count", "Mean", "Median", "Maximum", "Total"]
     )
     customer_df.expect_nrow(3)
+
+
+def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
+    
+    """Reset button restores dashboard filters."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
+    reset_btn = controller.InputActionButton(page, "reset")
+    kpi_count = controller.OutputText(page, "kpi_count")
+
+    # changing filter
+
+    region_checkbox.set(["Asia"])
+    kpi_count.expect_value("3 ⚠️ Low sample")
+
+    # resetting filter
+
+    reset_btn.click()
+
+    kpi_count.expect_value("10,000")
+    region_checkbox.expect_selected([])
