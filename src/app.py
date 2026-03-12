@@ -9,8 +9,11 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic
 import duckdb
+import plotly.graph_objects as go
+
 
 # used LLM to know how to show actual count/mean inside the box for heatmap
+# used LLM to plot trends over time
 # used querychat-explore.ipynb notes for querychat integration
 
 # use shiny run --reload --launch-browser src/app.py to local test
@@ -943,6 +946,71 @@ def server(input, output, session):
         
         return fig
 
+    @render_widget
+    def trend_over_time():
+        df = dashboard_df()
+
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        metric = input.time_metric()
+
+        metric_labels = {
+            "Lifetime_Value": "Customer Lifetime Value ($)",
+            "Churn_Probability": "Churn Risk",
+            "risk_value": "Value at Risk ($)",
+            "Average_Order_Value": "Average Order Value ($)",
+            "Purchase_Frequency": "Purchase Frequency",
+            "Time_Between_Purchases": "Days Between Purchases",
+        }
+
+        if metric not in df.columns:
+            return px.scatter(
+                title=f"Selected metric '{metric}' is not available in the current dataframe"
+            )
+
+        df_plot = df.copy()
+        df_plot["Launch_Date"] = pd.to_datetime(df_plot["Launch_Date"])
+
+        trend_df = (
+            df_plot.groupby("Launch_Date", as_index=False)[metric]
+            .mean()
+            .sort_values("Launch_Date")
+        )
+
+        trend_df["smooth"] = trend_df[metric].rolling(window=7, min_periods=1).mean()
+
+        fig = go.Figure()
+
+        fig.add_trace(
+            go.Scatter(
+                x=trend_df["Launch_Date"].dt.to_pydatetime(),
+                y=trend_df[metric],
+                mode="markers",
+                name="Daily average",
+                marker=dict(size=6),
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=trend_df["Launch_Date"].dt.to_pydatetime(),
+                y=trend_df["smooth"],
+                mode="lines",
+                name="7-day rolling mean",
+            )
+        )
+
+        fig.update_layout(
+            title=f"{metric_labels.get(metric, metric)} Over Time",
+            xaxis_title="Date",
+            yaxis_title=metric_labels.get(metric, metric),
+            hovermode="x unified",
+        )
+
+        fig.update_xaxes(type="date")
+
+        return fig
     
     @render.text
     def kpi_count():
