@@ -31,3 +31,15 @@ def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None
         ["Region", "Count", "Mean", "Median", "Maximum", "Total"]
     )
     customer_df.expect_nrow(4)
+
+
+def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> None:
+    
+    """Spot-check Asia row values."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    customer_df = controller.OutputDataFrame(page, "customer_df")
+    customer_df.expect_cell("Asia", row=0, col=0)
+    customer_df.expect_cell("3", row=0, col=1)
