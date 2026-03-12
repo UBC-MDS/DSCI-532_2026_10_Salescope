@@ -37,6 +37,8 @@ Rough churn thresholds: above 0.7 = high risk, 0.4-0.7 = medium, below 0.4 = low
 
 When you answer, say what it means for the business (e.g. "this region has $X at risk").
 Keep responses short. Suggest which retention strategy fits when it's relevant.
+
+If the user's question is outside the current analysis scope (churn-only or revenue-only), do not reinterpret it; instead, tell them which scope is active and suggest switching modes.
 """
 
 qc = querychat.QueryChat(
@@ -336,7 +338,8 @@ panel_ai = ui.nav_panel(
             ui.layout_columns(
                 ui.card(
                     ui.card_header("AI Filtered Data"),
-                    ui.output_data_frame("ai_data_table")
+                    ui.output_data_frame("ai_data_table"),
+                    ui.help_text("This table updates when you ask the AI to filter customers (e.g., 'show customers where...'). Pure summary questions may leave the table at the full dataset.")
                 ),
                 ui.card(
                     output_widget("ai_tab_scatter"),
