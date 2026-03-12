@@ -43,3 +43,21 @@ def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> No
     customer_df = controller.OutputDataFrame(page, "customer_df")
     customer_df.expect_cell("Asia", row=0, col=0)
     customer_df.expect_cell("3", row=0, col=1)
+
+def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
+
+    
+    """Selecting only Asia verifies that the Region filter updates the KPI count
+       and grouped table output, ensuring dashboard summaries reflect the filtered subset.
+    """
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
+    region_checkbox.set(["Asia"])
+    region_checkbox.expect_selected(["Asia"])
+
+    controller.OutputText(page, "kpi_count").expect_value("3 ⚠️ Low sample")
+    controller.OutputDataFrame(page, "customer_df").expect_nrow(1)
+
