@@ -38,6 +38,8 @@ Added `ui.input_select("ai_scope_mode", ...)` to the AI Insights panel with thre
 
 The scope is stored in a `_scope` dict that gets updated by a `@reactive.effect` whenever the dropdown changes. The `on_tool_request` callback reads from this dict directly, which bridges Shiny's reactive world with chatlas's synchronous callback.
 
+*Note on table updates:* `qc_vals.df()` (and `ai_data_table`) only change when the model runs a filter/update tool. Aggregate/summary queries can answer via SQL without changing the filtered dataset.
+
 ### Design decisions and alternatives considered
 
 See `notebooks/querychat_customization.ipynb` for the full experiment log. Key choices:
