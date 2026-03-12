@@ -267,6 +267,41 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
         col_widths=[3, 9], ),
 )
 
+# Specialized plot for trends over time
+
+panel_4 = ui.nav_panel(
+    
+    "Trends Over Time",
+    ui.layout_columns(
+        ui.card(
+            ui.card_header("Trend settings"),
+            ui.input_radio_buttons(
+                "time_metric",
+                "Select metric:",
+                {
+                    "Lifetime_Value": "Customer Lifetime Value",
+                    "Churn_Probability": "Churn Risk",
+                    "risk_value": "Value at Risk",                    
+                    "Average_Order_Value": "Average Order Value",
+                    "Purchase_Frequency": "Purchase Frequency",
+                    "Time_Between_Purchases": "Days Between Purchases",
+                },
+                selected="Lifetime_Value",
+            ),
+            ui.help_text("This plot uses dashboard filters or AI filtered data when AI checkbox is enabled."),
+        ),
+        ui.card(
+            ui.card_header("Metric Trend Over Time"),
+
+            output_widget("trend_over_time"),
+
+            full_screen=True,
+        ),
+
+        col_widths=[3, 9],
+    ),
+)
+
 #panel for AI insights
 panel_ai = ui.nav_panel(
     "AI Insights",
@@ -311,7 +346,8 @@ app_ui = ui.page_navbar(
         ui.navset_card_tab(
             panel_1,
             panel_2,
-            panel_3, 
+            panel_3,            , 
+            panel_4,
             id="advanced_nav"
         )
     ),
