@@ -77,57 +77,40 @@ qc = querychat.QueryChat(
     client=ChatAnthropic(model="claude-sonnet-4-0", api_key=API_KEY),
 )
 
-kpi_component = ui.layout_columns(
+kpi_component = ui.TagList(
     ui.layout_columns(
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Avg Lifetime Value (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_lifetime")
-            ),
-            ui.value_box(
-                ui.tags.span(
-                    "Avg Value-At-Risk (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_risk")
-            ),
-            col_widths=(12, 12)
-        ),
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Avg Churn (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_churn")
-            ),
-            ui.value_box(
-                ui.tags.span(
-                    "Avg Days Between Purchase (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_days")
-            ),
-            col_widths=(12, 12)
-        ),
-    col_widths=(6, 6)
-    ),
-    ui.layout_columns(
-        ui.value_box(            
+        ui.value_box(
             ui.tags.span(
-                "Count of Datapoints (Filtered Base)",
-                style="font-size:1.25em; font-weight:600;"
-            ), 
-            ui.output_text("kpi_count")
+                "Avg Lifetime Value (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_lifetime")
         ),
-        ui.markdown("### Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
-        col_widths=(12, 12)
+        ui.value_box(
+            ui.tags.span(
+                "Avg Value-At-Risk (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_risk")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Churn (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_churn")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Avg Days Between Purchase (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_days")
+        ),
+        col_widths=(3, 3, 3, 3),
+        fill=False,
     ),
-    col_widths=(9, 3),  # 12 part ratio
-    fill=False
+    ui.output_ui("kpi_note"),
 )
 
 main_sidebar = ui.sidebar(
@@ -247,9 +230,11 @@ main_sidebar = ui.sidebar(
 # Specialized table for User Story 1
 panel_1 = ui.nav_panel("KPI Tables", 
     ui.layout_columns(
-        ui.input_select(id = "row_dropdown",
-                        label = "Table partition options:",
-                        choices = ["Region","Retention Strategy","Most Frequent Value"]),
+        ui.input_select(
+            id="row_dropdown",
+            label="Table partition options:",
+            choices=["Total", "Region", "Retention Strategy", "Most Frequent Value"]
+        ),
         ui.navset_card_tab(
             ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
             ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
@@ -386,14 +371,30 @@ app_ui = ui.page_navbar(
     theme=ui.Theme("lumen")
 )    
 
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
+def create_summary_table(df, grouping, feature):
+    if grouping == "Total":
+        summary = pd.DataFrame({
+            "Group": ["Total"],
+            "Count": [df[feature].size],
+            "Mean": [df[feature].mean()],
+            "Median": [df[feature].median()],
+            "Maximum": [df[feature].max()],
+            "Total": [df[feature].sum()]
+        }).round(2)
+        return summary
+
+    summary = (
+        df.groupby(grouping)
+        .agg(
+            Count=(feature, "size"),
+            Mean=(feature, "mean"),
+            Median=(feature, "median"),
+            Maximum=(feature, "max"),
+            Total=(feature, "sum"),
+        )
+        .round(2)
+        .reset_index()
+    )
     return summary
 
 # Server
@@ -784,6 +785,18 @@ def server(input, output, session):
                 subtext = f"{sign}{abs(delta):,.2f} days"
                 return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
         return val_str
+    
+    @render.ui
+    def kpi_note():
+        df = dashboard_df()
+        count = len(df)
+
+        if count < 50:
+            return ui.HTML(
+                f"<small style='color:#b45309;'>⚠️ Low sample size: current filters leave only {count} datapoints.</small>"
+            )
+
+        return None
 
     @render.ui
     def decision_cues():
@@ -836,10 +849,12 @@ def server(input, output, session):
 
     @render.data_frame
     def customer_df():
-        mapping = {"Region": "Region",
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
             "Retention Strategy": "Retention_Strategy",
             "Most Frequent Value": "Most_Frequent_Category"
-                    }
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Lifetime_Value")
 
