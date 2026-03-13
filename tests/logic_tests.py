@@ -1,7 +1,11 @@
 import pandas as pd
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from src.logic import normalize_range, create_summary_table, filter_sales_data
 
 #Note : Used LLM to write functions.
-from src.logic import normalize_range, create_summary_table, filter_sales_data
 
 def make_test_df():
     
