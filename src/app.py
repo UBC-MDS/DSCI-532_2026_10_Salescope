@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
+from db import get_base_dataframe, execute_filtered_query
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
@@ -16,9 +17,8 @@ import duckdb
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
-sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+sales_df = execute_filtered_query()
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Determine the most recent quarter in the data
@@ -514,7 +514,6 @@ def server(input, output, session):
 
     @reactive.calc
     def churn_plot_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -535,35 +534,35 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
-        date_start, date_end = input.date_range()
 
+        date_start, date_end = input.date_range()
         reduced_max = churn_max * (1 - pct_decrease / 100)
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-        if regions:
-            df = df[df["Region"].isin(regions)]
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
 
     @reactive.calc
     def filtered_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -584,33 +583,32 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
+
         date_start, date_end = input.date_range()
 
-        # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
         reduced_max = churn_max * (1 - pct_decrease / 100)
+        effective_churn_max = reduced_max if pct_decrease > 0 else churn_max
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-        if pct_decrease > 0:
-            df = df[df["Churn_Probability"] <= reduced_max]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=effective_churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-
-        if regions:
-            df = df[df["Region"].isin(regions)]
-
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
     
