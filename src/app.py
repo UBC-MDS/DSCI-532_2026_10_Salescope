@@ -619,11 +619,14 @@ def server(input, output, session):
             if not df_base.empty:
                 base_val = df_base['Lifetime_Value'].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
-        return val_str
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
 
     @render.ui
     def kpi_churn():
@@ -639,11 +642,13 @@ def server(input, output, session):
             if not df_base.empty:
                 base_val = df_base['Churn_Probability'].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):.1%}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
-        return val_str
+                subtext = f"{abs(delta):.1%} {direction} vs no churn reduction"
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
 
     @render.ui
     def kpi_risk():
