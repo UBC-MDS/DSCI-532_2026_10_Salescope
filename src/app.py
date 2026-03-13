@@ -130,23 +130,78 @@ kpi_component = ui.layout_columns(
     fill=False
 )
 
+    
 main_sidebar = ui.sidebar(
-    ui.input_numeric(
-        id="num_churn_min",
-        label="Churn rate min",
-        value=0.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
+    # CSS Styling, 
+    ui.tags.style("""
+        /* Outer container styling */
+        .numeric-range-styled {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            display: grid !important;
+            align-items: center;
+            width: fit-content;
+        }
+        
+        /* Remove internal borders */
+        .numeric-range-styled .form-control {
+            border: none !important;
+            box-shadow: none !important;
+            text-align: center;
+        }
+
+        /* Adjust last input for the 'to' box */
+        .numeric-range-styled > div:last-child {
+            position: relative;
+        }
+
+        /* Create the 'to' box, position linked to last object */
+        .numeric-range-styled > div:last-child::before {
+            content: "to";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eeeeee;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 0 12px;
+            height: 100%;
+            color: #555;
+            position: absolute;
+            left: -35px;
+            z-index: 1;
+        }
+
+    """),
+    
+    ui.markdown("Churn Rate"),
+    # UI Component
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_churn_min",
+            label=None,
+            value=0.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            #width="80%"
+        ),
+        ui.input_numeric(
+            id="num_churn_max",
+            label=None,
+            value=1.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            #width="100%"
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
     ),
-    ui.input_numeric(
-        id="num_churn_max",
-        label="Churn rate max",
-        value=1.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
-    ),
+
+
     ui.input_slider(
         id="slider_churn_decrease",
         label="Churn rate decrease (%)",
