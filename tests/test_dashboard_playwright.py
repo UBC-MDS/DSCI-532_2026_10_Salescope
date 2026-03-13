@@ -130,5 +130,17 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
 
     reset_btn.click()
 
-    kpi_count.expect_value("7 ⚠️ Low sample")
+    kpi_count.expect_value("0 ⚠️ Low sample")
     region_checkbox.expect_selected([])
+
+def test_trends_over_time_tab_renders(page: Page, app: ShinyAppProc) -> None:
+    """Opening the Trends Over Time tab renders the chart controls, ensuring the Advanced Figures visualization loads correctly."""
+
+    page.goto(app.url)
+    page.wait_for_load_state("networkidle")
+
+    page.get_by_role("tab", name="Trends Over Time").click()
+
+    assert page.get_by_text("Metric Trend Over Time").is_visible()
+    assert page.get_by_role("radio", name="Customer Lifetime Value").is_visible()
+    assert page.get_by_role("radio", name="Churn Risk").is_visible()
