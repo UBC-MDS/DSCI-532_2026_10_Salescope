@@ -970,7 +970,7 @@ def server(input, output, session):
             )
 
         df_plot = df.copy()
-        df_plot["Launch_Date"] = pd.to_datetime(df_plot["Launch_Date"])
+        #df_plot["Launch_Date"] = pd.to_datetime(df_plot["Launch_Date"])
 
         trend_df = (
             df_plot.groupby("Launch_Date", as_index=False)[metric]
