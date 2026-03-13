@@ -8,9 +8,9 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 import querychat
-from chatlas import ChatAnthropic
+from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
-
+from db import get_base_dataframe, execute_filtered_query
 
 # used LLM to know how to show actual count/mean inside the box for heatmap
 # used LLM to plot trends over time
@@ -20,9 +20,8 @@ import duckdb
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
-sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+sales_df = execute_filtered_query()
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Determine the most recent quarter in the data
@@ -30,19 +29,54 @@ latest_quarter = pd.Period(max_date, freq='Q')
 default_start = latest_quarter.start_time.date()
 default_end = latest_quarter.end_time.date()
 
+# domain context for the LLM - see notebooks/querychat_customization.ipynb for why we settled on this
+SALESCOPE_EXTRA_INSTRUCTIONS = """
+You are working inside the Salescope retention dashboard. Users are sales managers, not data scientists.
+
+risk_value = Lifetime_Value * Churn_Probability. This is the dollar amount at risk if a customer churns.
+Treat it as the most useful column when prioritizing interventions.
+
+Rough churn thresholds: above 0.7 = high risk, 0.4-0.7 = medium, below 0.4 = low.
+
+When you answer, say what it means for the business (e.g. "this region has $X at risk").
+Keep responses short. Suggest which retention strategy fits when it's relevant.
+
+If the user's question is outside the current analysis scope (churn-only or revenue-only), do not reinterpret it; instead, tell them which scope is active and suggest switching modes.
+"""
+
 qc = querychat.QueryChat(
     sales_df.copy(),
     "Salescope",
-    greeting=" Hi! I'm your Salescope Assistant. Feel free to ask me to filter by region, category, churn risk or other relevant questions!",
+    greeting=(
+        "Hi! I'm your Salescope AI Assistant. I can help you filter customers, "
+        "analyze churn risk, and surface retention insights.\n\n"
+        "Try asking:\n"
+        "- *Show me high-risk customers in Asia*\n"
+        "- *Which retention strategy has the highest average LTV?*\n"
+        "- *Find customers with Churn_Probability above 0.8 and Lifetime_Value above 5000*"
+    ),
     data_description="""
-    This is Sales insights dataset
+    Salescope customer dataset — 10,000 e-commerce customer records across four global regions.
+
     Columns:
-    - Region: Asia, Europe, North America, South America
+    - Customer_ID: Unique customer identifier
+    - Product_ID: Product identifier
+    - Transaction_ID: Transaction identifier
+    - Purchase_Frequency: Integer (1–19), number of purchases in the review period
+    - Average_Order_Value: Float (20–200 USD), typical basket size
     - Most_Frequent_Category: Clothing, Electronics, Home, Sports
-    - Lifetime_Value: Numerical float
-    - Churn_Probability: Float (0 to 1)
+    - Time_Between_Purchases: Integer (days), gap between purchases — a proxy for engagement
+    - Region: Asia, Europe, North America, South America
+    - Churn_Probability: Float (0–1), modeled churn risk score
+    - Lifetime_Value: Float (100–10000 USD), predicted total customer revenue
+    - Launch_Date: Date (YYYY-MM-DD), customer acquisition date
+    - Peak_Sales_Date: Date (YYYY-MM-DD), date of highest purchase activity
+    - Season: Spring, Summer, Fall, Winter
+    - Preferred_Purchase_Times: Morning, Afternoon, Evening
     - Retention_Strategy: Discount, Email Campaign, Loyalty Program
+    - risk_value: Derived column — Lifetime_Value × Churn_Probability (revenue at risk)
     """,
+    extra_instructions=SALESCOPE_EXTRA_INSTRUCTIONS,
     client=ChatAnthropic(model="claude-sonnet-4-0", api_key=API_KEY),
 )
 
@@ -320,12 +354,30 @@ panel_ai = ui.nav_panel(
             }
         """),
         ui.layout_sidebar(
+            # AI chat interface
             qc.sidebar(),
+            # AI scope control — affects LLM behavior via on_tool_request
+            ui.card(
+                ui.card_header("AI Analysis Settings"),
+                ui.input_select(
+                    id="ai_scope_mode",
+                    label="Analysis Scope",
+                    choices={
+                        "full": "Full Analysis (no restrictions)",
+                        "churn_only": "Churn Focus Only",
+                        "revenue_only": "Revenue & LTV Focus Only",
+                    },
+                    selected="full",
+                ),
+                ui.output_ui("scope_mode_info"),
+                style="margin-bottom: 8px;",
+            ),
             ui.download_button("download_ai_filtered", "⬇️ Download Filtered Dataframe"),
             ui.layout_columns(
                 ui.card(
                     ui.card_header("AI Filtered Data"),
-                    ui.output_data_frame("ai_data_table")
+                    ui.output_data_frame("ai_data_table"),
+                    ui.help_text("This table updates when you ask the AI to filter customers (e.g., 'show customers where...'). Pure summary questions may leave the table at the full dataset.")
                 ),
                 ui.card(
                     output_widget("ai_tab_scatter"),
@@ -377,9 +429,51 @@ def create_summary_table(df,grouping,feature):
 
 # Server
 def server(input, output, session):
-    
+
     qc_vals = qc.server()
-    
+
+    # Mutable holder for scope — updated by reactive effect below so the
+    # on_tool_request callback (which runs outside reactive context) can read it.
+    _scope = {"value": "full"}
+
+    @reactive.effect
+    def _sync_scope():
+        _scope["value"] = input.ai_scope_mode()
+
+    def _handle_tool_request(request):
+        # log the call so we can see what sql the model is generating
+        args = request.arguments if isinstance(request.arguments, dict) else {}
+        sql = args.get("query", "")
+        print(f"[querychat] tool={request.name} scope={_scope['value']} sql={sql[:80]!r}")
+
+        # block queries outside the selected scope
+        scope = _scope["value"]
+        if scope == "churn_only" and sql:
+            if not any(t in sql.lower() for t in ("churn", "churn_probability", "retention_strategy")):
+                raise ToolRejectError(
+                    "Churn Focus Only mode is on. Please ask about churn, "
+                    "retention strategies, or at-risk customers."
+                )
+        elif scope == "revenue_only" and sql:
+            if not any(t in sql.lower() for t in ("lifetime_value", "average_order_value", "risk_value")):
+                raise ToolRejectError(
+                    "Revenue Focus Only mode is on. Please ask about "
+                    "Lifetime_Value, Average_Order_Value, or risk_value."
+                )
+
+    qc_vals.client.on_tool_request(_handle_tool_request)
+
+    @render.ui
+    def scope_mode_info():
+        scope = input.ai_scope_mode()
+        msgs = {
+            "full": ("All questions allowed", "green"),
+            "churn_only": ("Churn & retention questions only", "darkorange"),
+            "revenue_only": ("Revenue & LTV questions only", "steelblue"),
+        }
+        msg, color = msgs[scope]
+        return ui.HTML(f'<small style="color:{color};">{msg}</small>')
+
     @reactive.calc
     def ai_filtered_df():
         return qc_vals.df()
@@ -459,7 +553,6 @@ def server(input, output, session):
 
     @reactive.calc
     def churn_plot_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -480,35 +573,35 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
-        date_start, date_end = input.date_range()
 
+        date_start, date_end = input.date_range()
         reduced_max = churn_max * (1 - pct_decrease / 100)
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-        if regions:
-            df = df[df["Region"].isin(regions)]
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
 
     @reactive.calc
     def filtered_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -529,33 +622,32 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
+
         date_start, date_end = input.date_range()
 
-        # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
         reduced_max = churn_max * (1 - pct_decrease / 100)
+        effective_churn_max = reduced_max if pct_decrease > 0 else churn_max
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-        if pct_decrease > 0:
-            df = df[df["Churn_Probability"] <= reduced_max]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=effective_churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-
-        if regions:
-            df = df[df["Region"].isin(regions)]
-
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
     
