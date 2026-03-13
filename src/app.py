@@ -1,6 +1,7 @@
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
+import plotly.graph_objects as go
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
 import pandas as pd
@@ -9,7 +10,6 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic
 import duckdb
-import plotly.graph_objects as go
 
 
 # used LLM to know how to show actual count/mean inside the box for heatmap
