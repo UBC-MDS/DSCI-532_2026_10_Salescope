@@ -268,6 +268,11 @@ main_sidebar = ui.sidebar(
         value=0,
     ),
 
+    ui.help_text(
+        "Scenario slider: simulate reducing the upper churn bound by this percentage. "
+        "KPIs and plots compare this scenario against the original churn range."
+    ),
+
     ui.markdown("Customer Lifetime Value"),
     ui.layout_column_wrap(  
         ui.input_numeric(
@@ -465,8 +470,8 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "Advanced Figures",
         ui.navset_card_tab(
-            panel_1,
             panel_2,
+            panel_1,
             panel_3, 
             id="advanced_nav"
         )
@@ -476,6 +481,10 @@ app_ui = ui.page_navbar(
     sidebar=main_sidebar,
     header=ui.TagList(
         ui.markdown("#### Data-driven customer retention and churn analysis."),
+        ui.markdown(
+            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
+            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
+        ),
         ui.output_ui("conditional_kpis")
     ),
     id="top_navbar",
