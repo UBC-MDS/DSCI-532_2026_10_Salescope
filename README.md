@@ -97,7 +97,7 @@ Run the Playwright dashboard tests with:
 pytest tests/test_dashboard_playwright.py -v
 ```
 
-### 5. Run the Dashboard
+### 6. Run the Dashboard
 
 Start the Shiny dashboard application:
 
