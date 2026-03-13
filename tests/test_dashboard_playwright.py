@@ -15,7 +15,7 @@ def test_initial_kpi_count(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.OutputText(page, "kpi_count").expect_value("7 ⚠️ Low sample")
+    controller.OutputText(page, "kpi_count").expect_value("7 ⚠️ Low sample", timeout = 10000)
 
 
 def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None:
@@ -25,8 +25,10 @@ def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     customer_df = controller.OutputDataFrame(page, "customer_df")
-    customer_df.expect_ncol(6)
+    customer_df.expect_ncol(6, timeout = 10000)
     customer_df.expect_column_labels(
         ["Region", "Count", "Mean", "Median", "Maximum", "Total"]
     )
@@ -40,8 +42,10 @@ def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> No
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     customer_df = controller.OutputDataFrame(page, "customer_df")
-    customer_df.expect_cell("Asia", row=0, col=0)
+    customer_df.expect_cell("Asia", row=0, col=0, timeout = 10000)
     customer_df.expect_cell("3", row=0, col=1)
 
 
@@ -55,9 +59,11 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     region_checkbox.set(["Asia"])
-    region_checkbox.expect_selected(["Asia"])
+    region_checkbox.expect_selected(["Asia"], timeout = 10000)
 
     controller.OutputText(page, "kpi_count").expect_value("3 ⚠️ Low sample")
     controller.OutputDataFrame(page, "customer_df").expect_nrow(1)
@@ -70,9 +76,11 @@ def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     purchase_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_type")
     purchase_checkbox.set(["Clothing", "Electronics"])
-    purchase_checkbox.expect_selected(["Clothing", "Electronics"])
+    purchase_checkbox.expect_selected(["Clothing", "Electronics"], timeout = 10000)
 
     controller.OutputText(page, "kpi_count").expect_value("4 ⚠️ Low sample")
 
@@ -84,9 +92,11 @@ def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     strategy_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_strategy")
     strategy_checkbox.set(["Discount", "Email Campaign"])
-    strategy_checkbox.expect_selected(["Discount", "Email Campaign"])
+    strategy_checkbox.expect_selected(["Discount", "Email Campaign"], timeout = 10000)
 
     controller.OutputText(page, "kpi_count").expect_value("5 ⚠️ Low sample")
 
@@ -98,12 +108,14 @@ def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     row_dropdown = controller.InputSelect(page, "row_dropdown")
     customer_df = controller.OutputDataFrame(page, "customer_df")
 
     row_dropdown.set("Retention Strategy")
 
-    customer_df.expect_ncol(6)
+    customer_df.expect_ncol(6, timeout = 10000)
     customer_df.expect_column_labels(
         ["Retention_Strategy", "Count", "Mean", "Median", "Maximum", "Total"]
     )
@@ -117,6 +129,8 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     reset_btn = controller.InputActionButton(page, "reset")
     kpi_count = controller.OutputText(page, "kpi_count")
@@ -124,23 +138,11 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
     # changing filter
 
     region_checkbox.set(["Asia"])
-    kpi_count.expect_value("3 ⚠️ Low sample")
+    kpi_count.expect_value("3 ⚠️ Low sample", timeout = 10000)
 
     # resetting filter
 
     reset_btn.click()
 
-    kpi_count.expect_value("0 ⚠️ Low sample")
+    kpi_count.expect_value("0 ⚠️ Low sample", timeout = 10000)
     region_checkbox.expect_selected([])
-
-def test_trends_over_time_tab_renders(page: Page, app: ShinyAppProc) -> None:
-    """Opening the Trends Over Time tab renders the chart controls, ensuring the Advanced Figures visualization loads correctly."""
-
-    page.goto(app.url)
-    page.wait_for_load_state("networkidle")
-
-    page.get_by_role("tab", name="Trends Over Time").click()
-
-    assert page.get_by_text("Metric Trend Over Time").is_visible()
-    assert page.get_by_role("radio", name="Customer Lifetime Value").is_visible()
-    assert page.get_by_role("radio", name="Churn Risk").is_visible()

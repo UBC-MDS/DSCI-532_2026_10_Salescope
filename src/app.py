@@ -1,3 +1,4 @@
+from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -17,6 +18,7 @@ from db import get_base_dataframe, execute_filtered_query
 # used querychat-explore.ipynb notes for querychat integration
 
 # use shiny run --reload --launch-browser src/app.py to local test
+
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
@@ -156,6 +158,10 @@ main_sidebar = ui.sidebar(
         min=0,
         max=100,
         value=0,
+    ),
+    ui.help_text(
+        "Scenario slider: simulate reducing the upper churn bound by this percentage. "
+        "KPIs and plots compare this scenario against the original churn range."
     ),
     ui.input_numeric(
         id="num_clv_min",
@@ -399,9 +405,9 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "Advanced Figures",
         ui.navset_card_tab(
-            panel_1,
             panel_2,
-            panel_3,
+            panel_1,
+            panel_3, 
             panel_4,
             id="advanced_nav"
         )
@@ -411,21 +417,15 @@ app_ui = ui.page_navbar(
     sidebar=main_sidebar,
     header=ui.TagList(
         ui.markdown("#### Data-driven customer retention and churn analysis."),
+        ui.markdown(
+            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
+            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
+        ),
         ui.output_ui("conditional_kpis")
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
 )    
-
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
-    return summary
 
 # Server
 def server(input, output, session):
