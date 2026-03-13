@@ -175,6 +175,66 @@ main_sidebar = ui.sidebar(
 
     """),
     
+    # Launch date filter
+    
+    ui.input_date_range(
+        id="date_range", 
+        label="Filter by launch date",
+        start=max(default_start,min_date),
+        end=min(default_end,max_date),
+        min=min_date,
+        max=max_date
+    ),
+    
+    # Checkbox filters
+
+    ui.input_checkbox(
+        id="use_ai_filter",
+        label=ui.tags.span("Use the ",ui.tags.code("AI Insights")," dataframe"),
+        value=False,
+    ),
+
+    ui.input_checkbox_group(
+        id="checkbox_group_type",
+        label="Most Common Purchase Type",
+        choices={
+            "Clothing": "Clothing",
+            "Electronics": "Electronics",
+            "Home": "Home",
+            "Sports": "Sports",             
+        },
+        selected=[
+
+        ],
+    ),
+    ui.input_checkbox_group(
+        id="checkbox_group_region",
+        label="Region",
+        choices={
+            "Asia": "Asia",
+            "Europe": "Europe",
+            "North America": "North America",
+            "South America": "South America",
+        },
+        selected=[
+            
+        ],
+    ),
+    ui.input_checkbox_group(
+        id="checkbox_group_strategy",
+        label="Retention Strategy",
+        choices={
+            "Discount": "Discount",
+            "Email Campaign": "Email Campaign",
+            "Loyalty Program": "Loyalty Program"
+        },
+        selected=[
+
+        ],
+    ),
+
+    # Numeric Filters
+
     ui.markdown("Churn Rate"),
     ui.layout_column_wrap(
         ui.input_numeric(
@@ -277,57 +337,8 @@ main_sidebar = ui.sidebar(
     class_="numeric-range-styled"
     ),
     
-    ui.input_date_range(
-        id="date_range", 
-        label="Filter by launch date",
-        start=max(default_start,min_date),
-        end=min(default_end,max_date),
-        min=min_date,
-        max=max_date
-    ),
-    ui.input_checkbox(
-    id="use_ai_filter",
-    label="Use AI filtered data for dashboard",
-    value=False,
-    ),
-    ui.input_checkbox_group(
-        id="checkbox_group_type",
-        label="Most Common Purchase Type",
-        choices={
-            "Clothing": "Clothing",
-            "Electronics": "Electronics",
-            "Home": "Home",
-            "Sports": "Sports",             
-        },
-        selected=[
-
-        ],
-    ),
-    ui.input_checkbox_group(
-        id="checkbox_group_region",
-        label="Region",
-        choices={
-            "Asia": "Asia",
-            "Europe": "Europe",
-            "North America": "North America",
-            "South America": "South America",
-        },
-        selected=[
-            
-        ],
-    ),
-    ui.input_checkbox_group(
-        id="checkbox_group_strategy",
-        label="Retention Strategy",
-        choices={
-            "Discount": "Discount",
-            "Email Campaign": "Email Campaign",
-            "Loyalty Program": "Loyalty Program"
-        },
-        selected=[
-
-        ],
-    ),
+    
+    
     ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
