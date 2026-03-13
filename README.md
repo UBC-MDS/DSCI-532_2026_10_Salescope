@@ -117,6 +117,16 @@ notebooks/logic_tests.ipynb
 
 Run all cells in the notebook to inspect representative logic scenarios manually.
 
+### 5.4 Dashboard UI Playwright Tests
+
+The Playwright tests verify key dashboard behaviors such as filter updates, table changes and reset behavior.
+
+Run the Playwright dashboard tests with:
+
+```bash
+pytest tests/test_dashboard_playwright.py -v
+```
+
 
 ### 6. Run the Dashboard
 
