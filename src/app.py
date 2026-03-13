@@ -664,11 +664,14 @@ def server(input, output, session):
             if not df_base.empty:
                 base_val = df_base['risk_value'].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
-        return val_str
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
 
     @render.ui
     def kpi_days():
@@ -684,11 +687,14 @@ def server(input, output, session):
             if not df_base.empty:
                 base_val = df_base['Time_Between_Purchases'].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):,.2f} days"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
-        return val_str
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
 
     @render.ui
     def decision_cues():
