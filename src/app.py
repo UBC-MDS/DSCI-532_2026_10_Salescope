@@ -1,3 +1,4 @@
+from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -14,6 +15,7 @@ from db import get_base_dataframe, execute_filtered_query
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
 # use shiny run --reload --launch-browser src/app.py to local test
+
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
@@ -385,16 +387,6 @@ app_ui = ui.page_navbar(
     id="top_navbar",
     theme=ui.Theme("lumen")
 )    
-
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
-    return summary
 
 # Server
 def server(input, output, session):
