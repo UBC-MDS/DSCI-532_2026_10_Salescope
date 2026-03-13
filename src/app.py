@@ -1,3 +1,4 @@
+from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -9,17 +10,19 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
+from db import get_base_dataframe, execute_filtered_query
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
 # use shiny run --reload --launch-browser src/app.py to local test
+
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
+sales_df = execute_filtered_query()
 sales_df["Churn_Probability"] = sales_df["Churn_Probability"].fillna(0)
 sales_df["risk_value"] = sales_df["Lifetime_Value"] * sales_df["Churn_Probability"]
-sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
+sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
 # Determine the most recent quarter in the data
@@ -159,7 +162,9 @@ main_sidebar = ui.sidebar(
         max=100,
         value=0,
     ),
-    ui.help_text("Use this slider to simulate a reduction in churn. It does not reflect historical data."),
+    ui.help_text(
+        "Scenario slider: simulate reducing churn in the selected range; KPIs and plots compare this scenario to the original churn range."
+    ),
     ui.input_numeric(
         id="num_clv_min",
         label="Customer Lifetime Value min",
@@ -368,8 +373,8 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "Advanced Figures",
         ui.navset_card_tab(
-            panel_1,
             panel_2,
+            panel_1,
             panel_3, 
             id="advanced_nav"
         )
@@ -379,21 +384,15 @@ app_ui = ui.page_navbar(
     sidebar=main_sidebar,
     header=ui.TagList(
         ui.markdown("#### Data-driven customer retention and churn analysis."),
+        ui.markdown(
+            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
+            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
+        ),
         ui.output_ui("conditional_kpis")
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
 )    
-
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
-    return summary
 
 # Server
 def server(input, output, session):
@@ -521,7 +520,6 @@ def server(input, output, session):
 
     @reactive.calc
     def churn_plot_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -542,35 +540,35 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
-        date_start, date_end = input.date_range()
 
+        date_start, date_end = input.date_range()
         reduced_max = churn_max * (1 - pct_decrease / 100)
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-        if regions:
-            df = df[df["Region"].isin(regions)]
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
 
     @reactive.calc
     def filtered_df():
-        df = sales_df.copy()
         churn_min_raw = input.num_churn_min() or 0.0
         churn_max_raw = input.num_churn_max() or 1.0
         churn_min = min(churn_min_raw, churn_max_raw)
@@ -591,33 +589,32 @@ def server(input, output, session):
         freq_max_raw = input.num_freq_max() or 19
         freq_min = min(freq_min_raw, freq_max_raw)
         freq_max = max(freq_min_raw, freq_max_raw)
+
         date_start, date_end = input.date_range()
 
-        # Math: reduced_max = churn_max * (1 - pct_decrease / 100).
         reduced_max = churn_max * (1 - pct_decrease / 100)
+        effective_churn_max = reduced_max if pct_decrease > 0 else churn_max
 
-        df = df[df["Churn_Probability"].between(churn_min, churn_max)]
-        if pct_decrease > 0:
-            df = df[df["Churn_Probability"] <= reduced_max]
-            
-        df["in_reduced_churn_range"] = (df["Churn_Probability"] >= churn_min) & (df["Churn_Probability"] <= reduced_max)
-        df = df[df["Lifetime_Value"].between(clv_min, clv_max)]
-        df = df[df["Average_Order_Value"].between(order_min, order_max)]
-        df = df[df["Purchase_Frequency"].between(freq_min, freq_max)]
-        df = df[df["Launch_Date"].between(pd.Timestamp(date_start),pd.Timestamp(date_end))]
+        df = execute_filtered_query(
+            churn_min=churn_min,
+            churn_max=effective_churn_max,
+            clv_min=clv_min,
+            clv_max=clv_max,
+            order_min=order_min,
+            order_max=order_max,
+            freq_min=freq_min,
+            freq_max=freq_max,
+            date_start=pd.Timestamp(date_start),
+            date_end=pd.Timestamp(date_end),
+            types=input.checkbox_group_type(),
+            regions=input.checkbox_group_region(),
+            strategies=input.checkbox_group_strategy(),
+        )
 
-        types = input.checkbox_group_type() 
-        regions = input.checkbox_group_region() 
-        strategies = input.checkbox_group_strategy() 
-
-        if types:
-            df = df[df["Most_Frequent_Category"].isin(types)]
-
-        if regions:
-            df = df[df["Region"].isin(regions)]
-
-        if strategies:
-            df = df[df["Retention_Strategy"].isin(strategies)]
+        df["in_reduced_churn_range"] = (
+            (df["Churn_Probability"] >= churn_min) &
+            (df["Churn_Probability"] <= reduced_max)
+        )
 
         return df
     
@@ -710,80 +707,111 @@ def server(input, output, session):
     def kpi_lifetime():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Lifetime_Value'].mean()
+
+        val = df["Lifetime_Value"].mean()
         val_str = f"${val:,.2f}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Lifetime_Value'].mean()
+                base_val = df_base["Lifetime_Value"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
-        return val_str
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
 
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
+        return val_str
+    
     @render.ui
     def kpi_churn():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Churn_Probability'].mean()
+
+        val = df["Churn_Probability"].mean()
         val_str = f"{val:.1%}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Churn_Probability'].mean()
+                base_val = df_base["Churn_Probability"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):.1%}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                subtext = f"{abs(delta):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
     def kpi_risk():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['risk_value'].mean()
+
+        val = df["risk_value"].mean()
         val_str = f"${val:,.2f}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['risk_value'].mean()
+                base_val = df_base["risk_value"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
     def kpi_days():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Time_Between_Purchases'].mean()
+
+        val = df["Time_Between_Purchases"].mean()
         val_str = f"{val:,.2f} days"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Time_Between_Purchases'].mean()
+                base_val = df_base["Time_Between_Purchases"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
                 color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):,.2f} days"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>")
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
