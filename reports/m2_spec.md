@@ -49,6 +49,8 @@ And these are the updated job stories and their progress as of Milestone 2:
 | `frequency_df`| Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `heatmap_metric`  | Input     |`ui.input_radio_buttons()`| -                           | #3         |
 | `heatmap`     | Output        | `@render_widget`        | `filtered_df, heatmap_metric`| #3         |
+| `time_metric` | Input | `ui.input_radio_buttons()` | — | #2 |
+| `trend_over_time` | Output | `@render_widget` | `filtered_df`, `time_metric` | #2 |
 
 Rows component_4-8 will be filled per issues #57, #58, #59 as implementation progresses.
 
@@ -120,6 +122,12 @@ flowchart TD
 - **Inputs:** Operates utilizing the same core logic parameters as `filtered_df` (tracking all global sliders and checkboxes). 
 - **Transformation:** Bypasses the strict `reduced_max` threshold cull triggered when the `slider_churn_decrease` goes above 0. Evaluates that top percentage grouping with a mapping boolean column: `in_reduced_churn_range`.
 - **Outputs:** `high_churn_risk` (Active selectively when `slider_churn_decrease` > 0 to plot the chopped-off metric bands concurrently) and baseline mapping computations for main KPI output strings (`kpi_lifetime`, `kpi_churn`, `kpi_risk`, `kpi_days`) tracking comparative change deltas.
+
+### `trend_over_time`
+
+- **Inputs:** `filtered_df`, `time_metric`
+- **Transformation:** Aggregates the selected metric by `Launch_Date` to compute the daily average. The aggregated series is then smoothed using a rolling mean window to highlight longer-term trends in the selected metric.
+- **Outputs:** A time series visualization in the **Advanced Figures → Trends Over Time** tab showing how the selected customer metric evolves over time. The visualization updates dynamically based on the dashboard filters and selected metric.
 
 ## Section 5: Complexity Enhancement — Reset Button
 
