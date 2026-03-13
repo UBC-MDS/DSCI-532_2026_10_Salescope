@@ -17,7 +17,8 @@ load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 sales_df = pd.read_csv("data/raw/sales_and_customer_insights.csv", parse_dates=True)
-sales_df["risk_value"] = sales_df["Lifetime_Value"]*sales_df["Churn_Probability"]
+sales_df["Churn_Probability"] = sales_df["Churn_Probability"].fillna(0)
+sales_df["risk_value"] = sales_df["Lifetime_Value"] * sales_df["Churn_Probability"]
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"], format = "%Y-%m-%d")
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
@@ -39,6 +40,10 @@ When you answer, say what it means for the business (e.g. "this region has $X at
 Keep responses short. Suggest which retention strategy fits when it's relevant.
 
 If the user's question is outside the current analysis scope (churn-only or revenue-only), do not reinterpret it; instead, tell them which scope is active and suggest switching modes.
+
+In Churn Focus mode, only query churn-related columns (e.g. Churn_Probability, risk_value, Region, Retention_Strategy). In Revenue Focus mode, only query revenue and value columns (e.g. Lifetime_Value, Average_Order_Value, risk_value).
+
+If Churn_Probability is missing for a row, assume it is 0 when computing risk_value so that new customers without a modeled churn score do not inflate revenue-at-risk totals.
 """
 
 qc = querychat.QueryChat(
