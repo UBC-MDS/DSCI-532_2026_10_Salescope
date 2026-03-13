@@ -176,7 +176,6 @@ main_sidebar = ui.sidebar(
     """),
     
     ui.markdown("Churn Rate"),
-    # UI Component
     ui.layout_column_wrap(
         ui.input_numeric(
             id="num_churn_min",
@@ -185,7 +184,7 @@ main_sidebar = ui.sidebar(
             min=0.0,
             max=1.0,
             step=0.01,
-            #width="80%"
+            width="100%"
         ),
         ui.input_numeric(
             id="num_churn_max",
@@ -194,13 +193,12 @@ main_sidebar = ui.sidebar(
             min=0.0,
             max=1.0,
             step=0.01,
-            #width="100%"
+            width="100%"
         ),
         width=1/2,
         gap="30px",
     class_="numeric-range-styled"
     ),
-
 
     ui.input_slider(
         id="slider_churn_decrease",
@@ -209,36 +207,76 @@ main_sidebar = ui.sidebar(
         max=100,
         value=0,
     ),
-    ui.input_numeric(
-        id="num_clv_min",
-        label="Customer Lifetime Value min",
-        value=100, min=100, max=10000, step=50
+
+    ui.markdown("Customer Lifetime Value"),
+    ui.layout_column_wrap(  
+        ui.input_numeric(
+            id="num_clv_min",
+            label=None,
+            value=100, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),
+        ui.input_numeric(
+            id="num_clv_max",
+            label=None,
+            value=10000, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),  
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
     ),
-    ui.input_numeric(
-        id="num_clv_max",
-        label="Customer Lifetime Value max",
-        value=10000, min=100, max=10000, step=50
+
+    ui.markdown("Average Order Value"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_order_min",
+            label=None,
+            value=20, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        ui.input_numeric(
+            id="num_order_max",
+            label=None,
+            value=200, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),    
+
+    ui.markdown("Purchase Frequency"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_freq_min",
+            label=None,
+            value=1, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        ui.input_numeric(
+            id="num_freq_max",
+            label=None,
+            value=19, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
     ),
-    ui.input_numeric(
-        id="num_order_min",
-        label="Average Order Value min",
-        value=20, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_order_max",
-        label="Average Order Value max",
-        value=200, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_freq_min",
-        label="Purchase Frequency min",
-        value=1, min=1, max=19, step=1
-    ),
-    ui.input_numeric(
-        id="num_freq_max",
-        label="Purchase Frequency max",
-        value=19, min=1, max=19, step=1
-    ),
+    
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
