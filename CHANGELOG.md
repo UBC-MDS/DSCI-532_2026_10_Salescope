@@ -10,25 +10,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 <!-- New features, components, tests - one line each. Reference PRs where relevant (e.g. #12). -->
-- Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
-
+- Transfer database setup to DuckDB + Parquet. (#154)
+    - Generate processed DuckDB Dataset. (#158)
+    - Add DuckDB/ibis data access layer. (#159)
+    - Replace in‑memory filtering with DB‑backed reactive calc. (#160)
+- Setup automated dashboard tests using playwright. (#156)
+    - Refactoring of `src/app.py` to extract testable functions (#164)
+    - Pytest unit tests located in `dflogic.py` for #164 (#165, renaming in PR #207)
+    - Playwright tests for dashboard interaction in `test_dashboard_playwright.py` (#166)
+    - Documentation of logic tests in `notebooks/logic_tests.ipynb` (#167)
+ 
 ### Changed
 
 <!-- Spec or design deviations, and motivation. -->
 <!-- Feedback items you addressed: "Addressed: <item description> (#<prioritization issue>) via #<PR>" -->
+- Rename risk_value column to Value_At_Risk in generated dataframes. (#194)
+- Update `environment.yml` and `requirements.txt` with playwright and duckdb support. (#196)
 
 ### Fixed
 
 **Feedback prioritization issue link:** #149
 
-A comprehensive list of feedback issues fixed for 0.4.0 along with accreditation car be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
+A comprehensive list of feedback issues addressed for 0.4.0 along with accreditation car be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
 
 #### Critical Issues
 
-- Explicit indication of how the comparisons in KPIs are computed (#178) 
+- Set the repo up so that each PR requires a review before merge (#172) 
 - AI chat is not scrollable yet, add this in to prevent horizontal expansion of this box. (#174)
 - Remove the KPIs when the `AI Insights` tab is chosen, currently when viewing the dashboard it is difficult to see visual change between the tabs. (#175)
-- Set the repo up so that each PR requires a review before merge (#172) 
+- Explicit indication of how the comparisons in KPIs are computed (#178)
+ 
 
 #### Non-critical Issues
 - Metric comparisons over time (#176)
@@ -70,7 +81,11 @@ from db import get_base_dataframe, execute_filtered_query
 ### Release Highlight: Querychat Customization
 
 - **Option chosen:** A
-- **PR:** #161, #162, #163
+- **Main PR:** #155
+- **Supporting PRs:**
+    - Design Option A (Querychat customization) in spec. (#161)
+    - Implement AI behavior controls + querychat prompts. (#162)
+    - Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
 - **Why this option over the others:** This new feature provides the LLM additional context over the dataset enabling the ability to respond to more specialized queries. Presistent LLM Logging was considered for this task but would have lacked the improvement in AI answer quality and would also have added additional complexity in maintenance of an additional database. 
 - **Feature prioritization issue link:** #155
 
