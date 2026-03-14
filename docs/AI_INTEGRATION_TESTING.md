@@ -12,9 +12,9 @@ We chose Option A (Querychat Customization) over the other three options because
 
 **1. System prompt — `extra_instructions`**
 
-The M3 `data_description` only listed 5 of the 16 dataset columns, had no business framing, and didn't mention `risk_value` at all (even though it's a key derived column in the dashboard). We added `SALESCOPE_EXTRA_INSTRUCTIONS` in `src/app.py` that gives the model:
+The M3 `data_description` only listed 5 of the 16 dataset columns, had no business framing, and didn't mention `Value_At_Risk` at all (even though it's a key derived column in the dashboard). We added `SALESCOPE_EXTRA_INSTRUCTIONS` in `src/app.py` that gives the model:
 
-- A definition of `risk_value = Lifetime_Value × Churn_Probability` as the primary intervention metric
+- A definition of `Value_At_Risk = Lifetime_Value × Churn_Probability` as the primary intervention metric
 - Rough churn risk thresholds (>0.7 = high)
 - Instructions to frame answers in business terms (revenue at risk, not just probability values)
 - The full column list so it stops hallucinating on columns like `Preferred_Purchase_Times`

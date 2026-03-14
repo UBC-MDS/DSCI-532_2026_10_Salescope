@@ -18,5 +18,5 @@ and writes:
 
 It also reproduces the current dashboard preprocessing logic by:
 
-- creating `risk_value`
+- creating `Value_At_Risk`
 - parsing `Launch_Date` as a datetime column
