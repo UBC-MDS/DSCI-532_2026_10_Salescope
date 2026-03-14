@@ -9,7 +9,7 @@ This document specifies the M4 advanced feature decision for Salescope. For test
 We already had a working querychat integration from M3 — the AI Insights tab was functional but the LLM had minimal context about the dataset and no user controls over its behavior. Option A lets us go deeper on what we already built instead of adding a separate logging backend (B), a RAG pipeline (C), or a click-event handler (D).
 
 The specific gaps in M3 that Option A fixes:
-- The data_description only listed 5 of 16 columns — the LLM didn't know about `risk_value`, `Preferred_Purchase_Times`, or `Peak_Sales_Date`
+- The data_description only listed 5 of 16 columns — the LLM didn't know about `Value_At_Risk`, `Preferred_Purchase_Times`, or `Peak_Sales_Date`
 - No business framing — answers were technically correct but not business-actionable
 - No way for users to focus the AI on a specific area of analysis
 
@@ -39,7 +39,7 @@ Example questions:
 Comfortable with the raw data. Uses the AI tab to run quick slice-and-dice queries without writing SQL manually.
 
 Example questions:
-- "What's the average risk_value by season and region?"
+- "What's the average Value_At_Risk by season and region?"
 - "Compare churn probability distributions across product categories"
 
 ---
@@ -54,7 +54,7 @@ Location: AI Insights tab, "AI Analysis Settings" card above the data table.
 |--------|---------------|---------|------------|
 | Full Analysis | All questions | Nothing | Analyst |
 | Churn Focus Only | Questions referencing `Churn_Probability`, `Retention_Strategy`, or `churn` | Queries on revenue/LTV/category that don't touch churn columns | Customer Success Lead |
-| Revenue & LTV Focus Only | Questions referencing `Lifetime_Value`, `Average_Order_Value`, or `risk_value` | Queries on churn/retention that don't touch revenue columns | Sales Leader |
+| Revenue & LTV Focus Only | Questions referencing `Lifetime_Value`, `Average_Order_Value`, or `Value_At_Risk` | Queries on churn/retention that don't touch revenue columns | Sales Leader |
 
 Enforcement happens via `on_tool_request` in the Shiny server — the callback checks the SQL the LLM generates and raises `ToolRejectError` if the query doesn't mention the right columns. The model then tells the user it's outside the current scope. App does not crash.
 
@@ -73,7 +73,7 @@ Together, the two controls give users:
 Based on the experiment results in `notebooks/querychat_customization.ipynb`, the enhanced system prompt pushes the model toward this structure:
 
 1. **Filter context** — what slice the query is looking at (e.g., "Looking at high-churn customers in Asia...")
-2. **Key metric** — the number, usually framed in dollars or percentage (e.g., "Average risk_value is $3,241")
+2. **Key metric** — the number, usually framed in dollars or percentage (e.g., "Average Value_At_Risk is $3,241")
 3. **Business takeaway** — one sentence on what to do about it (e.g., "Loyalty Program customers here have the lowest average churn — consider shifting budget toward that strategy")
 
 The model doesn't always follow this exactly, but the `extra_instructions` constant in `app.py` pushes it in that direction by telling it users are "sales managers, not data scientists" and to frame results in terms of revenue at risk.

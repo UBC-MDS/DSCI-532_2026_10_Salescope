@@ -29,7 +29,7 @@ API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 sales_df = execute_filtered_query()
 sales_df["Churn_Probability"] = sales_df["Churn_Probability"].fillna(0)
-sales_df["risk_value"] = sales_df["Lifetime_Value"] * sales_df["Churn_Probability"]
+sales_df["Value_At_Risk"] = sales_df["Lifetime_Value"] * sales_df["Churn_Probability"]
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
@@ -42,7 +42,7 @@ default_end = latest_quarter.end_time.date()
 SALESCOPE_EXTRA_INSTRUCTIONS = """
 You are working inside the Salescope retention dashboard. Users are sales managers, not data scientists.
 
-risk_value = Lifetime_Value * Churn_Probability. This is the dollar amount at risk if a customer churns.
+Value_At_Risk = Lifetime_Value * Churn_Probability. This is the dollar amount at risk if a customer churns.
 Treat it as the most useful column when prioritizing interventions.
 
 Rough churn thresholds: above 0.7 = high risk, 0.4-0.7 = medium, below 0.4 = low.
@@ -52,9 +52,9 @@ Keep responses short. Suggest which retention strategy fits when it's relevant.
 
 If the user's question is outside the current analysis scope (churn-only or revenue-only), do not reinterpret it; instead, tell them which scope is active and suggest switching modes.
 
-In Churn Focus mode, only query churn-related columns (e.g. Churn_Probability, risk_value, Region, Retention_Strategy). In Revenue Focus mode, only query revenue and value columns (e.g. Lifetime_Value, Average_Order_Value, risk_value).
+In Churn Focus mode, only query churn-related columns (e.g. Churn_Probability, Value_At_Risk, Region, Retention_Strategy). In Revenue Focus mode, only query revenue and value columns (e.g. Lifetime_Value, Average_Order_Value, Value_At_Risk).
 
-If Churn_Probability is missing for a row, assume it is 0 when computing risk_value so that new customers without a modeled churn score do not inflate revenue-at-risk totals.
+If Churn_Probability is missing for a row, assume it is 0 when computing Value_At_Risk so that new customers without a modeled churn score do not inflate revenue-at-risk totals.
 """
 
 qc = querychat.QueryChat(
@@ -87,7 +87,7 @@ qc = querychat.QueryChat(
     - Season: Spring, Summer, Fall, Winter
     - Preferred_Purchase_Times: Morning, Afternoon, Evening
     - Retention_Strategy: Discount, Email Campaign, Loyalty Program
-    - risk_value: Derived column — Lifetime_Value × Churn_Probability (revenue at risk)
+    - Value_At_Risk: Derived column — Lifetime_Value × Churn_Probability (revenue at risk)
     """,
     extra_instructions=SALESCOPE_EXTRA_INSTRUCTIONS,
     client=ChatAnthropic(model="claude-sonnet-4-0", api_key=API_KEY),
@@ -431,7 +431,7 @@ panel_4 = ui.nav_panel(
                 {
                     "Lifetime_Value": "Customer Lifetime Value",
                     "Churn_Probability": "Churn Risk",
-                    "risk_value": "Value at Risk",                    
+                    "Value_At_Risk": "Value at Risk",                    
                     "Average_Order_Value": "Average Order Value",
                     "Purchase_Frequency": "Purchase Frequency",
                     "Time_Between_Purchases": "Days Between Purchases",
@@ -615,10 +615,10 @@ def server(input, output, session):
                     "retention strategies, or at-risk customers."
                 )
         elif scope == "revenue_only" and sql:
-            if not any(t in sql.lower() for t in ("lifetime_value", "average_order_value", "risk_value")):
+            if not any(t in sql.lower() for t in ("lifetime_value", "average_order_value", "value_at_risk")):
                 raise ToolRejectError(
                     "Revenue Focus Only mode is on. Please ask about "
-                    "Lifetime_Value, Average_Order_Value, or risk_value."
+                    "Lifetime_Value, Average_Order_Value, or Value_At_Risk."
                 )
 
     qc_vals.client.on_tool_request(_handle_tool_request)
@@ -959,13 +959,13 @@ def server(input, output, session):
         if df.empty:
             return "—"
 
-        val = df["risk_value"].mean()
+        val = df["Value_At_Risk"].mean()
         val_str = f"${val:,.2f}"
 
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base["risk_value"].mean()
+                base_val = df_base["Value_At_Risk"].mean()
                 delta = val - base_val
                 pct_change = 0 if base_val == 0 else delta / base_val
                 direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
@@ -1089,7 +1089,7 @@ def server(input, output, session):
             "Most Frequent Value": "Most_Frequent_Category"
         }
         group = mapping[input.row_dropdown()]
-        return create_summary_table(dashboard_df(), group, "risk_value")
+        return create_summary_table(dashboard_df(), group, "Value_At_Risk")
 
     @render.data_frame
     def order_df():
@@ -1271,7 +1271,7 @@ def server(input, output, session):
         metric_labels = {
             "Lifetime_Value": "Customer Lifetime Value ($)",
             "Churn_Probability": "Churn Risk",
-            "risk_value": "Value at Risk ($)",
+            "Value_At_Risk": "Value at Risk ($)",
             "Average_Order_Value": "Average Order Value ($)",
             "Purchase_Frequency": "Purchase Frequency",
             "Time_Between_Purchases": "Days Between Purchases",

@@ -7,7 +7,7 @@ OUT_PATH = Path("data/processed/sales_and_customer_insights.parquet")
 def main():
     df = pd.read_csv(RAW_PATH, parse_dates=True)
 
-    df["risk_value"] = df["Lifetime_Value"] * df["Churn_Probability"]
+    df["Value_At_Risk"] = df["Lifetime_Value"] * df["Churn_Probability"]
     df["Launch_Date"] = pd.to_datetime(df["Launch_Date"], format="%Y-%m-%d")
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
