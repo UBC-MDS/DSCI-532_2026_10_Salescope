@@ -1,4 +1,4 @@
-from logic import create_summary_table, filter_sales_data
+from logic import filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -87,51 +87,39 @@ qc = querychat.QueryChat(
 
 kpi_component = ui.TagList(
     ui.layout_columns(
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Average Lifetime Value (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_lifetime")
-            ),
-            ui.value_box(
-                ui.tags.span(
-                    "Average Value-At-Risk (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_risk")
+        ui.value_box(
+            ui.tags.span(
+                "Average Lifetime Value (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
             ),
             ui.output_ui("kpi_lifetime")
         ),
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Average Churn (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_churn")
+        ui.value_box(
+            ui.tags.span(
+                "Average Value-At-Risk (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
             ),
-            ui.value_box(
-                ui.tags.span(
-                    "Average Days Between Purchase (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_days")
+            ui.output_ui("kpi_risk")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Average Churn (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
             ),
             ui.output_ui("kpi_churn")
         ),
         ui.value_box(
             ui.tags.span(
-                "Avg Days Between Purchase (Filtered Base)",
+                "Average Days Between Purchase (Filtered Base)",
                 style="font-size:1.0em; font-weight:600;"
             ),
             ui.output_ui("kpi_days")
         ),
         col_widths=(3, 3, 3, 3),
         fill=False,
-        ui.markdown("### Note ⚠️: All KPIs (Key Performance Indicators) and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
-        col_widths=(12, 12)
+    ),
+    ui.HTML(
+        "<div style='font-size: 0.9em;'>⚠️ <strong>Note:</strong> All KPIs (Key Performance Indicators) and charts on this page reflect <strong>current</strong> filter settings, defaulting to the most recent quarter.</div>"
     ),
     ui.output_ui("kpi_note"),
 )
@@ -402,16 +390,17 @@ app_ui = ui.page_navbar(
 )    
 
 def create_summary_table(df, grouping, feature):
+    total_row = pd.DataFrame({
+        "Group": ["Total"],
+        "Count": [df[feature].size],
+        "Mean": [df[feature].mean()],
+        "Median": [df[feature].median()],
+        "Maximum": [df[feature].max()],
+        "Total": [df[feature].sum()]
+    }).round(2)
+
     if grouping == "Total":
-        summary = pd.DataFrame({
-            "Group": ["Total"],
-            "Count": [df[feature].size],
-            "Mean": [df[feature].mean()],
-            "Median": [df[feature].median()],
-            "Maximum": [df[feature].max()],
-            "Total": [df[feature].sum()]
-        }).round(2)
-        return summary
+        return total_row
 
     summary = (
         df.groupby(grouping)
@@ -425,6 +414,10 @@ def create_summary_table(df, grouping, feature):
         .round(2)
         .reset_index()
     )
+
+    summary = summary.rename(columns={grouping: "Group"})
+    summary = pd.concat([summary, total_row], ignore_index=True)
+
     return summary
 
 # Server
@@ -921,22 +914,37 @@ def server(input, output, session):
 
     @render.data_frame
     def risk_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Purchase_Frequency")
-
+    
     @render_widget
     def high_churn_risk():
         pct_decrease = input.slider_churn_decrease()
