@@ -157,7 +157,14 @@ main_sidebar = ui.sidebar(
     ),
     ui.input_slider(
         id="slider_churn_decrease",
-        label="Churn rate decrease (%)",
+        label=ui.tags.span(
+            "Churn rate decrease (%) ",
+            ui.tags.span(
+                "ⓘ",
+                title="Scenario slider: simulate reducing the upper churn bound by this percentage. KPIs and plots compare this scenario against the original churn range.",
+                style="cursor: help;"
+            )
+        ),
         min=0,
         max=100,
         value=0,
