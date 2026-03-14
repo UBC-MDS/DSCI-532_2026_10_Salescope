@@ -11,8 +11,8 @@ from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
 
 # src imports
-from dflogic import create_summary_table, filter_sales_data
-from db import get_base_dataframe, execute_filtered_query
+from .dflogic import create_summary_table, filter_sales_data
+from .db import get_base_dataframe, execute_filtered_query
 
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
