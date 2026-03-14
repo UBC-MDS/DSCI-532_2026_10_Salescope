@@ -49,4 +49,3 @@ dependencies:
     - pytest-playwright==0.7.2
     - ibis-framework==12.0.0
     - pyarrow_hotfix==0.7
-    - logic==0.2.3

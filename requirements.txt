@@ -28,4 +28,3 @@ python-dotenv==1.1.0
 ibis-framework==12.0.0
 pyarrow_hotfix==0.7
 duckdb==1.4.3
-logic==0.2.3
