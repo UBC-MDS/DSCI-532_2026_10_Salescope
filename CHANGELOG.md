@@ -19,15 +19,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-<!-- Bugs resolved since M3. This section will be updated with the exact checklist of issues once complete. -->
+**Feedback prioritization issue link:** #149
 
-- **Feedback prioritization issue link:** #149
+A comprehensive list of feedback issues fixed for 0.4.0 along with accreditation car be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
 
-The specific list of feedback issues logged and fixed for Milestone 4 can be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
+#### Critical Issues
+
+- Explicit indication of how the comparisons in KPIs are computed (#178) 
+- AI chat is not scrollable yet, add this in to prevent horizontal expansion of this box. (#174)
+- Remove the KPIs when the `AI Insights` tab is chosen, currently when viewing the dashboard it is difficult to see visual change between the tabs. (#175)
+- Set the repo up so that each PR requires a review before merge (#172) 
+
+#### Non-critical Issues
+- Metric comparisons over time (#176)
+- Clean up abbreviations on dashboard  (#177)
+- Add logo and colour scheme (#179)
+- Update README with more concrete usage and dataset description (#184)
+- Reorganize filter sidebar length (#185)
+- Clean up wording of helper text (#186)
+- Reduce KPI filters to single row and move Count of Datapoints (#199)
+- Replace sidebar when on AI Insights tab (#200)
+- Tooltip for churn rate reduction slider (#203)
+- Help button linking to README examples (#204)
 
 ### Known Issues
 
 <!-- Anything incomplete or broken TAs should be aware of (so it isn't mistaken for unfinished work). -->
+When testing the app locally using the command `shiny run --reload --launch-browser src/app.py`, there is a possiblity of the following error appearing:
+
+```
+File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/Users/.../532/DSCI-532_2026_10_Salescope/src/app.py", line 17, in <module>
+    from .dflogic import create_summary_table, filter_sales_data
+ImportError: attempted relative import with no known parent package
+```
+
+This is a local import bug that does not affect the posit deployments. To workaround this you can either create your own posit deployment using the `main` branch of this repo or temporarily replace lines 17 and 18 in `src/app.py` with the following:
+
+```
+from dflogic import create_summary_table, filter_sales_data
+from db import get_base_dataframe, execute_filtered_query
+```
+
 
 ### Release Highlight: Querychat Customization
 
