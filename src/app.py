@@ -127,71 +127,53 @@ kpi_component = ui.TagList(
     ui.output_ui("kpi_note"),
 )
 
+    
 main_sidebar = ui.sidebar(
-    ui.input_numeric(
-        id="num_churn_min",
-        label="Churn rate min",
-        value=0.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
-    ),
-    ui.input_numeric(
-        id="num_churn_max",
-        label="Churn rate max",
-        value=1.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
-    ),
-    ui.input_slider(
-        id="slider_churn_decrease",
-        label=ui.tags.span(
-            "Churn rate decrease (%) ",
-            ui.tags.span(
-                "ⓘ",
-                title="Scenario slider: simulate reducing the upper churn bound by this percentage. KPIs and plots compare this scenario against the original churn range.",
-                style="cursor: help;"
-            )
-        ),
-        min=0,
-        max=100,
-        value=0,
-    ),
-    ui.help_text(
-        "Scenario slider: simulate reducing churn in the selected range; KPIs and plots compare this scenario to the original churn range."
-    ),
-    ui.input_numeric(
-        id="num_clv_min",
-        label="Customer Lifetime Value min",
-        value=100, min=100, max=10000, step=50
-    ),
-    ui.input_numeric(
-        id="num_clv_max",
-        label="Customer Lifetime Value max",
-        value=10000, min=100, max=10000, step=50
-    ),
-    ui.help_text("Lifetime Value (LTV) is the predicted total revenue a customer will generate over time."),
-    ui.input_numeric(
-        id="num_order_min",
-        label="Average Order Value min",
-        value=20, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_order_max",
-        label="Average Order Value max",
-        value=200, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_freq_min",
-        label="Purchase Frequency min",
-        value=1, min=1, max=19, step=1
-    ),
-    ui.input_numeric(
-        id="num_freq_max",
-        label="Purchase Frequency max",
-        value=19, min=1, max=19, step=1
-    ),
+    # CSS Styling, 
+    ui.tags.style("""
+        /* Outer container styling */
+        .numeric-range-styled {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            display: grid !important;
+            align-items: center;
+            width: fit-content;
+        }
+        
+        /* Remove internal borders */
+        .numeric-range-styled .form-control {
+            border: none !important;
+            box-shadow: none !important;
+            text-align: center;
+        }
+
+        /* Adjust last input for the 'to' box */
+        .numeric-range-styled > div:last-child {
+            position: relative;
+        }
+
+        /* Create the 'to' box, position linked to last object */
+        .numeric-range-styled > div:last-child::before {
+            content: "to";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eeeeee;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 0 12px;
+            height: 100%;
+            color: #555;
+            position: absolute;
+            left: -35px;
+            z-index: 1;
+        }
+
+    """),
+    
+    # Launch date filter
+    
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
@@ -200,11 +182,15 @@ main_sidebar = ui.sidebar(
         min=min_date,
         max=max_date
     ),
+    
+    # Checkbox filters
+
     ui.input_checkbox(
-    id="use_ai_filter",
-    label="Use AI filtered data for dashboard",
-    value=False,
+        id="use_ai_filter",
+        label=ui.tags.span("Use the ",ui.tags.code("AI Insights")," dataframe"),
+        value=False,
     ),
+
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -243,6 +229,120 @@ main_sidebar = ui.sidebar(
 
         ],
     ),
+
+    # Numeric Filters
+
+    ui.markdown("Churn Rate"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_churn_min",
+            label=None,
+            value=0.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            width="100%"
+        ),
+        ui.input_numeric(
+            id="num_churn_max",
+            label=None,
+            value=1.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            width="100%"
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+
+    ui.input_slider(
+        id="slider_churn_decrease",
+        label=ui.tags.span(
+            "Churn rate decrease (%) ",
+            ui.tags.span(
+                "ⓘ",
+                title="Scenario slider: simulate reducing the upper churn bound by this percentage. KPIs and plots compare this scenario against the original churn range.",
+                style="cursor: help;"
+            )
+        ),
+        min=0,
+        max=100,
+        value=0,
+    ),
+   
+    ui.markdown("Customer Lifetime Value"),
+    ui.layout_column_wrap(  
+        ui.input_numeric(
+            id="num_clv_min",
+            label=None,
+            value=100, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),
+        ui.input_numeric(
+            id="num_clv_max",
+            label=None,
+            value=10000, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),  
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+
+    ui.markdown("Average Order Value"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_order_min",
+            label=None,
+            value=20, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        ui.input_numeric(
+            id="num_order_max",
+            label=None,
+            value=200, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),    
+
+    ui.markdown("Purchase Frequency"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_freq_min",
+            label=None,
+            value=1, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        ui.input_numeric(
+            id="num_freq_max",
+            label=None,
+            value=19, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+    
+    
+    
     ui.input_action_button("reset", "Reset filters"),
     open="desktop",
 )
@@ -698,8 +798,8 @@ def server(input, output, session):
         )
         ui.update_date_range(
             "date_range",
-            start=default_start,
-            end=default_end,
+            start=max(default_start,min_date),
+            end=min(default_end,max_date),
             min=min_date,
             max=max_date,
             session=session
