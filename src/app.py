@@ -20,6 +20,8 @@ load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 sales_df = execute_filtered_query()
+sales_df["Churn_Probability"] = sales_df["Churn_Probability"].fillna(0)
+sales_df["risk_value"] = sales_df["Lifetime_Value"] * sales_df["Churn_Probability"]
 sales_df["Launch_Date"] = pd.to_datetime(sales_df["Launch_Date"])
 min_date, max_date = sales_df["Launch_Date"].min().date(), sales_df["Launch_Date"].max().date()
 
@@ -41,6 +43,10 @@ When you answer, say what it means for the business (e.g. "this region has $X at
 Keep responses short. Suggest which retention strategy fits when it's relevant.
 
 If the user's question is outside the current analysis scope (churn-only or revenue-only), do not reinterpret it; instead, tell them which scope is active and suggest switching modes.
+
+In Churn Focus mode, only query churn-related columns (e.g. Churn_Probability, risk_value, Region, Retention_Strategy). In Revenue Focus mode, only query revenue and value columns (e.g. Lifetime_Value, Average_Order_Value, risk_value).
+
+If Churn_Probability is missing for a row, assume it is 0 when computing risk_value so that new customers without a modeled churn score do not inflate revenue-at-risk totals.
 """
 
 qc = querychat.QueryChat(
@@ -51,7 +57,7 @@ qc = querychat.QueryChat(
         "analyze churn risk, and surface retention insights.\n\n"
         "Try asking:\n"
         "- *Show me high-risk customers in Asia*\n"
-        "- *Which retention strategy has the highest average LTV?*\n"
+        "- *Which retention strategy has the highest average Lifetime Value (LTV)?*\n"
         "- *Find customers with Churn_Probability above 0.8 and Lifetime_Value above 5000*"
     ),
     data_description="""
@@ -84,14 +90,14 @@ kpi_component = ui.layout_columns(
         ui.layout_columns(
             ui.value_box(
                 ui.tags.span(
-                    "Avg Lifetime Value (Filtered Base)",
+                    "Average Lifetime Value (Filtered Base)",
                     style="font-size:1.25em; font-weight:600;"
                 ), 
                 ui.output_ui("kpi_lifetime")
             ),
             ui.value_box(
                 ui.tags.span(
-                    "Avg Value-At-Risk (Filtered Base)",
+                    "Average Value-At-Risk (Filtered Base)",
                     style="font-size:1.25em; font-weight:600;"
                 ), 
                 ui.output_ui("kpi_risk")
@@ -101,14 +107,14 @@ kpi_component = ui.layout_columns(
         ui.layout_columns(
             ui.value_box(
                 ui.tags.span(
-                    "Avg Churn (Filtered Base)",
+                    "Average Churn (Filtered Base)",
                     style="font-size:1.25em; font-weight:600;"
                 ), 
                 ui.output_ui("kpi_churn")
             ),
             ui.value_box(
                 ui.tags.span(
-                    "Avg Days Between Purchase (Filtered Base)",
+                    "Average Days Between Purchase (Filtered Base)",
                     style="font-size:1.25em; font-weight:600;"
                 ), 
                 ui.output_ui("kpi_days")
@@ -125,7 +131,7 @@ kpi_component = ui.layout_columns(
             ), 
             ui.output_text("kpi_count")
         ),
-        ui.markdown("### Note ⚠️: All KPIs and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
+        ui.markdown("### Note ⚠️: All KPIs (Key Performance Indicators) and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
         col_widths=(12, 12)
     ),
     col_widths=(9, 3),  # 12 part ratio
@@ -354,7 +360,7 @@ main_sidebar = ui.sidebar(
 
 
 # Specialized table for User Story 1
-panel_1 = ui.nav_panel("KPI Tables", 
+panel_1 = ui.nav_panel("Key Metric Tables", 
     ui.layout_columns(
         ui.input_select(id = "row_dropdown",
                         label = "Table partition options:",
@@ -400,7 +406,7 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
                 "heatmap_metric", 
                 "Select metric:", 
                 {
-                "mean": "Avg customer value", 
+                "mean": "Average customer value", 
                 "count": "Frequency (Count of entries)" },
                 selected="mean"
                ),
@@ -440,7 +446,7 @@ panel_ai = ui.nav_panel(
                     choices={
                         "full": "Full Analysis (no restrictions)",
                         "churn_only": "Churn Focus Only",
-                        "revenue_only": "Revenue & LTV Focus Only",
+                        "revenue_only": "Revenue & Lifetime Value Focus Only",
                     },
                     selected="full",
                 ),
@@ -537,7 +543,7 @@ def server(input, output, session):
         msgs = {
             "full": ("All questions allowed", "green"),
             "churn_only": ("Churn & retention questions only", "darkorange"),
-            "revenue_only": ("Revenue & LTV questions only", "steelblue"),
+            "revenue_only": ("Revenue & Lifetime Value questions only", "steelblue"),
         }
         msg, color = msgs[scope]
         return ui.HTML(f'<small style="color:{color};">{msg}</small>')
@@ -585,7 +591,7 @@ def server(input, output, session):
             size_max=18
         )
         fig.update_layout(
-            title="AI-filtered: Customers by LTV and Days Between Purchases",
+            title="AI-filtered: Customers by Lifetime Value (LTV) and Days Between Purchases",
             xaxis_title="Customer Lifetime Value ($)",
             yaxis_title="Days Between Purchases"
         )
@@ -612,8 +618,8 @@ def server(input, output, session):
             x="Season",
             y="Most_Frequent_Category",
             z="Lifetime_Value",
-            title="AI-filtered: Avg LTV by Season vs. Category",
-            labels={"Lifetime_Value": "Avg LTV ($)", "Most_Frequent_Category": "Product Type"},
+            title="AI-filtered: Average Lifetime Value (LTV) by Season vs. Category",
+            labels={"Lifetime_Value": "Average Lifetime Value ($)", "Most_Frequent_Category": "Product Type"},
             color_continuous_scale="Viridis",
             text_auto=True,
         )
@@ -934,7 +940,7 @@ def server(input, output, session):
                 else:
                     cues.append(f"**Stable Regions**: Across all regions, churn remains manageable (highest: {high_risk} at {val:.1%}).")
 
-        # Cue 2: Retention strategy with highest CLV
+        # Cue 2: Retention strategy with highest Lifetime Value
         if "Retention_Strategy" in df.columns and "Lifetime_Value" in df.columns:
             strat_ltv = df.groupby("Retention_Strategy")["Lifetime_Value"].mean()
             if not strat_ltv.empty:
@@ -1091,10 +1097,10 @@ def server(input, output, session):
             color_continuous_scale="RdYlGn_r"
         )
         fig.update_layout(
-            title="Q1-Q4 Trend: Retention Strategy by Avg LTV (Size) & Churn Risk (Color)",
+            title="Q1–Q4 Trend: Retention Strategy by Average Lifetime Value (Size) & Churn Risk (Color)",
             xaxis_title="Quarter",
             yaxis_title="Retention Strategy",
-            coloraxis_colorbar=dict(title="Churn Prob")
+            coloraxis_colorbar=dict(title="Average Churn Probability")
         )
         return fig
     
@@ -1122,8 +1128,8 @@ def server(input, output, session):
                 .mean()
                 .reset_index()  )
             z_col = "Lifetime_Value"
-            title_text = "Avg Value: Season vs. Category"
-            label_text = "Avg LTV ($)"
+            title_text = "Average Value: Season vs. Category"
+            label_text = "Average Lifetime Value ($)"
 
         fig = px.density_heatmap(
             plot_data, 
