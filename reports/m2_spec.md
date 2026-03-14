@@ -133,3 +133,10 @@ A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked
 
 Without the reset button, a user who has applied multiple overlapping filters (for example: a churn slider + two checkbox groups + a date range) must manually undo each control one by one to return to the default view. This creates unnecessary friction, especially for exploratory sessions where users jump between different filter combinations. A single "Reset Filters" click eliminates this pain point, making the dashboard significantly faster to use for real analytical workflows.
 
+## Terminology / Abbreviations
+
+- **Lifetime Value (LTV)**: The predicted total revenue a customer will generate over time.
+- **Value-at-risk**: The dollar amount at risk, calculated as Lifetime Value × Churn Probability.
+- **Churn Probability**: The modeled risk score (0–1) indicating the likelihood a customer will churn.
+- **KPI**: Key Performance Indicator. Metrics used to evaluate the success or status of an objective.
+
