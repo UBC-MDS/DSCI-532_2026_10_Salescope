@@ -10,20 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 <!-- New features, components, tests - one line each. Reference PRs where relevant (e.g. #12). -->
-- Transfer database setup to DuckDB + Parquet. (#154)
-    - Generate processed DuckDB Dataset. (#158)
-    - Add DuckDB/ibis data access layer. (#159)
-    - Replace in‑memory filtering with DB‑backed reactive calc. (#160)
-- Setup automated dashboard tests using playwright. (#156)
-    - Refactoring of `src/app.py` to extract testable functions (#164)
-    - Pytest unit tests located in `dflogic.py` for #164 (#165, renaming in PR #207)
-    - Playwright tests for dashboard interaction in `test_dashboard_playwright.py` (#166)
-    - Documentation of logic tests in `notebooks/logic_tests.ipynb` (#167)
+
+- Generate processed DuckDB Dataset. (#158)
+- Add DuckDB/ibis data access layer. (#159)
+- Pytest unit tests located in `dflogic.py` for #164. (#165, renaming in PR #207)
+- Playwright tests for dashboard interaction in `test_dashboard_playwright.py`. (#166)
+- Documentation of logic tests in `notebooks/logic_tests.ipynb`. (#167)
  
 ### Changed
 
 <!-- Spec or design deviations, and motivation. -->
 <!-- Feedback items you addressed: "Addressed: <item description> (#<prioritization issue>) via #<PR>" -->
+- Replace in‑memory filtering with DB‑backed reactive calc. (#160)
+- Refactoring of `src/app.py` to extract testable functions. (#164)
 - Rename risk_value column to Value_At_Risk in generated dataframes. (#194)
 - Update `environment.yml` and `requirements.txt` with playwright and duckdb support. (#196)
 
@@ -35,23 +34,23 @@ A comprehensive list of feedback issues addressed for 0.4.0 along with accredita
 
 #### Critical Issues
 
-- Set the repo up so that each PR requires a review before merge (#172) 
+- Set the repo up so that each PR requires a review before merge. (#172) 
 - AI chat is not scrollable yet, add this in to prevent horizontal expansion of this box. (#174)
 - Remove the KPIs when the `AI Insights` tab is chosen, currently when viewing the dashboard it is difficult to see visual change between the tabs. (#175)
-- Explicit indication of how the comparisons in KPIs are computed (#178)
+- Explicit indication of how the comparisons in KPIs are computed. (#178)
  
 
 #### Non-critical Issues
-- Metric comparisons over time (#176)
-- Clean up abbreviations on dashboard  (#177)
-- Add logo and colour scheme (#179)
-- Update README with more concrete usage and dataset description (#184)
-- Reorganize filter sidebar length (#185)
-- Clean up wording of helper text (#186)
-- Reduce KPI filters to single row and move Count of Datapoints (#199)
-- Replace sidebar when on AI Insights tab (#200)
-- Tooltip for churn rate reduction slider (#203)
-- Help button linking to README examples (#204)
+- Metric comparisons over time. (#176)
+- Clean up abbreviations on dashboard.  (#177)
+- Add logo and colour scheme. (#179)
+- Update README with more concrete usage and dataset description. (#184)
+- Reorganize filter sidebar length. (#185)
+- Clean up wording of helper text. (#186)
+- Reduce KPI filters to single row and move Count of Datapoints. (#199)
+- Replace sidebar when on AI Insights tab. (#200)
+- Tooltip for churn rate reduction slider. (#203)
+- Help button linking to README examples. (#204)
 
 ### Known Issues
 
@@ -96,9 +95,20 @@ A complete description for our decision to create this advanced feature and the 
 
 <!-- Summary of workflow or collaboration improvements made since M3. -->
 
-- **CONTRIBUTING.md:** <!-- Link to the PR that updated it with your M3 retrospective and M4 norms. -->
-- **M3 retrospective:** <!-- What changed in your workflow after M3 collaboration feedback. -->
-- **M4:** <!-- What you tried or improved this milestone. -->
+- **CONTRIBUTING.md:** A full reflection of improvements in collaboration made from M3 to M4 can be found in [CONTRIBUTING.md](CONTRIBUTING.md), in the `M3 Reflection` section. These are the specific improvements made in M4:
+<!-- Link to the PR that updated it with your M3 retrospective and M4 norms. -->
+
+- Issue creation was more structured than in M3; a main issue in #151 was reintroduced with child issues being setup for each requirement. This resulted in far fewer additional issues having to be created as work proceeded through M4. The specific issues created exclusively as children to #151 for tracking requirements are listed below:
+    - Submission setup for M4. (#152)
+    - Transfer database setup to DuckDB + Parquet. (#154)
+    - Implement advanced feature Querychat Customization. (#155)
+    - Setup automated dashboard tests using playwright. (#156)
+    - Prioritize and resolve M4 TA/Instructor/Peer Feedback. (#149)
+    - Utilize this exact format for CHANGELOG and Reflection. (#157)
+
+- The rate at which issues were completed over the week was much more balanced overall while still remaining at a high rate. Currently, we are projected to have all issues completed by end of Saturday/early Sunday, well before the deadline, which both means that no deadline-eve bursts will occur and that if there are unforeseen issues, we will have time to correct them.
+- `src/app.py` had parts of its functionality extracted into helper files, and the general file was refactored for general maintainability. Specific refactorings can be found in our [CHANGELOG](CHANGELOG.md).
+
 
 ### Reflection
 
