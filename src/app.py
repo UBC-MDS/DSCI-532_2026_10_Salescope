@@ -1,4 +1,3 @@
-from logic import filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -10,7 +9,11 @@ from dotenv import load_dotenv
 import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
-from db import get_base_dataframe, execute_filtered_query
+
+# src imports
+from .dflogic import create_summary_table, filter_sales_data
+from .db import get_base_dataframe, execute_filtered_query
+
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
