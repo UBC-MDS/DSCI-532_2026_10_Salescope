@@ -1,4 +1,3 @@
-from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -11,7 +10,11 @@ import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
 from pathlib import Path
-from db import get_base_dataframe, execute_filtered_query
+
+# src imports
+from .dflogic import create_summary_table, filter_sales_data
+from .db import get_base_dataframe, execute_filtered_query
+
 
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
@@ -86,124 +89,92 @@ qc = querychat.QueryChat(
     client=ChatAnthropic(model="claude-sonnet-4-0", api_key=API_KEY),
 )
 
-kpi_component = ui.layout_columns(
+kpi_component = ui.TagList(
     ui.layout_columns(
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Average Lifetime Value (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_lifetime")
-            ),
-            ui.value_box(
-                ui.tags.span(
-                    "Average Value-At-Risk (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_risk")
-            ),
-            col_widths=(12, 12)
-        ),
-        ui.layout_columns(
-            ui.value_box(
-                ui.tags.span(
-                    "Average Churn (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_churn")
-            ),
-            ui.value_box(
-                ui.tags.span(
-                    "Average Days Between Purchase (Filtered Base)",
-                    style="font-size:1.25em; font-weight:600;"
-                ), 
-                ui.output_ui("kpi_days")
-            ),
-            col_widths=(12, 12)
-        ),
-    col_widths=(6, 6)
-    ),
-    ui.layout_columns(
-        ui.value_box(            
+        ui.value_box(
             ui.tags.span(
-                "Count of Datapoints (Filtered Base)",
-                style="font-size:1.25em; font-weight:600;"
-            ), 
-            ui.output_text("kpi_count")
+                "Average Lifetime Value (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_lifetime")
         ),
-        ui.markdown("### Note ⚠️: All KPIs (Key Performance Indicators) and charts on this page reflect **current** filter settings, defaulting to the most recent quarter."),
-        col_widths=(12, 12)
+        ui.value_box(
+            ui.tags.span(
+                "Average Value-At-Risk (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_risk")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Average Churn (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_churn")
+        ),
+        ui.value_box(
+            ui.tags.span(
+                "Average Days Between Purchase (Filtered Base)",
+                style="font-size:1.0em; font-weight:600;"
+            ),
+            ui.output_ui("kpi_days")
+        ),
+        col_widths=(3, 3, 3, 3),
+        fill=False,
     ),
-    col_widths=(9, 3),  # 12 part ratio
-    fill=False
+    ui.HTML(
+        "<div style='font-size: 0.9em;'>⚠️ <strong>Note:</strong> All KPIs (Key Performance Indicators) and charts on this page reflect <strong>current</strong> filter settings, defaulting to the most recent quarter.</div>"
+    ),
+    ui.output_ui("kpi_note"),
 )
 
+    
 main_sidebar = ui.sidebar(
-    ui.input_numeric(
-        id="num_churn_min",
-        label="Churn rate min",
-        value=0.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
-    ),
-    ui.input_numeric(
-        id="num_churn_max",
-        label="Churn rate max",
-        value=1.0,
-        min=0.0,
-        max=1.0,
-        step=0.01,
-    ),
-    ui.input_slider(
-        id="slider_churn_decrease",
-        label=ui.tags.span(
-            "Churn rate decrease (%) ",
-            ui.tags.span(
-                "ⓘ",
-                title="Scenario slider: simulate reducing the upper churn bound by this percentage. KPIs and plots compare this scenario against the original churn range.",
-                style="cursor: help;"
-            )
-        ),
-        min=0,
-        max=100,
-        value=0,
-    ),
-    ui.help_text(
-        "Scenario slider: simulate reducing churn in the selected range; KPIs and plots compare this scenario to the original churn range."
-    ),
-    ui.input_numeric(
-        id="num_clv_min",
-        label="Customer Lifetime Value min",
-        value=100, min=100, max=10000, step=50
-    ),
-    ui.input_numeric(
-        id="num_clv_max",
-        label="Customer Lifetime Value max",
-        value=10000, min=100, max=10000, step=50
-    ),
-    ui.help_text("Lifetime Value (LTV) is the predicted total revenue a customer will generate over time."),
-    ui.input_numeric(
-        id="num_order_min",
-        label="Average Order Value min",
-        value=20, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_order_max",
-        label="Average Order Value max",
-        value=200, min=20, max=200, step=5
-    ),
-    ui.input_numeric(
-        id="num_freq_min",
-        label="Purchase Frequency min",
-        value=1, min=1, max=19, step=1
-    ),
-    ui.input_numeric(
-        id="num_freq_max",
-        label="Purchase Frequency max",
-        value=19, min=1, max=19, step=1
-    ),
+    # CSS Styling, 
+    ui.tags.style("""
+        /* Outer container styling */
+        .numeric-range-styled {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            display: grid !important;
+            align-items: center;
+            width: fit-content;
+        }
+        
+        /* Remove internal borders */
+        .numeric-range-styled .form-control {
+            border: none !important;
+            box-shadow: none !important;
+            text-align: center;
+        }
+
+        /* Adjust last input for the 'to' box */
+        .numeric-range-styled > div:last-child {
+            position: relative;
+        }
+
+        /* Create the 'to' box, position linked to last object */
+        .numeric-range-styled > div:last-child::before {
+            content: "to";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eeeeee;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            padding: 0 12px;
+            height: 100%;
+            color: #555;
+            position: absolute;
+            left: -35px;
+            z-index: 1;
+        }
+
+    """),
+    
+    # Launch date filter
+    
     ui.input_date_range(
         id="date_range", 
         label="Filter by launch date",
@@ -212,11 +183,15 @@ main_sidebar = ui.sidebar(
         min=min_date,
         max=max_date
     ),
+    
+    # Checkbox filters
+
     ui.input_checkbox(
-    id="use_ai_filter",
-    label="Use AI filtered data for dashboard",
-    value=False,
+        id="use_ai_filter",
+        label=ui.tags.span("Use the ",ui.tags.code("AI Insights")," dataframe"),
+        value=False,
     ),
+
     ui.input_checkbox_group(
         id="checkbox_group_type",
         label="Most Common Purchase Type",
@@ -255,6 +230,121 @@ main_sidebar = ui.sidebar(
 
         ],
     ),
+    
+
+    # Numeric Filters
+
+    ui.markdown("Churn Rate"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_churn_min",
+            label=None,
+            value=0.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            width="100%"
+        ),
+        ui.input_numeric(
+            id="num_churn_max",
+            label=None,
+            value=1.0,
+            min=0.0,
+            max=1.0,
+            step=0.01,
+            width="100%"
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+
+    ui.input_slider(
+        id="slider_churn_decrease",
+        label=ui.tags.span(
+            "Churn rate decrease (%) ",
+            ui.tags.span(
+                "ⓘ",
+                title="Scenario slider: simulate reducing the upper churn bound by this percentage. KPIs and plots compare this scenario against the original churn range.",
+                style="cursor: help;"
+            )
+        ),
+        min=0,
+        max=100,
+        value=0,
+    ),
+   
+    ui.markdown("Customer Lifetime Value"),
+    ui.layout_column_wrap(  
+        ui.input_numeric(
+            id="num_clv_min",
+            label=None,
+            value=100, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),
+        ui.input_numeric(
+            id="num_clv_max",
+            label=None,
+            value=10000, 
+            min=100, 
+            max=10000, 
+            step=50
+        ),  
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+
+    ui.markdown("Average Order Value"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_order_min",
+            label=None,
+            value=20, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        ui.input_numeric(
+            id="num_order_max",
+            label=None,
+            value=200, 
+            min=20, 
+            max=200, 
+            step=5
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),    
+
+    ui.markdown("Purchase Frequency"),
+    ui.layout_column_wrap(
+        ui.input_numeric(
+            id="num_freq_min",
+            label=None,
+            value=1, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        ui.input_numeric(
+            id="num_freq_max",
+            label=None,
+            value=19, 
+            min=1, 
+            max=19, 
+            step=1
+        ),
+        width=1/2,
+        gap="30px",
+    class_="numeric-range-styled"
+    ),
+    
+    
+    
     ui.input_action_button("reset", "Reset filters", class_="salescope-primary-btn"),
     open="desktop",
 )
@@ -263,9 +353,11 @@ main_sidebar = ui.sidebar(
 # Specialized table for User Story 1
 panel_1 = ui.nav_panel("Key Metric Tables", 
     ui.layout_columns(
-        ui.input_select(id = "row_dropdown",
-                        label = "Table partition options:",
-                        choices = ["Region","Retention Strategy","Most Frequent Value"]),
+        ui.input_select(
+            id="row_dropdown",
+            label="Table partition options:",
+            choices=["Total", "Region", "Retention Strategy", "Most Frequent Value"]
+        ),
         ui.navset_card_tab(
             ui.nav_panel("Customer Lifetime Value", ui.output_data_frame("customer_df")),
             ui.nav_panel("Value-at-risk", ui.output_data_frame("risk_df")),
@@ -423,6 +515,37 @@ app_ui = ui.page_navbar(
     id="top_navbar",
     theme=ui.Theme("lumen")
 )    
+
+def create_summary_table(df, grouping, feature):
+    total_row = pd.DataFrame({
+        "Group": ["Total"],
+        "Count": [df[feature].size],
+        "Mean": [df[feature].mean()],
+        "Median": [df[feature].median()],
+        "Maximum": [df[feature].max()],
+        "Total": [df[feature].sum()]
+    }).round(2)
+
+    if grouping == "Total":
+        return total_row
+
+    summary = (
+        df.groupby(grouping)
+        .agg(
+            Count=(feature, "size"),
+            Mean=(feature, "mean"),
+            Median=(feature, "median"),
+            Maximum=(feature, "max"),
+            Total=(feature, "sum"),
+        )
+        .round(2)
+        .reset_index()
+    )
+
+    summary = summary.rename(columns={grouping: "Group"})
+    summary = pd.concat([summary, total_row], ignore_index=True)
+
+    return summary
 
 # Server
 def server(input, output, session):
@@ -699,8 +822,8 @@ def server(input, output, session):
         )
         ui.update_date_range(
             "date_range",
-            start=default_start,
-            end=default_end,
+            start=max(default_start,min_date),
+            end=min(default_end,max_date),
             min=min_date,
             max=max_date,
             session=session
@@ -843,6 +966,18 @@ def server(input, output, session):
                 )
 
         return val_str
+    
+    @render.ui
+    def kpi_note():
+        df = dashboard_df()
+        count = len(df)
+
+        if count < 50:
+            return ui.HTML(
+                f"<small style='color:#b45309;'>⚠️ Low sample size: current filters leave only {count} datapoints.</small>"
+            )
+
+        return None
 
     @render.ui
     def decision_cues():
@@ -896,31 +1031,48 @@ def server(input, output, session):
 
     @render.data_frame
     def customer_df():
-        mapping = {"Region": "Region",
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
             "Retention Strategy": "Retention_Strategy",
             "Most Frequent Value": "Most_Frequent_Category"
-                    }
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Lifetime_Value")
 
     @render.data_frame
     def risk_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "risk_value")
 
     @render.data_frame
     def order_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Average_Order_Value")
 
     @render.data_frame
     def frequency_df():
-        mapping = {"Region": "Region", "Retention Strategy": "Retention_Strategy", "Most Frequent Value": "Most_Frequent_Category"}
+        mapping = {
+            "Total": "Total",
+            "Region": "Region",
+            "Retention Strategy": "Retention_Strategy",
+            "Most Frequent Value": "Most_Frequent_Category"
+        }
         group = mapping[input.row_dropdown()]
         return create_summary_table(dashboard_df(), group, "Purchase_Frequency")
-
+    
     @render_widget
     def high_churn_risk():
         pct_decrease = input.slider_churn_decrease()
