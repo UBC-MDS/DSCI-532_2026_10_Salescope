@@ -1,3 +1,4 @@
+from logic import create_summary_table, filter_sales_data
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
@@ -15,6 +16,7 @@ from db import get_base_dataframe, execute_filtered_query
 # see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
 
 # use shiny run --reload --launch-browser src/app.py to local test
+
 load_dotenv()
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
@@ -409,16 +411,6 @@ app_ui = ui.page_navbar(
     theme=ui.Theme("lumen")
 )    
 
-def create_summary_table(df,grouping,feature):
-    summary = df.groupby(grouping).agg(
-        Count=(feature, "size"),
-        Mean=(feature, "mean"),
-        Median=(feature, "median"),
-        Maximum=(feature, "max"),
-        Total=(feature, "sum")
-    ).round(2).reset_index()
-    return summary
-
 # Server
 def server(input, output, session):
 
@@ -732,80 +724,111 @@ def server(input, output, session):
     def kpi_lifetime():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Lifetime_Value'].mean()
+
+        val = df["Lifetime_Value"].mean()
         val_str = f"${val:,.2f}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Lifetime_Value'].mean()
+                base_val = df_base["Lifetime_Value"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "#28a745" if delta > 0 else "#dc3545" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
-        return val_str
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
+                color = "green" if delta > 0 else "red" if delta < 0 else "inherit"
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
 
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
+        return val_str
+    
     @render.ui
     def kpi_churn():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Churn_Probability'].mean()
+
+        val = df["Churn_Probability"].mean()
         val_str = f"{val:.1%}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Churn_Probability'].mean()
+                base_val = df_base["Churn_Probability"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):.1%}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{abs(delta):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
     def kpi_risk():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['risk_value'].mean()
+
+        val = df["risk_value"].mean()
         val_str = f"${val:,.2f}"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['risk_value'].mean()
+                base_val = df_base["risk_value"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
-                subtext = f"{sign}${abs(delta):,.2f}"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
     def kpi_days():
         df = filtered_df()
         pct_decrease = input.slider_churn_decrease()
+
         if df.empty:
             return "—"
-        val = df['Time_Between_Purchases'].mean()
+
+        val = df["Time_Between_Purchases"].mean()
         val_str = f"{val:,.2f} days"
-        
+
         if pct_decrease > 0:
             df_base = churn_plot_df()
             if not df_base.empty:
-                base_val = df_base['Time_Between_Purchases'].mean()
+                base_val = df_base["Time_Between_Purchases"].mean()
                 delta = val - base_val
-                sign = "+" if delta > 0 else "−" if delta < 0 else ""
-                color = "#dc3545" if delta > 0 else "#28a745" if delta < 0 else "inherit"
-                subtext = f"{sign}{abs(delta):,.2f} days"
-                return ui.HTML(f"<div>{val_str}</div><div style='font-size: 0.8em; font-weight: 500; color: {color};'>{subtext}</div>")
+                pct_change = 0 if base_val == 0 else delta / base_val
+                direction = "increase" if delta > 0 else "decrease" if delta < 0 else "change"
+                color = "red" if delta > 0 else "green" if delta < 0 else "inherit"
+                subtext = f"{abs(pct_change):.1%} {direction} vs no churn reduction"
+
+                return ui.HTML(
+                    f"<div>{val_str}</div>"
+                    f"<div style='font-size: 0.6em; opacity: 0.8; color: {color};'>{subtext}</div>"
+                )
+
         return val_str
 
     @render.ui
