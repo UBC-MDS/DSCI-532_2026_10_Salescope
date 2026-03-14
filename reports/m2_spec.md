@@ -49,6 +49,8 @@ And these are the updated job stories and their progress as of Milestone 2:
 | `frequency_df`| Output        | `@render.data_frame`    | `filtered_df`,`row_dropdown` | #1         |
 | `heatmap_metric`  | Input     |`ui.input_radio_buttons()`| -                           | #3         |
 | `heatmap`     | Output        | `@render_widget`        | `filtered_df, heatmap_metric`| #3         |
+| `time_metric` | Input | `ui.input_radio_buttons()` | — | #2 |
+| `trend_over_time` | Output | `@render_widget` | `filtered_df`, `time_metric` | #2 |
 
 Rows component_4-8 will be filled per issues #57, #58, #59 as implementation progresses.
 
@@ -76,6 +78,7 @@ flowchart TD
   J[/num_churn_min/] --> F{{filtered_df}}
   K[/num_churn_max/] --> F
   A[/slider_churn_decrease/] --> F
+  L[/date_range/] --> F
   B[/slider_customer/] --> F
   C[/slider_order/] --> F
   D[/slider_freq/] --> F
@@ -112,7 +115,7 @@ flowchart TD
 ### `filtered_df`
 
 - **Inputs:** `num_churn_min`, `num_churn_max`, `slider_churn_decrease`, `slider_customer`, `slider_order`, `slider_freq`, `date_range`, `checkbox_group_type`, `checkbox_group_region`, `checkbox_group_strategy`. Note: The default date range view is explicitly set to the most recent quarter in the dataset.
-- **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are clipped to the selected slider ranges using `.between()`. `Churn_Probability` is filtered using the `num_churn_min` and `num_churn_max` boundaries, then further reduced (setting `reduced_max` and the `in_reduced_churn_range` column) according to `slider_churn_decrease`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
+- **Transformation:** Starts with a copy of the full 10,000-row dataset and applies sequential filters. Numeric columns (`Lifetime_Value`, `Average_Order_Value`, `Purchase_Frequency`) are filtered to the selected slider ranges using `.between()`. `Churn_Probability` is filtered using the `num_churn_min` and `num_churn_max` boundaries, then further reduced (setting `reduced_max` and the `in_reduced_churn_range` column) according to `slider_churn_decrease`. The `Launch_Date` column is filtered to the selected date range. Categorical columns (`Most_Frequent_Category`, `Region`, `Retention_Strategy`) are then filtered using `.isin()` based on the selected checkbox values. If a checkbox group has nothing selected, that filter is skipped entirely so the app does not return zero rows unexpectedly.
 - **Outputs:** `high_churn_risk` (if `slider_churn_decrease` is 0), `heatmap`, `customer_df`, `risk_df`, `order_df`, `frequency_df`, `kpi_count`. The KPI descriptions have been updated to explicitly mention that their figures reflect this `filtered_df` segment, with default values tied to the most recent quarter.
 
 ### `churn_plot_df`
@@ -120,6 +123,12 @@ flowchart TD
 - **Inputs:** Operates utilizing the same core logic parameters as `filtered_df` (tracking all global sliders and checkboxes). 
 - **Transformation:** Bypasses the strict `reduced_max` threshold cull triggered when the `slider_churn_decrease` goes above 0. Evaluates that top percentage grouping with a mapping boolean column: `in_reduced_churn_range`.
 - **Outputs:** `high_churn_risk` (Active selectively when `slider_churn_decrease` > 0 to plot the chopped-off metric bands concurrently) and baseline mapping computations for main KPI output strings (`kpi_lifetime`, `kpi_churn`, `kpi_risk`, `kpi_days`) tracking comparative change deltas.
+
+### `trend_over_time`
+
+- **Inputs:** `filtered_df`, `time_metric`
+- **Transformation:** Aggregates the selected metric by `Launch_Date` to compute the daily average. The aggregated series is then smoothed using a rolling mean window to highlight longer-term trends in the selected metric.
+- **Outputs:** A time series visualization in the **Advanced Figures → Trends Over Time** tab showing how the selected customer metric evolves over time. The visualization updates dynamically based on the dashboard filters and selected metric.
 
 ## Section 5: Complexity Enhancement — Reset Button
 
@@ -133,3 +142,17 @@ A "Reset Filters" action button (`reset`) was added to the sidebar. When clicked
 
 Without the reset button, a user who has applied multiple overlapping filters (for example: a churn slider + two checkbox groups + a date range) must manually undo each control one by one to return to the default view. This creates unnecessary friction, especially for exploratory sessions where users jump between different filter combinations. A single "Reset Filters" click eliminates this pain point, making the dashboard significantly faster to use for real analytical workflows.
 
+## Terminology / Abbreviations
+
+- **Lifetime Value (LTV)**: The predicted total revenue a customer will generate over time.
+- **Value-at-risk**: The dollar amount at risk, calculated as Lifetime Value × Churn Probability.
+- **Churn Probability**: The modeled risk score (0–1) indicating the likelihood a customer will churn.
+- **KPI**: Key Performance Indicator. Metrics used to evaluate the success or status of an objective.
+
+## Branding and Colour Palette
+
+To improve accessibility and brand coherence, the following scheme was applied across the dashboard:
+- **Primary Action (Salescope Blue `#007bc2`)**: Used for the primary "Reset filters" and "Download Filtered Dataframe" action buttons.
+- **Accent Insight (Salescope Orange `#FF9F1C`)**: Used as a highlight accent border for the "Actionable Insights & Next Steps" card to draw user attention.
+- **Positive Indicator (Green `#28a745`)**: Used semantically for improved KPIs (e.g. increase in LTV, decrease in churn probability).
+- **Negative Indicator (Red `#dc3545`)**: Used semantically for worsening KPIs (e.g. drop in LTV, increase in churn risk).
