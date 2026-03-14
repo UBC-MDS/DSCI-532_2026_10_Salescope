@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
+import numpy as np
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -1076,7 +1077,7 @@ def server(input, output, session):
 
         fig.add_trace(
             go.Scatter(
-                x=trend_df["Launch_Date"].dt.to_pydatetime(),
+                x=np.array(trend_df["Launch_Date"].dt.to_pydatetime()),
                 y=trend_df[metric],
                 mode="markers",
                 name="Daily average",
@@ -1086,7 +1087,7 @@ def server(input, output, session):
 
         fig.add_trace(
             go.Scatter(
-                x=trend_df["Launch_Date"].dt.to_pydatetime(),
+                x=np.array(trend_df["Launch_Date"].dt.to_pydatetime()),
                 y=trend_df["smooth"],
                 mode="lines",
                 name="7-day rolling mean",
