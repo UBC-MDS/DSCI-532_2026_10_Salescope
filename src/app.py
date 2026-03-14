@@ -1,8 +1,10 @@
 from shiny import App, render, ui, reactive
 from shiny.types import ImgData
 import plotly.express as px
+import plotly.graph_objects as go
 import seaborn as sns
 from shinywidgets import render_plotly, render_widget, output_widget
+import numpy as np
 import pandas as pd
 import os
 from dotenv import load_dotenv
@@ -16,7 +18,9 @@ from .dflogic import create_summary_table, filter_sales_data
 from .db import get_base_dataframe, execute_filtered_query
 
 
-# see querychat_explore.ipynb and querychat_customization.ipynb for integration notes
+# used LLM to know how to show actual count/mean inside the box for heatmap
+# used LLM to plot trends over time
+# used querychat-explore.ipynb notes for querychat integration
 
 # use shiny run --reload --launch-browser src/app.py to local test
 
@@ -413,6 +417,41 @@ panel_3 = ui.nav_panel("Seasonal Product Heatmap",
         col_widths=[3, 9], ),
 )
 
+# Specialized plot for trends over time
+
+panel_4 = ui.nav_panel(
+    
+    "Trends Over Time",
+    ui.layout_columns(
+        ui.card(
+            ui.card_header("Trend settings"),
+            ui.input_radio_buttons(
+                "time_metric",
+                "Select metric:",
+                {
+                    "Lifetime_Value": "Customer Lifetime Value",
+                    "Churn_Probability": "Churn Risk",
+                    "risk_value": "Value at Risk",                    
+                    "Average_Order_Value": "Average Order Value",
+                    "Purchase_Frequency": "Purchase Frequency",
+                    "Time_Between_Purchases": "Days Between Purchases",
+                },
+                selected="Lifetime_Value",
+            ),
+            ui.help_text("This plot uses dashboard filters or AI filtered data when AI checkbox is enabled."),
+        ),
+        ui.card(
+            ui.card_header("Metric Trend Over Time"),
+
+            output_widget("trend_over_time"),
+
+            full_screen=True,
+        ),
+
+        col_widths=[3, 9],
+    ),
+)
+
 #panel for AI insights
 panel_ai = ui.nav_panel(
     "AI Insights",
@@ -476,6 +515,7 @@ app_ui = ui.page_navbar(
             panel_2,
             panel_1,
             panel_3, 
+            panel_4,
             id="advanced_nav"
         )
     ),
@@ -1219,6 +1259,71 @@ def server(input, output, session):
         
         return fig
 
+    @render_widget
+    def trend_over_time():
+        df = dashboard_df()
+
+        if df.empty:
+            return px.scatter(title="No data available for current filters")
+
+        metric = input.time_metric()
+
+        metric_labels = {
+            "Lifetime_Value": "Customer Lifetime Value ($)",
+            "Churn_Probability": "Churn Risk",
+            "risk_value": "Value at Risk ($)",
+            "Average_Order_Value": "Average Order Value ($)",
+            "Purchase_Frequency": "Purchase Frequency",
+            "Time_Between_Purchases": "Days Between Purchases",
+        }
+
+        if metric not in df.columns:
+            return px.scatter(
+                title=f"Selected metric '{metric}' is not available in the current dataframe"
+            )
+
+        df_plot = df.copy()
+        #df_plot["Launch_Date"] = pd.to_datetime(df_plot["Launch_Date"])
+
+        trend_df = (
+            df_plot.groupby("Launch_Date", as_index=False)[metric]
+            .mean()
+            .sort_values("Launch_Date")
+        )
+
+        trend_df["smooth"] = trend_df[metric].rolling(window=7, min_periods=1).mean()
+
+        fig = go.Figure()
+
+        fig.add_trace(
+            go.Scatter(
+                x=np.array(trend_df["Launch_Date"].dt.to_pydatetime()),
+                y=trend_df[metric],
+                mode="markers",
+                name="Daily average",
+                marker=dict(size=6),
+            )
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=np.array(trend_df["Launch_Date"].dt.to_pydatetime()),
+                y=trend_df["smooth"],
+                mode="lines",
+                name="7-day rolling mean",
+            )
+        )
+
+        fig.update_layout(
+            title=f"{metric_labels.get(metric, metric)} Over Time",
+            xaxis_title="Date",
+            yaxis_title=metric_labels.get(metric, metric),
+            hovermode="x unified",
+        )
+
+        fig.update_xaxes(type="date")
+
+        return fig
     
     @render.text
     def kpi_count():
