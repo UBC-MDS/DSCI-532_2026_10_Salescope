@@ -14,8 +14,8 @@ import duckdb
 from pathlib import Path
 
 # src imports
-from .dflogic import create_summary_table, filter_sales_data
-from .db import get_base_dataframe, execute_filtered_query
+from dflogic import create_summary_table, filter_sales_data
+from db import get_base_dataframe, execute_filtered_query
 
 
 # used LLM to know how to show actual count/mean inside the box for heatmap
@@ -513,13 +513,16 @@ app_ui = ui.page_navbar(
         "Advanced Figures",
         ui.layout_sidebar(
             main_sidebar, 
-            ui.navset_card_tab(
-                panel_2,
-                panel_1,
-                panel_3, 
-                panel_4,
-                id="advanced_nav"
-            )
+            ui.TagList(
+                ui.output_ui("conditional_kpis"),
+                ui.navset_card_tab(
+                    panel_2,
+                    panel_1,
+                    panel_3, 
+                    panel_4,
+                    id="advanced_nav"
+                )
+            ) 
         )
     ),
     panel_ai, 
@@ -551,8 +554,7 @@ app_ui = ui.page_navbar(
         ui.markdown(
             "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
             "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
-        ),
-        ui.output_ui("conditional_kpis")
+        )
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
