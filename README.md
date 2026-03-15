@@ -12,7 +12,26 @@ An updating deployment from the `dev` branch can be viewed at [https://019c8d16-
 
 ## Dataset
 
-We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights) dataset from Kaggle, which contains 10,000 customer records with purchasing behavior and engagement metrics.
+We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranalishahh/sales-and-customer-insights) dataset from Kaggle, which contains 10,000 customer records with purchasing behavior and engagement metrics. Below is a description of each column in our dataset:
+
+| Column name  | type | Description | Range of Values |
+| ------------- | ------------- | -------------- | ----------------- |
+| Customer_ID  | `str`  |  Unique customer identifier| - | 
+| Product_ID  | `str`  | Product identifier| - |
+| Transaction_ID  | `str`  | Transaction identifier| - |
+| Purchase_Frequency  | `int`  | Number of purchases in the review period | `min = 1, max = 19` |
+| Average_Order_Value | `float` | Average transaction value in USD| `min = 20, max = 200`| 
+| Most_Frequent_Category | `str` | Product type most frequently purchased | `[Clothing, Electronics, Home, Sports]` |
+| Time_Between_Purchases | `int` | Average number of days between purchases | `min = 5, max = 89` |
+| Region | `str` | Region the customer is located in | `[Asia, Europe, North America, South America]` |
+| Churn_Probability | `float` | Probability of the customer leaving | `min = 0, max = 1`|
+| Lifetime_Value | `float`  | Predicted total customer revenue in USD | `min = 100, max = 10000`|
+| Launch_Date | `date` |  Customer acquisition date | `min = 2019-12-31, max = 2023-01-01` |
+| Peak_Sales_Date | `date` |  Date of highest purchase activity | `min = 2022-12-31, max = 2024-01-01` |
+| Season | `str` | Season with most sales | `[Spring, Summer, Fall, Winter]` |
+| Preferred_Purchase_Times | `str` | Most common time the customer makes purchases | `[Morning, Afternoon, Evening]` |
+| Retention_Strategy | `str` | Strategy used for retaining the customer | `[Discount, Email Campaign, Loyalty Program]` |
+| Value_At_Risk | `float` | Customer revenue at risk computed by Lifetime_Value × Churn_Probability | `min = 0, max = 10000` |
 
 ## Team
 
