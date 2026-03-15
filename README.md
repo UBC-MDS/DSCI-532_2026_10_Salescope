@@ -51,6 +51,30 @@ This dashboard is developed by Group 10 for DSCI 532:
 
 ![Milestone 3 Demo](img/milestone3_demo.gif)
 
+### Milestone 4 User Story Demo
+
+[reports/m2_proposal.md](reports/m2_proposal.md) contains several example use cases for this dashboard. For this demo, we will resolve User Story 1:
+
+> As a **Regional Sales Director**, I want to **compare basic KPIs (such as mean, median, and maximum) for customer lifetime value, average order value, and purchase frequency across different geographic regions** so that I can **identify high-performing regions to replicate best practices and underperforming regions that need intervention**.
+
+We first access the dashboard at [https://019c8d13-5610-dd58-6134-331453179c0e.share.connect.posit.cloud](https://019c8d13-5610-dd58-6134-331453179c0e.share.connect.posit.cloud). This should bring up a dashboard similar to the one below:
+
+![Starting Salescope dashboard.](img/m4_demo1.png)
+
+The first thing we need to do is filter what subset of data we want to analyze. The default settings of this dashboard is to only show the customer records from customers acquired in the most recent quarter in the dataset. In this case, that would be 2023 Q1, and it happens that there are only 7 customers acquired from January 2023 to March 2023. We need more data, so lets adjust the date filter in the blue highlighted rectangle to show all the customer data from the previous year 2022.
+
+![Dashboard showing only data from 2022.](img/m4_demo2.png)
+
+Notice now that the previous low datapoint count warning has disappeared, indicating we have sufficient data to continue. From the main KPI boxes, we can see the average lifetime value of a customer in 2022 is $5062, their average value at risk is $2527.33, their average churn probability is 50%, and the average days between purchase is 46.73 days, which is useful to keep in mind as a base comparison. Now click on the blue rectangle to observe key stats that can be partitioned by geographic region.
+
+![Partition options for `Key Metric Tables`.](img/m4_demo3.png)
+
+Upon clicking `Key Metric Tables`, there is a drop down where you can choose how to group the filtered data. Select the `Region` option.
+
+![Resulting Key Metric Table that can answer our question.](img/m4_demo4.png)
+
+From here, we are now able to compare basic KPIs for customer lifetime value across the geographic regions. Reading the table, we can see that North America has the highest average customer lifetime value at $5146.92 whereas South America has the lowest average customer lifetime value at $4990.33. The value at risk, average order value, and purchase frequency for these regions can also be compared by clicking the respective tabs. 
+
 ## Using AI Assistant
 The **AI Insights** tab provides a natural language interface to your customer data, allowing for rapid exploration without manual slider adjustments.
 
