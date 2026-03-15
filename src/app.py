@@ -514,6 +514,11 @@ app_ui = ui.page_navbar(
         ui.layout_sidebar(
             main_sidebar, 
             ui.TagList(
+                ui.markdown("#### Data-driven customer retention and churn analysis."),
+                ui.markdown(
+            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
+            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
+                ),
                 ui.output_ui("conditional_kpis"),
                 ui.navset_card_tab(
                     panel_2,
@@ -549,12 +554,7 @@ app_ui = ui.page_navbar(
                 border-left: 4px solid #FF9F1C;
             }
             """
-        ),
-        ui.markdown("#### Data-driven customer retention and churn analysis."),
-        ui.markdown(
-            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
-            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
-        )
+        )        
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
