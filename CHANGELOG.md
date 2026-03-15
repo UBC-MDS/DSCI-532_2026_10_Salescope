@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pytest unit tests located in `dflogic.py` for #164. (#165, renaming in PR #207)
 - Playwright tests for dashboard interaction in `test_dashboard_playwright.py`. (#166)
 - Documentation of logic tests in `notebooks/logic_tests.ipynb`. (#167)
- 
+- New Advanced Figure panel for metric comparisons over time. (#176)
+
 ### Changed
 
 <!-- Spec or design deviations, and motivation. -->
@@ -115,10 +116,18 @@ A complete description for our decision to create this advanced feature and the 
 <!-- Standard (see General Guidelines): what the dashboard does well, current limitations,
      any intentional deviations from DSCI 531 visualization best practices. -->
 
+The completed 0.4.0 version of the Salescope dashboard processes sales analytics queries efficiently and presents them in an AI-enhanced user-tested interface. Usage of a DuckDB/ibis infrastructure means that further scaling of the dataset can be handled effectively without lag typically associated with processing data entirely in the browser or app memory. Asides from the `AI Insights` tab, additional focus has been made on decisional aspects for churn risk analysis through computed recommendations and more case specific comparisons between retention strategies. Rudimentary temporal analysis is also possible with this dashboard through the date filter and the `Trends Over Time` Advanced figure, and with further time additions in time analysis would be considered. Lastly, the dashboard has been extensively documented and automatically tested in the `reports` and `tests` folders of our repository respectively.
+
+Most visualization practices in DSCI 531 were followed. Interactivity was kept to mainly the base `plotly` functionality as there was already a high degree of complexity in the dashboard as a whole and most of the user stories could be resolved through simpler radio buttons and dropdown filters. The only significant divergence from DSCI 531 guidelines was in the scatter plot being able to show all 10000 points, creating a cluttered and noisy plot. The scatter plot in this sense works best when the data is significantly filtered, which is why the box plot was created as an accompanying plot as it can represent more data points in a more effective manner.
+
+
 <!-- Trade-offs: one sentence on feedback prioritization - full rationale is in #<issue> and ### Changed above. -->
+Full feedback prioritization and rationale is stored in #149. For peer feedback issues #168, #173, and #201, child issues directly addressing the feedback have been linked accordingly.
 
 <!-- Most useful: which lecture, material, or feedback shaped your work most this milestone,
      and anything you wish had been covered. -->
+In terms of feedback shaping the work on M4, many of the issues stored under #149 followed a process of referring to the relevant lecture material, then utilizing the [Shiny Python Documentation](https://shiny.posit.co/py/docs/overview.html) for more specific `ui` functions and interactions necessary. With further time, there could be more work put into the visually compact setup of the dashboard and further emphasis on how to balance the necessity for presenting key stats without overwhelming the user and including the features to go into extensive depth with our dataset.
+
 
 
 
