@@ -468,7 +468,7 @@ panel_ai = ui.nav_panel(
         """),
         ui.layout_sidebar(
             # AI chat interface
-            qc.sidebar(),
+            qc.sidebar(open = "always"),
             # AI scope control — affects LLM behavior via on_tool_request
             ui.card(
                 ui.card_header("AI Analysis Settings"),
@@ -511,12 +511,15 @@ panel_ai = ui.nav_panel(
 app_ui = ui.page_navbar(
     ui.nav_panel(
         "Advanced Figures",
-        ui.navset_card_tab(
-            panel_2,
-            panel_1,
-            panel_3, 
-            panel_4,
-            id="advanced_nav"
+        ui.layout_sidebar(
+            main_sidebar, 
+            ui.navset_card_tab(
+                panel_2,
+                panel_1,
+                panel_3, 
+                panel_4,
+                id="advanced_nav"
+            )
         )
     ),
     panel_ai, 
@@ -528,7 +531,6 @@ app_ui = ui.page_navbar(
         ),
         "Salescope — Customer Retention & Churn Insights",
     ),
-    sidebar=main_sidebar,
     header=ui.TagList(
         ui.tags.style(
             """
