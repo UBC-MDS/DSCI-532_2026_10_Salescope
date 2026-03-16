@@ -31,7 +31,7 @@ We use the [Sales and Customer Insights](https://www.kaggle.com/datasets/imranal
 | Season | `str` | Season with most sales | `[Spring, Summer, Fall, Winter]` |
 | Preferred_Purchase_Times | `str` | Most common time the customer makes purchases | `[Morning, Afternoon, Evening]` |
 | Retention_Strategy | `str` | Strategy used for retaining the customer | `[Discount, Email Campaign, Loyalty Program]` |
-| Value_At_Risk | `float` | Customer revenue at risk computed by Lifetime_Value × Churn_Probability | `min = 0, max = 10000` |
+| Value_At_Risk | `float` | Customer revenue at risk (USD) computed by Lifetime_Value × Churn_Probability | `min = 0, max = 10000` |
 
 ## Team
 
