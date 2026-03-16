@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-17
+
+### Added
+- Generate processed DuckDB Dataset. (#158)
+- Add DuckDB/ibis data access layer. (#159)
+- Pytest unit tests in `dflogic.py` (#165, renaming in PR #207)
+- Playwright tests for dashboard interaction in `test_dashboard_playwright.py`. (#166)
+- Documentation of logic tests in `notebooks/logic_tests.ipynb`. (#167)
+- New Advanced Figure panel for metric comparisons over time. (#176)
+- Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
+- README dataset description table and written demo use case. (#184, #211)
+- Help button in header linking to README usage examples. (#204, #212)
+
+### Changed
+- Replace in-memory filtering with DB-backed reactive calc. (#160)
+- Refactoring of `src/app.py` to extract testable functions. (#164)
+- Rename risk_value column to Value_At_Risk in generated dataframes. (#194, #208)
+- Update `environment.yml` and `requirements.txt` with playwright and duckdb support. (#196)
+- Manual filters moved to tab-specific layout; AI Insights tab shows only AI chat sidebar. (#200, #213)
+
+### Fixed
+
+**Feedback prioritization issue link:** #149
+
+A comprehensive list of feedback issues addressed for 0.4.0 along with accreditation can be found in [issue #149](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
+
+#### Critical Issues
+- Set the repo so each PR requires a review before merge. (#172)
+- AI chat scrollable to prevent horizontal expansion. (#174)
+- Remove KPIs when AI Insights tab is chosen. (#175)
+- Explicit indication of how KPI comparisons are computed. (#178)
+
+#### Non-critical Issues
+- Metric comparisons over time. (#176)
+- Clean up abbreviations on dashboard. (#177)
+- Add logo and colour scheme. (#179)
+- Update README with usage and dataset description. (#184)
+- Reorganize filter sidebar length. (#185)
+- Clean up wording of helper text. (#186)
+- Reduce KPI filters to single row and move Count of Datapoints. (#199)
+- Replace sidebar when on AI Insights tab. (#200)
+- Tooltip for churn rate reduction slider. (#203)
+- Help button linking to README examples. (#204)
+
+### Known Issues
+
+Within `tests/test_dashboard_playwright.py`, the tests `test_retention_strategy_filter_two_values` and `test_reset_button_restores_defaults` require selecting the `Key Metrics Table` to the `Region` option even though this is technically not checked in the test. Removing these lines will result in the following error, and the cause is currently unknown as manually trying this test on the dashboard shows that the text is rendering as expected.
+
+```
+Call log:
+E         - Expect "to_have_text" with timeout 15000ms
+E         - waiting for locator("#kpi_note")
+E           6 × locator resolved to <div id="kpi_note" aria-live="polite" class="shiny-html-output shiny-bound-output recalculating"></div>
+E             - unexpected value ""
+```
+
+### Release Highlight: Querychat Customization
+- **Option chosen:** A
+- **Main PR:** #155
+- **Supporting PRs:** Design Option A in spec (#161), AI controls and prompts (#162), experiments notebook (#163)
+- **Why this option:** Gives the LLM full dataset context and user controls; persistent LLM logging would add infra without the same answer-quality gain. Feature prioritization: #155. Full description: [reports/m4_spec.md](./reports/m4_spec.md).
+
+### Collaboration
+
+- **CONTRIBUTING.md:** Updated with M3 retrospective and M4 norms via [PR #209](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/pull/209). Summary: issue creation more structured (#151 + child issues), work spread across the week, `src/app.py` refactored into `dflogic.py` and `db.py`.
+- **Spec and design before code.** For Option A we updated `reports/m4_spec.md` and #155 before implementing. For DuckDB/Parquet (#154) we had the pipeline and `db.py` design before wiring the app. For Playwright (#156) we added tests alongside the spec. For some feedback items we fixed first then updated CHANGELOG/spec; we aimed for spec-first on larger features. (#215)
+
+### Reflection
+
+The completed 0.4.0 dashboard processes sales analytics efficiently and presents them in an AI-enhanced, tested interface. DuckDB/ibis allows scaling without in-memory lag. Beyond the AI Insights tab we focused on churn risk decisions (recommendations, retention strategy comparisons). Temporal analysis is supported via the date filter and Trends Over Time figure. The repo is documented in `reports/` and `tests/`.
+
+Most DSCI 531 visualization practices were followed. The main divergence is the scatter plot showing all 10k points (noisy when unfiltered); the box plot complements it for dense data. Full feedback prioritization and rationale: #149.
+
+**Tests.** The Playwright tests in `test_dashboard_playwright.py` cover the dashboard UI: initial KPI count, Key Metric Tables structure and cell values, region/purchase type/retention strategy filters, row dropdown grouping, and reset button behaviour. The logic tests in `logic_tests.py` cover `normalize_range`, `create_summary_table`, and `filter_sales_data` in `dflogic.py`. If those behaviours regress, filter state and KPI summaries could be wrong or the app could show incorrect aggregates. (#214)
+
 ## [0.3.0] - 2026-03-08
 
 ### Added
