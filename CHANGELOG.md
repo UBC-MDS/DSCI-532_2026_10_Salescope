@@ -51,12 +51,15 @@ A comprehensive list of feedback issues addressed for 0.4.0 along with accredita
 
 ### Known Issues
 
-When testing locally with `shiny run --reload --launch-browser src/app.py`, you may see:
+Within `tests/test_dashboard_playwright.py`, the tests `test_retention_strategy_filter_two_values` and `test_reset_button_restores_defaults` require selecting the `Key Metrics Table` to the `Region` option even though this is technically not checked in the test. Removing these lines will result in the following error, and the cause is currently unknown as manually trying this test on the dashboard shows that the text is rendering as expected.
 
 ```
-ImportError: attempted relative import with no known parent package
+Call log:
+E         - Expect "to_have_text" with timeout 15000ms
+E         - waiting for locator("#kpi_note")
+E           6 × locator resolved to <div id="kpi_note" aria-live="polite" class="shiny-html-output shiny-bound-output recalculating"></div>
+E             - unexpected value ""
 ```
-(for `from .dflogic import ...` in `src/app.py`). This is a local import bug and does not affect Posit deployments. Workaround: use a Posit deployment, or temporarily replace lines 17–18 in `src/app.py` with `from dflogic import ...` and `from db import ...`.
 
 ### Release Highlight: Querychat Customization
 - **Option chosen:** A
