@@ -12,6 +12,10 @@ import querychat
 from chatlas import ChatAnthropic, ToolRejectError
 import duckdb
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).parent
+sys.path.append(str(ROOT))
 
 # src imports
 from dflogic import create_summary_table, filter_sales_data
