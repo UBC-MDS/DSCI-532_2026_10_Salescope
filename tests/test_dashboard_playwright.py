@@ -3,7 +3,9 @@
 from shiny.playwright import controller
 from shiny.run import ShinyAppProc
 from shiny.pytest import create_app_fixture
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
+
+import re
 
 app = create_app_fixture("../src/app.py")
 
@@ -14,10 +16,13 @@ def test_initial_kpi_count(page: Page, app: ShinyAppProc) -> None:
 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
+    kpi_locator = page.locator("#kpi_note")
 
-    controller.OutputText(page, "kpi_count").expect_value("7 ⚠️ Low sample", timeout = 10000)
-
-
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 7 datapoints.", timeout = 10000
+    )
+    
+    
 def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None:
     
     """Customer Lifetime Value summary table structure, ensuring the KPI table renders correct summary statistics for the selected grouping."""
@@ -27,12 +32,14 @@ def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None
 
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
+    controller.InputSelect(page, "row_dropdown").set("Region")
+
     customer_df = controller.OutputDataFrame(page, "customer_df")
     customer_df.expect_ncol(6, timeout = 10000)
     customer_df.expect_column_labels(
-        ["Region", "Count", "Mean", "Median", "Maximum", "Total"]
+        ["Group", "Count", "Mean", "Median", "Maximum", "Total"]
     )
-    customer_df.expect_nrow(4)
+    customer_df.expect_nrow(5)
 
 
 def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> None:
@@ -43,6 +50,8 @@ def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> No
     page.wait_for_load_state("networkidle")
 
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
+
+    controller.InputSelect(page, "row_dropdown").set("Region")
 
     customer_df = controller.OutputDataFrame(page, "customer_df")
     customer_df.expect_cell("Asia", row=0, col=0, timeout = 10000)
@@ -61,12 +70,19 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
 
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
+    controller.InputSelect(page, "row_dropdown").set("Region")
+
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     region_checkbox.set(["Asia"])
     region_checkbox.expect_selected(["Asia"], timeout = 10000)
 
-    controller.OutputText(page, "kpi_count").expect_value("3 ⚠️ Low sample")
-    controller.OutputDataFrame(page, "customer_df").expect_nrow(1)
+    kpi_locator = page.locator("#kpi_note")
+
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 3 datapoints.", timeout = 10000
+    )
+
+    controller.OutputDataFrame(page, "customer_df").expect_nrow(2)
 
 
 def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
@@ -78,11 +94,17 @@ def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
 
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
+    controller.InputSelect(page, "row_dropdown").set("Region")
+
     purchase_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_type")
     purchase_checkbox.set(["Clothing", "Electronics"])
     purchase_checkbox.expect_selected(["Clothing", "Electronics"], timeout = 10000)
 
-    controller.OutputText(page, "kpi_count").expect_value("4 ⚠️ Low sample")
+    kpi_locator = page.locator("#kpi_note")
+
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 4 datapoints.", timeout = 10000
+    )
 
 
 def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> None:
@@ -92,13 +114,32 @@ def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+
+    # NOTE: These two lines are not actually relevant to this test but removing them causes the following error to show up for some inexplicable reason:
+    """
+     AssertionError: Locator expected to have text '⚠️ Low sample size: current filters leave only 5 datapoints.'
+E       Actual value:  
+E       Call log:
+E         - Expect "to_have_text" with timeout 10000ms
+E         - waiting for locator("#kpi_note")
+E           5 × locator resolved to <div id="kpi_note" aria-live="polite" class="shiny-html-output shiny-bound-output recalculating"></div>
+E             - unexpected value ""
+    """
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
+    controller.InputSelect(page, "row_dropdown").set("Region")
 
     strategy_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_strategy")
     strategy_checkbox.set(["Discount", "Email Campaign"])
     strategy_checkbox.expect_selected(["Discount", "Email Campaign"], timeout = 10000)
 
-    controller.OutputText(page, "kpi_count").expect_value("5 ⚠️ Low sample")
+    # there is apparently a race condition here
+    kpi_locator = page.locator("#kpi_note")
+
+
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 5 datapoints.", timeout = 10000
+    )
+
 
 
 def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
@@ -117,9 +158,9 @@ def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
 
     customer_df.expect_ncol(6, timeout = 10000)
     customer_df.expect_column_labels(
-        ["Retention_Strategy", "Count", "Mean", "Median", "Maximum", "Total"]
+        ["Group", "Count", "Mean", "Median", "Maximum", "Total"]
     )
-    customer_df.expect_nrow(3)
+    customer_df.expect_nrow(4)
 
 
 def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
@@ -129,20 +170,42 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
+    # NOTE: These two lines are not actually relevant to this test but removing them causes the following error to show up for some inexplicable reason:
+    """
+     AssertionError: Locator expected to have text '⚠️ Low sample size: current filters leave only 5 datapoints.'
+E       Actual value:  
+E       Call log:
+E         - Expect "to_have_text" with timeout 10000ms
+E         - waiting for locator("#kpi_note")
+E           5 × locator resolved to <div id="kpi_note" aria-live="polite" class="shiny-html-output shiny-bound-output recalculating"></div>
+E             - unexpected value ""
+    """
     controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
+    controller.InputSelect(page, "row_dropdown").set("Region")
 
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     reset_btn = controller.InputActionButton(page, "reset")
-    kpi_count = controller.OutputText(page, "kpi_count")
-
+    
     # changing filter
 
     region_checkbox.set(["Asia"])
-    kpi_count.expect_value("3 ⚠️ Low sample", timeout = 10000)
+    
+    kpi_locator = page.locator("#kpi_note")
+    kpi_locator.wait_for(state="visible")
+
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 3 datapoints.", timeout = 10000
+    )
 
     # resetting filter
 
     reset_btn.click()
 
-    kpi_count.expect_value("0 ⚠️ Low sample", timeout = 10000)
+    kpi_locator = page.locator("#kpi_note")
+    expect(page.locator("#kpi_note")).not_to_have_class(re.compile(r"recalculating"), timeout=15000)
+
+    expect(kpi_locator).to_have_text(
+        "⚠️ Low sample size: current filters leave only 7 datapoints.", timeout = 10000
+    )
+
     region_checkbox.expect_selected([])
