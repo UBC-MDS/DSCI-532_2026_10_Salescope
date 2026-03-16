@@ -39,11 +39,10 @@ happy for any support that they can get.
 
 ### Write Documentation
 
-imitation-game could always use more documentation, whether as
-part of the official documentation, in docstrings, or even on the web in blog
-posts, articles, and such. Just
-[open an issue](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues)
-to let us know what you will be working on so that we can provide you with guidance.
+Salescope could always use more documentation, whether in the README,
+docstrings, or in the `reports/` and `docs/` folders. Open an
+[issue](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues)
+to let us know what you will be working on so we can align with the rest of the team.
 
 ### Submit Feedback
 
@@ -54,56 +53,51 @@ project and everybody has limited time.
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up imitation-game for
-local development.
+Ready to contribute? Here's how to set up Salescope for local development.
 
-1. Fork the https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues
-   repository on GitHub.
-2. Clone your fork locally (*if you want to work locally*)
+1. Fork the [repository](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope) on GitHub.
+2. Clone your fork locally and create an environment (see the [README](README.md) for full steps):
 
     ```shell
-    git clone git@github.com:UBC-MDS/DSCI-532_2026_10_Salescope.git
+    git clone https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope.git
+    cd DSCI-532_2026_10_Salescope
+    conda env create -f environment.yml
+    conda activate Salescope
     ```
 
-3. [Install hatch](https://hatch.pypa.io/latest/install/).
-
-4. Create a branch for local development using the default branch (typically `main`) as a starting point. Use `fix` or `feat` as a prefix for your branch name.
+3. Create a branch from `dev` (or `main` for hotfixes). Use a short prefix like `fix/` or `feat/` and a descriptive name.
 
     ```shell
-    git checkout main
-    git checkout -b fix-name-of-your-bugfix
+    git checkout dev
+    git checkout -b fix/short-description-of-change
     ```
 
-    Now you can make your changes locally.
+    Make your changes locally.
 
-5. When you're done making changes, apply the quality assurance tools and check
-   that your changes pass our test suite. This is all included with tox
+4. Run the test suite before pushing:
 
     ```shell
-    hatch run test:run
+    python -m pytest -v
     ```
 
-6. Commit your changes and push your branch to GitHub. Please use [semantic
-   commit messages](https://www.conventionalcommits.org/).
+5. Commit with a clear message and push your branch. We use meaningful commit messages so that the history stays readable.
 
     ```shell
     git add .
-    git commit -m "fix: summarize your changes"
-    git push -u origin fix-name-of-your-bugfix
+    git commit -m "fix: brief description of what changed"
+    git push -u origin fix/short-description-of-change
     ```
 
-7. Open the link displayed in the message when pushing your new branch in order
-   to submit a pull request.
+6. Open a pull request against `dev` and request a review. All PRs need at least one approval before merge.
 
 ### Pull Request Guidelines
 
 Before you submit a pull request, check that it meets these guidelines:
 
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put your
-   new functionality into a function with a docstring.
-3. Your pull request will automatically be checked by the full test suite.
-   It needs to pass all of them before it can be considered for merging.
+1. One logical change per PR (one feature or one fix). Keeps reviews focused and history clear.
+2. If the PR adds functionality, update the docs (README, CHANGELOG, or spec) as needed.
+3. Request at least one review; we do not merge without approval.
+4. Run the test suite locally (`python -m pytest -v`) so it passes before requesting review.
 
 
 ## Attribution
@@ -157,6 +151,8 @@ This was the main decision for having the contributor with the most lines of cod
 M3 could best be described as a dramatic success overall, in that while the unintentional procrastination made the process on Saturday concerningly high paced, we were able to complete all the AI integration and several useful improvements to the dashboard with minimal bug concerns. Based on this reflection, we made the following improvements in our M4 collaboration process:
 
 
-- Issue creation was more structured than in M3; a main issue in #151 was reintroduced with child issues being setup for each requirement. This resulted in far fewer additional issues having to be created as work proceeded through M4.
-- The rate at which issues were completed over the week was much more balanced overall while still remaining at a high rate. Currently, we are projected to have all issues completed by end of Saturday/early Sunday, well before the deadline, which both means that no deadline-eve bursts will occur and that if there are unforeseen issues, we will have time to correct them.
-- `src/app.py` had parts of its functionality extracted into helper files, and the general file was refactored for general maintainability. Specific refactorings can be found in our [CHANGELOG](CHANGELOG.md).
+- Issue creation was more structured than in M3; a main issue in #151 was reintroduced with child issues being set up for each requirement. That meant we rarely had to spin up new issues mid-sprint—most work was already scoped.
+- We spread work across the week instead of piling it onto the last day. Completing issues at a steadier pace gave us time for proper reviews and avoided the kind of deadline-eve rush we saw in M3.
+- We refactored `src/app.py` by moving logic into `dflogic.py` and `db.py`, so the main app file is easier to follow and the filtering/aggregation logic is testable. Details are in the [CHANGELOG](CHANGELOG.md).
+
+**Norms we committed to for M4:** one feature or fix per PR (no large dumps), design or spec updates before code for bigger changes, and every PR gets a review before merge. This CONTRIBUTING update was merged via [PR #209](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/pull/209).
