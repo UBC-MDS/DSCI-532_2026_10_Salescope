@@ -468,7 +468,7 @@ panel_ai = ui.nav_panel(
         """),
         ui.layout_sidebar(
             # AI chat interface
-            qc.sidebar(),
+            qc.sidebar(open = "always"),
             # AI scope control — affects LLM behavior via on_tool_request
             ui.card(
                 ui.card_header("AI Analysis Settings"),
@@ -511,12 +511,23 @@ panel_ai = ui.nav_panel(
 app_ui = ui.page_navbar(
     ui.nav_panel(
         "Advanced Figures",
-        ui.navset_card_tab(
-            panel_2,
-            panel_1,
-            panel_3, 
-            panel_4,
-            id="advanced_nav"
+        ui.layout_sidebar(
+            main_sidebar, 
+            ui.TagList(
+                ui.markdown("#### Data-driven customer retention and churn analysis."),
+                ui.markdown(
+            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
+            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
+                ),
+                ui.output_ui("conditional_kpis"),
+                ui.navset_card_tab(
+                    panel_2,
+                    panel_1,
+                    panel_3, 
+                    panel_4,
+                    id="advanced_nav"
+                )
+            ) 
         )
     ),
     panel_ai, 
@@ -538,7 +549,6 @@ app_ui = ui.page_navbar(
         ),
         "Salescope — Customer Retention & Churn Insights",
     ),
-    sidebar=main_sidebar,
     header=ui.TagList(
         ui.tags.style(
             """
@@ -554,13 +564,7 @@ app_ui = ui.page_navbar(
                 border-left: 4px solid #FF9F1C;
             }
             """
-        ),
-        ui.markdown("#### Data-driven customer retention and churn analysis."),
-        ui.markdown(
-            "**Suggested analysis flow:** Start on the *Churn Risk Plot* tab to spot high-risk segments, "
-            "then use *KPI Tables* and the *Seasonal Product Heatmap* to drill into details."
-        ),
-        ui.output_ui("conditional_kpis")
+        )        
     ),
     id="top_navbar",
     theme=ui.Theme("lumen")
