@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
 
+### Reflection
+
+**Tests.** The Playwright tests in `test_dashboard_playwright.py` cover the dashboard UI: initial KPI count, Key Metric Tables structure and cell values, region/purchase type/retention strategy filters, row dropdown grouping, and reset button behaviour. The logic tests in `logic_tests.py` cover `normalize_range`, `create_summary_table`, and `filter_sales_data` in `dflogic.py`. If those behaviours regress, filter state and KPI summaries could be wrong or the app could show incorrect aggregates. (#214)
+
 ## [0.3.0] - 2026-03-08
 
 ### Added
