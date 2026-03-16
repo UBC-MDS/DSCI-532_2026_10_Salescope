@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Tests.** The Playwright tests in `test_dashboard_playwright.py` cover the dashboard UI: initial KPI count, Key Metric Tables structure and cell values, region/purchase type/retention strategy filters, row dropdown grouping, and reset button behaviour. The logic tests in `logic_tests.py` cover `normalize_range`, `create_summary_table`, and `filter_sales_data` in `dflogic.py`. If those behaviours regress, filter state and KPI summaries could be wrong or the app could show incorrect aggregates. (#214)
 
+### Collaboration
+
+**Spec and design before code.** For Option A we updated `reports/m4_spec.md` and the option prioritization issue (#155) before implementing the AI controls. For DuckDB/Parquet (#154) we had the data pipeline and `db.py` design in place before wiring the app. For Playwright (#156) we added tests alongside the existing spec. For some feedback items we implemented the fix first and then updated the CHANGELOG or spec; we aimed for spec-first on larger features. (#215)
+
 ## [0.3.0] - 2026-03-08
 
 ### Added
