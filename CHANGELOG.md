@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Playwright tests for dashboard interaction in `test_dashboard_playwright.py`. (#166)
 - Documentation of logic tests in `notebooks/logic_tests.ipynb`. (#167)
 - New Advanced Figure panel for metric comparisons over time. (#176)
+- Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
+- README dataset description table and written demo use case. (#184, #211)
+- Help button in header linking to README usage examples. (#204, #212)
 
 ### Changed
 
@@ -24,14 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Feedback items you addressed: "Addressed: <item description> (#<prioritization issue>) via #<PR>" -->
 - Replace in‑memory filtering with DB‑backed reactive calc. (#160)
 - Refactoring of `src/app.py` to extract testable functions. (#164)
-- Rename risk_value column to Value_At_Risk in generated dataframes. (#194)
+- Rename risk_value column to Value_At_Risk in generated dataframes. (#194, #208)
 - Update `environment.yml` and `requirements.txt` with playwright and duckdb support. (#196)
+- Manual filters moved to tab-specific layout; AI Insights tab shows only AI chat sidebar. (#200, #213)
 
 ### Fixed
 
 **Feedback prioritization issue link:** #149
 
-A comprehensive list of feedback issues addressed for 0.4.0 along with accreditation car be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
+A comprehensive list of feedback issues addressed for 0.4.0 along with accreditation can be found in [https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/issues/149#issuecomment-4027556013).
 
 #### Critical Issues
 
@@ -56,7 +60,7 @@ A comprehensive list of feedback issues addressed for 0.4.0 along with accredita
 ### Known Issues
 
 <!-- Anything incomplete or broken TAs should be aware of (so it isn't mistaken for unfinished work). -->
-When testing the app locally using the command `shiny run --reload --launch-browser src/app.py`, there is a possiblity of the following error appearing:
+When testing the app locally using the command `shiny run --reload --launch-browser src/app.py`, there is a possibility of the following error appearing:
 
 ```
 File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
@@ -86,7 +90,7 @@ from db import get_base_dataframe, execute_filtered_query
     - Design Option A (Querychat customization) in spec. (#161)
     - Implement AI behavior controls + querychat prompts. (#162)
     - Querychat prompt and scope experiments notebook (`notebooks/querychat_experiments.ipynb`) documenting design decisions for M4 Option A. (#163)
-- **Why this option over the others:** This new feature provides the LLM additional context over the dataset enabling the ability to respond to more specialized queries. Presistent LLM Logging was considered for this task but would have lacked the improvement in AI answer quality and would also have added additional complexity in maintenance of an additional database. 
+- **Why this option over the others:** This new feature provides the LLM additional context over the dataset enabling the ability to respond to more specialized queries. Persistent LLM Logging was considered for this task but would have lacked the improvement in AI answer quality and would also have added additional complexity in maintenance of an additional database. 
 - **Feature prioritization issue link:** #155
 
 A complete description for our decision to create this advanced feature and the technical functionality can be found as part of our [Milestone 4 Report](./reports/m4_spec.md).
@@ -96,8 +100,7 @@ A complete description for our decision to create this advanced feature and the 
 
 <!-- Summary of workflow or collaboration improvements made since M3. -->
 
-- **CONTRIBUTING.md:** A full reflection of improvements in collaboration made from M3 to M4 can be found in [CONTRIBUTING.md](CONTRIBUTING.md), in the `M3 Reflection` section. These are the specific improvements made in M4:
-<!-- Link to the PR that updated it with your M3 retrospective and M4 norms. -->
+- **CONTRIBUTING.md:** Updated with our M3 retrospective and M4 collaboration norms via [PR #209](https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope/pull/209). The full reflection (what went well in M3, what we improved, and norms we committed to for M4) is in [CONTRIBUTING.md](CONTRIBUTING.md) under the `M3 Reflection` section. Summary of what we did in M4:
 
 - Issue creation was more structured than in M3; a main issue in #151 was reintroduced with child issues being setup for each requirement. This resulted in far fewer additional issues having to be created as work proceeded through M4. The specific issues created exclusively as children to #151 for tracking requirements are listed below:
     - Submission setup for M4. (#152)
@@ -107,8 +110,8 @@ A complete description for our decision to create this advanced feature and the 
     - Prioritize and resolve M4 TA/Instructor/Peer Feedback. (#149)
     - Utilize this exact format for CHANGELOG and Reflection. (#157)
 
-- The rate at which issues were completed over the week was much more balanced overall while still remaining at a high rate. Currently, we are projected to have all issues completed by end of Saturday/early Sunday, well before the deadline, which both means that no deadline-eve bursts will occur and that if there are unforeseen issues, we will have time to correct them.
-- `src/app.py` had parts of its functionality extracted into helper files, and the general file was refactored for general maintainability. Specific refactorings can be found in our [CHANGELOG](CHANGELOG.md).
+- We spread work across the week instead of leaving it to the last day, so we could finish before the deadline without a repeat of M3’s deadline-eve crunch.
+- We refactored `src/app.py` into helper modules (`dflogic.py`, `db.py`) for maintainability and testability; see the Changed section above for details.
 
 
 ### Reflection
