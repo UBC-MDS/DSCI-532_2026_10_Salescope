@@ -520,6 +520,16 @@ app_ui = ui.page_navbar(
         )
     ),
     panel_ai, 
+    ui.nav_spacer(),
+    ui.nav_control(
+        ui.a(
+            "Help with Demos",
+            href="https://github.com/UBC-MDS/DSCI-532_2026_10_Salescope?tab=readme-ov-file#demo",
+            target="_blank",
+            class_="btn btn-outline-secondary btn-sm",
+            style="margin-top: 5px;"
+        )
+    ),
     title=ui.TagList(
         ui.img(
             src="salescope_logo_icon.png",
