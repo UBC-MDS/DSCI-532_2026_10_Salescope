@@ -25,7 +25,7 @@ def test_customer_table_initial_structure(page: Page, app: ShinyAppProc) -> None
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     customer_df = controller.OutputDataFrame(page, "customer_df")
     customer_df.expect_ncol(6, timeout = 10000)
@@ -42,7 +42,7 @@ def test_customer_table_initial_cell_values(page: Page, app: ShinyAppProc) -> No
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     customer_df = controller.OutputDataFrame(page, "customer_df")
     customer_df.expect_cell("Asia", row=0, col=0, timeout = 10000)
@@ -59,7 +59,7 @@ def test_region_filter_asia_only(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     region_checkbox.set(["Asia"])
@@ -76,7 +76,7 @@ def test_purchase_type_filter_two_values(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     purchase_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_type")
     purchase_checkbox.set(["Clothing", "Electronics"])
@@ -92,7 +92,7 @@ def test_retention_strategy_filter_two_values(page: Page, app: ShinyAppProc) -> 
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     strategy_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_strategy")
     strategy_checkbox.set(["Discount", "Email Campaign"])
@@ -108,7 +108,7 @@ def test_row_dropdown_changes_grouping(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     row_dropdown = controller.InputSelect(page, "row_dropdown")
     customer_df = controller.OutputDataFrame(page, "customer_df")
@@ -129,7 +129,7 @@ def test_reset_button_restores_defaults(page: Page, app: ShinyAppProc) -> None:
     page.goto(app.url)
     page.wait_for_load_state("networkidle")
 
-    controller.NavPanel(page, id = "advanced_nav", panel_value = "KPI Tables").click()
+    controller.NavPanel(page, id = "advanced_nav", panel_value = "Key Metric Tables").click()
 
     region_checkbox = controller.InputCheckboxGroup(page, "checkbox_group_region")
     reset_btn = controller.InputActionButton(page, "reset")
